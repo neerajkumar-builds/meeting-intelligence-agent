@@ -31,8 +31,8 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/");
-    router.refresh();
+    // Full page navigation to force middleware re-evaluation with new auth cookie
+    window.location.href = "/";
   }
 
   return (
