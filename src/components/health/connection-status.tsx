@@ -8,6 +8,7 @@ interface ServiceStatus {
   name: string;
   status: "green" | "yellow" | "red" | "checking";
   detail: string;
+  help?: string;
 }
 
 const DOT_COLORS = {
@@ -50,7 +51,7 @@ export function ConnectionStatus() {
         detail: error ? error.message : "Connected",
       });
     } catch {
-      results.push({ name: "Supabase", status: "red", detail: "Unreachable" });
+      results.push({ name: "Supabase", status: "red", detail: "Unreachable", help: "Check supabase.co dashboard for service status" });
     }
 
     // Check scoring pipeline recency
@@ -75,12 +76,14 @@ export function ConnectionStatus() {
             name: "Scoring Pipeline",
             status: "yellow",
             detail: `Last run ${Math.round(hoursAgo)}h ago`,
+            help: "Pipeline usually runs every 4h — check n8n workflows",
           });
         } else {
           results.push({
             name: "Scoring Pipeline",
             status: "red",
             detail: `Last run ${Math.round(hoursAgo)}h ago`,
+            help: "Pipeline may be paused — check n8n Cloud dashboard",
           });
         }
       } else {
@@ -124,6 +127,9 @@ export function ConnectionStatus() {
             <div>
               <p className="text-sm font-medium">{svc.name}</p>
               <p className="text-xs text-muted-foreground">{svc.detail}</p>
+              {svc.help && (
+                <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-0.5">{svc.help}</p>
+              )}
             </div>
           </CardContent>
         </Card>

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { SidebarNav } from "./sidebar-nav";
 import { MobileNav } from "./mobile-nav";
 import { ThemeToggle } from "./theme-toggle";
@@ -11,7 +12,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="flex h-screen">
       {/* Desktop Sidebar — dark background per brand guidelines */}
       <aside className="hidden lg:flex lg:w-56 lg:flex-col bg-[#0A0A0A] text-white">
-        <div className="flex h-14 items-center px-4 gap-2">
+        <Link href="/" className="flex h-14 items-center px-4 gap-2 hover:opacity-80 transition-opacity">
           <Image
             src="/favicon.svg"
             alt="FullFunnel"
@@ -22,7 +23,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <span className="text-sm font-semibold tracking-tight text-white">
             Meeting Intel
           </span>
-        </div>
+        </Link>
         <Separator className="bg-white/10" />
         <div className="flex-1 overflow-y-auto py-4">
           <SidebarNav />
@@ -44,7 +45,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Top Bar */}
         <header className="flex h-14 items-center justify-between border-b px-4 bg-background">
           <MobileNav />
-          <div className="hidden lg:flex items-center gap-2">
+          <Link href="/" className="hidden lg:flex items-center gap-2 hover:opacity-80 transition-opacity">
             <Image
               src="/fullfunnel-logo.svg"
               alt="FullFunnel"
@@ -59,7 +60,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               height={20}
               className="hidden dark:block"
             />
-          </div>
+          </Link>
           <div className="flex items-center gap-2">
             <ThemeToggle />
           </div>

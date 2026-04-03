@@ -6,6 +6,9 @@ import { SummaryCards } from "@/components/scorecard/summary-cards";
 import { RepComparisonTable } from "@/components/scorecard/rep-comparison-table";
 import { ScoreDistributionChart } from "@/components/scorecard/score-distribution-chart";
 import { InsightsPanel } from "@/components/scorecard/insights-panel";
+import { ScoreTrendChart } from "@/components/scorecard/score-trend-chart";
+import { StageDistribution } from "@/components/scorecard/stage-distribution";
+import { RecentActivity } from "@/components/scorecard/recent-activity";
 import { useMeetingsList } from "@/lib/hooks/use-meetings-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -99,9 +102,14 @@ export default function TeamScorecardPage() {
       ) : (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
           <SummaryCards meetings={filtered} />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <ScoreTrendChart meetings={filtered} />
+            <StageDistribution meetings={filtered} />
+          </div>
           <InsightsPanel meetings={filtered} />
           <RepComparisonTable meetings={filtered} />
           <ScoreDistributionChart meetings={filtered} />
+          <RecentActivity meetings={filtered} />
         </div>
       )}
     </div>

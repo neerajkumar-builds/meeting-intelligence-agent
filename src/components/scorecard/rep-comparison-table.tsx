@@ -97,7 +97,14 @@ export function RepComparisonTable({ meetings }: RepComparisonTableProps) {
         <TableBody>
           {stats.map((rep) => (
             <TableRow key={rep.name}>
-              <TableCell className="font-medium">{rep.name}</TableCell>
+              <TableCell>
+                <Link
+                  href={`/meetings?rep=${encodeURIComponent(rep.name)}`}
+                  className="font-medium text-primary hover:underline"
+                >
+                  {rep.name}
+                </Link>
+              </TableCell>
               <TableCell className="text-center">{rep.meetingCount}</TableCell>
               <TableCell className="text-center">
                 <ScoreBadge score={rep.avgScore} />
