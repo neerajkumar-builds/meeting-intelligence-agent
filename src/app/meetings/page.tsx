@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { MeetingCard } from "@/components/shared/meeting-card";
 import { MeetingFilters } from "@/components/meetings/meeting-filters";
@@ -13,11 +14,12 @@ import type { MeetingsListRow } from "@/types/meetings";
 type SortKey = "date" | "score" | "rep" | "company";
 
 export default function MeetingFeedPage() {
+  const searchParams = useSearchParams();
   const { data: meetings, isLoading, error } = useMeetingsList();
-  const [repFilter, setRepFilter] = useState("all");
-  const [stageFilter, setStageFilter] = useState("all");
-  const [companyFilter, setCompanyFilter] = useState("");
-  const [sortBy, setSortBy] = useState<SortKey>("date");
+  const [repFilter, setRepFilter] = useState(searchParams.get("rep") ?? "all");
+  const [stageFilter, setStageFilter] = useState(searchParams.get("stage") ?? "all");
+  const [companyFilter, setCompanyFilter] = useState(searchParams.get("company") ?? "");
+  const [sortBy, setSortBy] = useState<SortKey>((searchParams.get("sort") as SortKey) ?? "date");
 
   const reps = useMemo(() => {
     if (!meetings) return [];
