@@ -6,9 +6,6 @@ const nextConfig: NextConfig = {
     // memory issues on 2-core build machines with large dependency trees
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
 };
 
 export default nextConfig;
