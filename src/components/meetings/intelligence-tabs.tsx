@@ -21,24 +21,33 @@ interface IntelligenceTabsProps {
   internalSummary: unknown;
 }
 
-function TextBlock({ label, text }: { label: string; text: string | null | undefined }) {
+function TextBlock({ label, text, icon }: { label: string; text: string | null | undefined; icon?: React.ReactNode }) {
   if (!text) return null;
   return (
-    <div className="mb-4">
-      <h4 className="text-sm font-medium mb-1">{label}</h4>
-      <p className="text-sm text-muted-foreground whitespace-pre-wrap">{text}</p>
+    <div className="rounded-lg border bg-card p-4">
+      <div className="flex items-center gap-2 mb-2">
+        {icon}
+        <h4 className="text-sm font-semibold">{label}</h4>
+      </div>
+      <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{text}</p>
     </div>
   );
 }
 
-function ListBlock({ label, items }: { label: string; items: string[] | undefined }) {
+function ListBlock({ label, items, icon }: { label: string; items: string[] | undefined; icon?: React.ReactNode }) {
   if (!items || items.length === 0) return null;
   return (
-    <div className="mb-4">
-      <h4 className="text-sm font-medium mb-1">{label}</h4>
-      <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+    <div className="rounded-lg border bg-card p-4">
+      <div className="flex items-center gap-2 mb-2">
+        {icon}
+        <h4 className="text-sm font-semibold">{label}</h4>
+      </div>
+      <ul className="space-y-1.5">
         {items.map((item, i) => (
-          <li key={i}>{item}</li>
+          <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-primary/60 mt-1.5 shrink-0" />
+            <span className="leading-relaxed">{item}</span>
+          </li>
         ))}
       </ul>
     </div>
@@ -222,11 +231,29 @@ function CoachingContent({
   };
 
   return (
-    <div className="space-y-3">
-      <TextBlock label="Strengths" text={rs.strengths} />
-      <TextBlock label="Areas for Improvement" text={rs.areas_for_improvement} />
-      <TextBlock label="Blind Spots" text={rs.blind_spots} />
-      <TextBlock label="Coaching Recommendations" text={rs.coaching_recommendations} />
+    <div className="grid gap-3 md:grid-cols-2">
+      <TextBlock
+        label="Strengths"
+        text={rs.strengths}
+        icon={<span className="h-5 w-5 rounded bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-xs font-bold">+</span>}
+      />
+      <TextBlock
+        label="Areas for Improvement"
+        text={rs.areas_for_improvement}
+        icon={<span className="h-5 w-5 rounded bg-amber-100 dark:bg-amber-900 flex items-center justify-center text-amber-600 dark:text-amber-400 text-xs font-bold">!</span>}
+      />
+      {rs.blind_spots && (
+        <TextBlock
+          label="Blind Spots"
+          text={rs.blind_spots}
+          icon={<span className="h-5 w-5 rounded bg-red-100 dark:bg-red-900 flex items-center justify-center text-red-600 dark:text-red-400 text-xs font-bold">?</span>}
+        />
+      )}
+      <TextBlock
+        label="Coaching Recommendations"
+        text={rs.coaching_recommendations}
+        icon={<span className="h-5 w-5 rounded bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-400 text-xs font-bold">C</span>}
+      />
       {rs.handling_analysis && (
         <TextBlock label="Objection Handling" text={rs.handling_analysis} />
       )}

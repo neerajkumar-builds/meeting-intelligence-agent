@@ -8,6 +8,24 @@ import { ConnectionStatus } from "@/components/health/connection-status";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePipelineStats } from "@/lib/hooks/use-pipeline-stats";
 import { useScoringRunLog } from "@/lib/hooks/use-scoring-run-log";
+import { Wifi, BarChart3, Activity, ScrollText } from "lucide-react";
+
+function SectionHeader({
+  icon: Icon,
+  title,
+}: {
+  icon: React.ElementType;
+  title: string;
+}) {
+  return (
+    <div className="flex items-center gap-2 mb-4 mt-2">
+      <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
+        <Icon className="h-3.5 w-3.5 text-primary" />
+      </div>
+      <h2 className="text-sm font-semibold">{title}</h2>
+    </div>
+  );
+}
 
 export default function PipelineHealthPage() {
   const { data: stats, isLoading: statsLoading, error: statsError } = usePipelineStats();
@@ -30,33 +48,49 @@ export default function PipelineHealthPage() {
     <div>
       <PageHeader
         title="Pipeline Health"
-        description="System monitoring: processing status, error rates, and RAG readiness"
+        description="System monitoring and service status"
       />
 
-      <div className="space-y-6">
-        <ConnectionStatus />
+      <div className="space-y-8">
+        {/* Section 1: Connection Status */}
+        <section>
+          <SectionHeader icon={Wifi} title="Service Status" />
+          <ConnectionStatus />
+        </section>
 
-        {statsLoading ? (
-          <>
+        {/* Section 2: System Metrics */}
+        <section>
+          <SectionHeader icon={BarChart3} title="System Metrics" />
+          {statsLoading ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <Skeleton key={i} className="h-20 rounded-lg" />
               ))}
             </div>
-            <Skeleton className="h-64 rounded-lg" />
-          </>
-        ) : stats ? (
-          <>
+          ) : stats ? (
             <SystemMetrics stats={stats} />
-            <StatusBreakdown statusCounts={stats.statusCounts} />
-          </>
-        ) : null}
+          ) : null}
+        </section>
 
-        {logsLoading ? (
-          <Skeleton className="h-48 rounded-lg" />
-        ) : logs ? (
-          <ProcessingLog logs={logs} />
-        ) : null}
+        {/* Section 3: Meeting Status Distribution */}
+        <section>
+          <SectionHeader icon={Activity} title="Meeting Status Distribution" />
+          {statsLoading ? (
+            <Skeleton className="h-64 rounded-lg" />
+          ) : stats ? (
+            <StatusBreakdown statusCounts={stats.statusCounts} />
+          ) : null}
+        </section>
+
+        {/* Section 4: Workflow Run History */}
+        <section>
+          <SectionHeader icon={ScrollText} title="Workflow Run History" />
+          {logsLoading ? (
+            <Skeleton className="h-48 rounded-lg" />
+          ) : logs ? (
+            <ProcessingLog logs={logs} />
+          ) : null}
+        </section>
       </div>
     </div>
   );

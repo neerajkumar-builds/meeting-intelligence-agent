@@ -26,9 +26,9 @@ export function ScoreDistributionChart({ meetings }: ScoreDistributionChartProps
   const data = Array.from(repBands.entries())
     .map(([name, bands]) => ({
       name: name.split(" ")[0],
-      "8-10 Strong": bands.high,
-      "6-7.9 Average": bands.medium,
-      "<6 Needs Work": bands.low,
+      "8+ Strong": bands.high,
+      "6-7.9 Mid": bands.medium,
+      "<6 Low": bands.low,
       total: bands.high + bands.medium + bands.low,
     }))
     .sort((a, b) => b.total - a.total);
@@ -40,44 +40,15 @@ export function ScoreDistributionChart({ meetings }: ScoreDistributionChartProps
       <CardContent className="p-6">
         <h3 className="text-sm font-semibold mb-4">Score Distribution by Rep</h3>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-            <XAxis
-              dataKey="name"
-              tick={{ fontSize: 12 }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis
-              allowDecimals={false}
-              tick={{ fontSize: 12 }}
-              axisLine={false}
-              tickLine={false}
-            />
+          <BarChart data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }} barSize={40}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
+            <XAxis dataKey="name" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
             <BrandTooltip />
-            <Legend
-              wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
-              iconType="circle"
-              iconSize={8}
-            />
-            <Bar
-              dataKey="8-10 Strong"
-              stackId="score"
-              fill="#10b981"
-              radius={[0, 0, 0, 0]}
-            />
-            <Bar
-              dataKey="6-7.9 Average"
-              stackId="score"
-              fill="#f59e0b"
-              radius={[0, 0, 0, 0]}
-            />
-            <Bar
-              dataKey="<6 Needs Work"
-              stackId="score"
-              fill="#ef4444"
-              radius={[4, 4, 0, 0]}
-            />
+            <Legend wrapperStyle={{ fontSize: 12, paddingTop: 12 }} iconType="circle" iconSize={8} />
+            <Bar dataKey="8+ Strong" stackId="score" fill="#146DFA" radius={[0, 0, 0, 0]} />
+            <Bar dataKey="6-7.9 Mid" stackId="score" fill="#93b4f5" radius={[0, 0, 0, 0]} />
+            <Bar dataKey="<6 Low" stackId="score" fill="#f87171" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

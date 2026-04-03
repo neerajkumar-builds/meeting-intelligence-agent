@@ -103,22 +103,12 @@ function generateInsights(meetings: MeetingsListRow[]): Insight[] {
     }
   }
 
-  // --- Stage distribution ---
+  // --- Stage score comparison ---
   const stageCounts = new Map<string, number>();
   for (const m of meetings) {
     if (!m.scoring_stage_type) continue;
     stageCounts.set(m.scoring_stage_type, (stageCounts.get(m.scoring_stage_type) ?? 0) + 1);
   }
-  const internalCount = stageCounts.get("internal") ?? 0;
-  if (internalCount > meetings.length * 0.4) {
-    insights.push({
-      icon: "chart",
-      text: `${internalCount} of ${meetings.length} meetings are internal (${Math.round((internalCount / meetings.length) * 100)}%) — high internal meeting volume`,
-      type: "neutral",
-    });
-  }
-
-  // --- Stage score comparison ---
   const stageAvgs = new Map<string, number>();
   for (const [stage, count] of stageCounts) {
     const staged = meetings.filter(
@@ -178,19 +168,15 @@ function generateInsights(meetings: MeetingsListRow[]): Insight[] {
     }
   }
 
-  // --- Single-meeting companies ---
-  const companyCounts = new Map<string, number>();
-  for (const m of meetings) {
-    if (!m.company_name) continue;
-    companyCounts.set(m.company_name, (companyCounts.get(m.company_name) ?? 0) + 1);
+  // --- At-risk accounts (health < 5) ---
+  const atRiskCompanies: string[] = [];
+  for (const [company, data] of companyHealth) {
+    if (data.latest < 5) atRiskCompanies.push(company);
   }
-  const singleMeetingCompanies = [...companyCounts.entries()].filter(
-    ([, count]) => count === 1
-  );
-  if (singleMeetingCompanies.length >= 3) {
+  if (atRiskCompanies.length > 0) {
     insights.push({
       icon: "warning",
-      text: `${singleMeetingCompanies.length} companies have only 1 scored meeting — potential relationship coverage gaps`,
+      text: `${atRiskCompanies.join(", ")} ${atRiskCompanies.length === 1 ? "has" : "have"} health score below 5 — needs attention`,
       type: "negative",
     });
   }

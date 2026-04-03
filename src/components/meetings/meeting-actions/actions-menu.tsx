@@ -52,7 +52,7 @@ export function ActionsMenu({
           Actions
           <ChevronDown className="h-3.5 w-3.5" />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuItem onClick={() => setEmailOpen(true)}>
             <Mail className="h-4 w-4 mr-2" />
             Draft Follow-Up Email
