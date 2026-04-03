@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useRef, type FormEvent } from "react";
+import { useState, useRef, useEffect, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Send, Loader2 } from "lucide-react";
 
 interface ChatInputProps {
@@ -14,13 +13,20 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Auto-resize textarea
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 160) + "px";
+  }, [input]);
+
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const trimmed = input.trim();
     if (!trimmed || disabled) return;
     onSend(trimmed);
     setInput("");
-    textareaRef.current?.focus();
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -31,21 +37,25 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2 items-end">
-      <Textarea
+    <form
+      onSubmit={handleSubmit}
+      className="flex items-end gap-3 rounded-xl border bg-card p-3 shadow-sm transition-shadow focus-within:shadow-md focus-within:border-primary/30"
+    >
+      <textarea
         ref={textareaRef}
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Ask about meetings, scores, action items..."
         disabled={disabled}
-        className="min-h-[44px] max-h-32 resize-none"
         rows={1}
+        className="flex-1 resize-none bg-transparent text-sm leading-relaxed placeholder:text-muted-foreground focus:outline-none disabled:opacity-50 min-h-[40px] max-h-[160px] py-2"
       />
       <Button
         type="submit"
         size="icon"
         disabled={disabled || !input.trim()}
+        className="shrink-0 rounded-lg h-9 w-9"
       >
         {disabled ? (
           <Loader2 className="h-4 w-4 animate-spin" />

@@ -2,6 +2,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
+import { FileText, GraduationCap, ListChecks, Gavel, Users } from "lucide-react";
 import type { ScoringStageType } from "@/lib/constants";
 import type {
   DiscoveryMeetingScore,
@@ -66,11 +67,15 @@ export function IntelligenceTabs({
   return (
     <Tabs defaultValue="summary">
       <TabsList>
-        {tabs.map((tab) => (
-          <TabsTrigger key={tab.value} value={tab.value}>
-            {tab.label}
-          </TabsTrigger>
-        ))}
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <TabsTrigger key={tab.value} value={tab.value} className="gap-1.5">
+              <Icon className="h-3.5 w-3.5" />
+              {tab.label}
+            </TabsTrigger>
+          );
+        })}
       </TabsList>
 
       <TabsContent value="summary">
@@ -148,15 +153,15 @@ export function IntelligenceTabs({
 
 function getTabs(stageType: ScoringStageType | null) {
   const base = [
-    { value: "summary", label: "Summary" },
-    { value: "coaching", label: "Coaching" },
+    { value: "summary", label: "Summary", icon: FileText },
+    { value: "coaching", label: "Coaching", icon: GraduationCap },
   ];
   if (stageType === "internal") {
     return [
       ...base,
-      { value: "actions", label: "Action Items" },
-      { value: "decisions", label: "Decisions" },
-      { value: "clients", label: "Client Refs" },
+      { value: "actions", label: "Action Items", icon: ListChecks },
+      { value: "decisions", label: "Decisions", icon: Gavel },
+      { value: "clients", label: "Client Refs", icon: Users },
     ];
   }
   return base;
@@ -255,10 +260,18 @@ function CoachingContent({
         icon={<span className="h-5 w-5 rounded bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-400 text-xs font-bold">C</span>}
       />
       {rs.handling_analysis && (
-        <TextBlock label="Objection Handling" text={rs.handling_analysis} />
+        <TextBlock
+          label="Objection Handling"
+          text={rs.handling_analysis}
+          icon={<span className="h-5 w-5 rounded bg-purple-100 dark:bg-purple-900 flex items-center justify-center text-purple-600 dark:text-purple-400 text-xs font-bold">O</span>}
+        />
       )}
       {rs.deal_progression_assessment && (
-        <TextBlock label="Deal Progression" text={rs.deal_progression_assessment} />
+        <TextBlock
+          label="Deal Progression"
+          text={rs.deal_progression_assessment}
+          icon={<span className="h-5 w-5 rounded bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-xs font-bold">D</span>}
+        />
       )}
     </div>
   );

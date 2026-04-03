@@ -118,20 +118,23 @@ export function DraftEmailDialog({
           </div>
         ) : (
           <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium mb-1 block">Subject</label>
-              <Input
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">Body</label>
-              <Textarea
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                className="min-h-[200px]"
-              />
+            <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block uppercase tracking-wide">Subject</label>
+                <Input
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  className="text-base font-medium"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block uppercase tracking-wide">Body</label>
+                <Textarea
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  className="min-h-[300px] text-sm leading-relaxed"
+                />
+              </div>
             </div>
             <div className="flex gap-2">
               <Button onClick={copyToClipboard} variant="outline" size="sm" className="gap-1">

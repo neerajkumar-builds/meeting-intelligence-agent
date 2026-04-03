@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { PageHeader } from "@/components/layout/page-header";
 import { ScoreBadge } from "@/components/shared/score-badge";
@@ -9,7 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { useMeetingsList } from "@/lib/hooks/use-meetings-list";
 import { formatDate, formatScore } from "@/lib/utils/format";
-import { Building2, ArrowRight, Calendar, Hash, Heart } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Building2, ArrowRight, Calendar, Hash, Heart, Search } from "lucide-react";
 
 interface CompanyStats {
   name: string;
@@ -22,6 +23,7 @@ interface CompanyStats {
 
 export default function CompaniesIndexPage() {
   const { data: meetings, isLoading, error } = useMeetingsList();
+  const [search, setSearch] = useState("");
 
   const companies = useMemo(() => {
     if (!meetings) return [];
@@ -95,8 +97,18 @@ export default function CompaniesIndexPage() {
           description="Company data will appear once meetings are scored with HubSpot company information."
         />
       ) : (
+        <>
+        <div className="relative mb-4 max-w-sm">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search companies..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {companies.map((company, i) => (
+          {companies.filter(c => c.name.toLowerCase().includes(search.toLowerCase())).map((company, i) => (
             <Link
               key={company.name}
               href={`/companies/${encodeURIComponent(company.name)}`}
@@ -141,6 +153,7 @@ export default function CompaniesIndexPage() {
             </Link>
           ))}
         </div>
+        </>
       )}
     </div>
   );
