@@ -3,8 +3,9 @@ import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(request: NextRequest) {
-  // Skip auth check for login page, API routes, and static assets
   const { pathname } = request.nextUrl;
+
+  // Skip auth for login page, API routes, and static assets
   if (
     pathname.startsWith("/login") ||
     pathname.startsWith("/api/") ||
@@ -30,11 +31,13 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
+          cookiesToSet.forEach(({ name, value }) => {
             request.cookies.set(name, value);
-            response = NextResponse.next({
-              request: { headers: request.headers },
-            });
+          });
+          response = NextResponse.next({
+            request: { headers: request.headers },
+          });
+          cookiesToSet.forEach(({ name, value, options }) => {
             response.cookies.set(name, value, options);
           });
         },
@@ -42,11 +45,9 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // This refreshes the session if expired and sets updated cookies
+  const { data: { user } } = await supabase.auth.getUser();
 
-  // Not authenticated → redirect to login
   if (!user) {
     const loginUrl = new URL("/login", request.url);
     return NextResponse.redirect(loginUrl);
@@ -57,7 +58,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Match all paths except static files
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.svg$|.*\\.png$).*)",
   ],
 };
