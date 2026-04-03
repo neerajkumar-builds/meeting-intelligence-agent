@@ -52,7 +52,7 @@ export const NAV_ITEMS = [
   { label: "Meetings", href: "/meetings", icon: "CalendarDays" as const },
   { label: "Companies", href: "/companies", icon: "Building2" as const },
   { label: "AI Search", href: "/search", icon: "Search" as const },
-  { label: "Pipeline", href: "/health", icon: "Activity" as const },
+  { label: "System", href: "/health", icon: "Activity" as const },
 ];
 
 export const SUGGESTED_PROMPTS = [

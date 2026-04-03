@@ -40,65 +40,73 @@ export function MeetingFilters({
   onClearFilters,
 }: MeetingFiltersProps) {
   return (
-    <div className="flex flex-wrap items-center gap-3 mb-4">
-      <Select value={repFilter} onValueChange={(v) => onRepFilterChange(v ?? "all")}>
-        <SelectTrigger className="w-[170px]">
-          <SelectValue placeholder="All Reps" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Reps</SelectItem>
-          {reps.map((rep) => (
-            <SelectItem key={rep} value={rep}>
-              {rep}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+    <div className="flex flex-wrap items-end gap-3 mb-4">
+      <div>
+        <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Rep</label>
+        <Select value={repFilter} onValueChange={(v) => onRepFilterChange(v ?? "all")}>
+          <SelectTrigger className="w-[170px]">
+            <SelectValue placeholder="All Reps" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Reps</SelectItem>
+            {reps.map((rep) => (
+              <SelectItem key={rep} value={rep}>{rep}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-      <Select value={stageFilter} onValueChange={(v) => onStageFilterChange(v ?? "all")}>
-        <SelectTrigger className="w-[170px]">
-          <SelectValue placeholder="All Stages" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Stages</SelectItem>
-          {(Object.entries(STAGE_CONFIG) as [ScoringStageType, (typeof STAGE_CONFIG)[ScoringStageType]][]).map(
-            ([key, config]) => (
-              <SelectItem key={key} value={key}>
-                {config.label}
-              </SelectItem>
-            )
-          )}
-        </SelectContent>
-      </Select>
+      <div>
+        <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Stage</label>
+        <Select value={stageFilter} onValueChange={(v) => onStageFilterChange(v ?? "all")}>
+          <SelectTrigger className="w-[170px]">
+            <SelectValue placeholder="All Stages" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Stages</SelectItem>
+            {(Object.entries(STAGE_CONFIG) as [ScoringStageType, (typeof STAGE_CONFIG)[ScoringStageType]][]).map(
+              ([key, config]) => (
+                <SelectItem key={key} value={key}>{config.label}</SelectItem>
+              )
+            )}
+          </SelectContent>
+        </Select>
+      </div>
 
-      <Input
-        placeholder="Search company..."
-        value={companyFilter}
-        onChange={(e) => onCompanyFilterChange(e.target.value)}
-        className="w-[180px]"
-      />
+      <div>
+        <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Company</label>
+        <Input
+          placeholder="Search company..."
+          value={companyFilter}
+          onChange={(e) => onCompanyFilterChange(e.target.value)}
+          className="w-[180px]"
+        />
+      </div>
 
-      <Select value={sortBy} onValueChange={(v) => onSortChange(v ?? "date")}>
-        <SelectTrigger className="w-[150px]">
-          <SelectValue placeholder="Sort by" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="date">Sort: Date</SelectItem>
-          <SelectItem value="score">Sort: Score</SelectItem>
-          <SelectItem value="rep">Sort: Rep</SelectItem>
-          <SelectItem value="company">Sort: Company</SelectItem>
-        </SelectContent>
-      </Select>
+      <div>
+        <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Sort by</label>
+        <Select value={sortBy} onValueChange={(v) => onSortChange(v ?? "date")}>
+          <SelectTrigger className="w-[150px]">
+            <SelectValue placeholder="Date" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="date">Date</SelectItem>
+            <SelectItem value="score">Score</SelectItem>
+            <SelectItem value="rep">Rep</SelectItem>
+            <SelectItem value="company">Company</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
       {hasActiveFilters && (
         <Button
           variant="ghost"
           size="sm"
           onClick={onClearFilters}
-          className="gap-1 text-xs text-muted-foreground"
+          className="gap-1 text-xs text-muted-foreground mb-0.5"
         >
           <X className="h-3 w-3" />
-          Clear filters
+          Clear
         </Button>
       )}
     </div>

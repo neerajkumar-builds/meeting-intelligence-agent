@@ -47,8 +47,8 @@ export default function PipelineHealthPage() {
   return (
     <div>
       <PageHeader
-        title="Pipeline Health"
-        description="System monitoring and service status"
+        title="System Overview"
+        description="Service health, scoring metrics, and workflow monitoring"
       />
 
       <div className="space-y-8">

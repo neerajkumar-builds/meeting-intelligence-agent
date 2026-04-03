@@ -59,8 +59,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Step 3: Build context from retrieved chunks
-    // Each chunk's `content` field already includes a header line with meeting metadata
+    // Step 2b: Also fetch meeting score data for score-comparison queries
+    const { data: meetingScores } = await supabase
+      .from("meetings_list")
+      .select("*")
+      .order("start_time", { ascending: false });
+
+    const scoresSummary = (meetingScores ?? [])
+      .map(
+        (m: Record<string, unknown>) =>
+          `${m.host_name} | ${m.topic} | ${m.scoring_stage_type} | Score: ${m.overall_score} | Health: ${m.client_health_score ?? "N/A"} | ${m.start_time} | Company: ${m.company_name ?? "Internal"}`
+      )
+      .join("\n");
+
+    // Step 3: Build context from retrieved chunks + score data
     const contextBlock = (chunks ?? [])
       .map(
         (c: {
@@ -82,9 +94,7 @@ export async function POST(request: NextRequest) {
       })),
       {
         role: "user",
-        content: contextBlock
-          ? `Context from meeting transcripts:\n${contextBlock}\n\n---\nUser question: ${message}`
-          : `No relevant meeting transcripts found for this query.\n\nUser question: ${message}`,
+        content: `Meeting Score Data (all scored meetings):\n${scoresSummary}\n\n---\n\nRelevant Transcript Excerpts:\n${contextBlock || "No transcript matches found."}\n\n---\nUser question: ${message}`,
       },
     ];
 
