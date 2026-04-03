@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ChatMessage } from "./chat-message";
 import { ChatInput } from "./chat-input";
 import { SuggestedPrompts } from "./suggested-prompts";
@@ -14,10 +14,19 @@ interface Message {
   content: string;
 }
 
-export function ChatInterface() {
+export function ChatInterface({ initialQuery }: { initialQuery?: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const initialSent = useRef(false);
+
+  useEffect(() => {
+    if (initialQuery && !initialSent.current && messages.length === 0) {
+      initialSent.current = true;
+      sendMessage(initialQuery);
+    }
+  }, [initialQuery]);
 
   const scrollToBottom = useCallback(() => {
     if (scrollRef.current) {

@@ -46,7 +46,14 @@ export function MeetingCard({ meeting, index = 0 }: MeetingCardProps) {
                 {meeting.company_name && (
                   <>
                     <span className="text-xs text-muted-foreground/50">|</span>
-                    <span className="text-xs text-muted-foreground">
+                    <span
+                      className="text-xs text-primary hover:underline"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.location.href = `/companies/${encodeURIComponent(meeting.company_name!)}`;
+                      }}
+                    >
                       {meeting.company_name}
                     </span>
                   </>

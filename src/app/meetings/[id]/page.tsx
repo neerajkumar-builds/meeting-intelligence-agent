@@ -11,7 +11,8 @@ import { ActionsMenu } from "@/components/meetings/meeting-actions/actions-menu"
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMeetingDetail } from "@/lib/hooks/use-meeting-detail";
 import { formatDateTime, formatDuration } from "@/lib/utils/format";
-import { ExternalLink, ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ExternalLink, ArrowLeft, Sparkles } from "lucide-react";
 import type { ScoringStageType } from "@/lib/constants";
 
 export default function MeetingDetailPage({
@@ -21,6 +22,7 @@ export default function MeetingDetailPage({
 }) {
   const { id } = use(params);
   const { data: meeting, isLoading, error } = useMeetingDetail(id);
+  const router = useRouter();
 
   if (error) {
     return (
@@ -111,6 +113,16 @@ export default function MeetingDetailPage({
             transcript={meeting.transcript_text}
             topic={meeting.topic}
           />
+          <button
+            onClick={() => {
+              const query = encodeURIComponent(`Tell me about the ${meeting.topic} meeting with ${meeting.host_name}`);
+              router.push(`/search?q=${query}`);
+            }}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-2.5 py-1.5 text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            Ask AI
+          </button>
         </div>
       </div>
 
