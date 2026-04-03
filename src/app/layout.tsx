@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/lib/providers";
-import { AppShell } from "@/components/layout/app-shell";
+import { ConditionalShell } from "@/components/layout/conditional-shell";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -37,7 +37,7 @@ export default function RootLayout({
     >
       <body className="h-full">
         <Providers>
-          <AppShell>{children}</AppShell>
+          <ConditionalShell>{children}</ConditionalShell>
         </Providers>
       </body>
     </html>

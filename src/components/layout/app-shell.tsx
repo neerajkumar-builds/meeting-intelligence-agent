@@ -2,12 +2,23 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { SidebarNav } from "./sidebar-nav";
 import { MobileNav } from "./mobile-nav";
 import { ThemeToggle } from "./theme-toggle";
 import { Separator } from "@/components/ui/separator";
+import { supabase } from "@/lib/supabase/client";
+import { LogOut } from "lucide-react";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  }
+
   return (
     <div className="flex h-screen">
       {/* Desktop Sidebar — dark background per brand guidelines */}
@@ -63,6 +74,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
           <div className="flex items-center gap-2">
             <ThemeToggle />
+            <button
+              onClick={handleSignOut}
+              className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              title="Sign out"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+            </button>
           </div>
         </header>
 
