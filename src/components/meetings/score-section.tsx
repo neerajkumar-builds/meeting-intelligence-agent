@@ -1,9 +1,8 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { CircularGauge } from "@/components/shared/circular-gauge";
 import { ScoreBadge } from "@/components/shared/score-badge";
 import type { ScoringStageType } from "@/lib/constants";
-import { STAGE_SCORE_FIELDS } from "@/lib/utils/stage";
 import {
   type DiscoveryMeetingScore,
   type DiscoveryRepScore,
@@ -13,7 +12,6 @@ import {
   type OnboardingMeetingScore,
   type OnboardingRepScore,
   type InternalMeetingScore,
-  getRepPerformanceScore,
 } from "@/types/scores";
 
 interface ScoreSectionProps {
@@ -28,30 +26,6 @@ interface ScoreSectionProps {
   overallScore: number | null;
 }
 
-function ScoreCard({
-  label,
-  score,
-  subtitle,
-}: {
-  label: string;
-  score: number | null;
-  subtitle?: string;
-}) {
-  return (
-    <Card>
-      <CardContent className="p-4 text-center">
-        <p className="text-xs text-muted-foreground mb-2">{label}</p>
-        <div className="flex justify-center">
-          <ScoreBadge score={score} size="lg" />
-        </div>
-        {subtitle && (
-          <p className="text-xs text-muted-foreground mt-2">{subtitle}</p>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
 export function ScoreSection(props: ScoreSectionProps) {
   const { stageType, overallScore } = props;
   if (!stageType) return null;
@@ -64,33 +38,35 @@ export function ScoreSection(props: ScoreSectionProps) {
         <span className="text-sm text-muted-foreground">overall</span>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        {stageType === "discovery_scoping" && (
-          <DiscoveryScores
-            meetingScore={props.meetingScore as DiscoveryMeetingScore | null}
-            repScore={props.repScore as DiscoveryRepScore | null}
-            icpScore={props.icpScore as IcpScore | null}
-          />
-        )}
-        {stageType === "follow_up" && (
-          <FollowUpScores
-            meetingScore={props.meetingScore as FollowUpMeetingScore | null}
-            repScore={props.repScore as FollowUpRepScore | null}
-            clientHealthScore={props.clientHealthScore}
-          />
-        )}
-        {stageType === "onboarding" && (
-          <OnboardingScores
-            meetingScore={props.meetingScore as OnboardingMeetingScore | null}
-            repScore={props.repScore as OnboardingRepScore | null}
-            clientHealthScore={props.clientHealthScore}
-          />
-        )}
-        {stageType === "internal" && (
-          <InternalScores
-            meetingScore={props.meetingScore as InternalMeetingScore | null}
-          />
-        )}
+      <div className="rounded-lg border bg-card p-6">
+        <div className="flex flex-wrap items-start justify-center gap-8 md:gap-12">
+          {stageType === "discovery_scoping" && (
+            <DiscoveryScores
+              meetingScore={props.meetingScore as DiscoveryMeetingScore | null}
+              repScore={props.repScore as DiscoveryRepScore | null}
+              icpScore={props.icpScore as IcpScore | null}
+            />
+          )}
+          {stageType === "follow_up" && (
+            <FollowUpScores
+              meetingScore={props.meetingScore as FollowUpMeetingScore | null}
+              repScore={props.repScore as FollowUpRepScore | null}
+              clientHealthScore={props.clientHealthScore}
+            />
+          )}
+          {stageType === "onboarding" && (
+            <OnboardingScores
+              meetingScore={props.meetingScore as OnboardingMeetingScore | null}
+              repScore={props.repScore as OnboardingRepScore | null}
+              clientHealthScore={props.clientHealthScore}
+            />
+          )}
+          {stageType === "internal" && (
+            <InternalScores
+              meetingScore={props.meetingScore as InternalMeetingScore | null}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
@@ -107,19 +83,19 @@ function DiscoveryScores({
 }) {
   return (
     <>
-      <ScoreCard
-        label="Meeting Outcome"
+      <CircularGauge
         score={meetingScore?.lead_score ?? null}
+        label="Meeting Outcome"
         subtitle={meetingScore?.deal_sentiment ?? undefined}
       />
-      <ScoreCard
-        label="Rep Performance"
+      <CircularGauge
         score={repScore?.rep_performance_score ?? null}
+        label="Rep Performance"
         subtitle={repScore?.meeting_quality_rating ?? undefined}
       />
-      <ScoreCard
-        label="ICP Fit"
+      <CircularGauge
         score={icpScore?.icp_fit_score ?? null}
+        label="ICP Fit"
         subtitle={icpScore?.confidence_level ?? undefined}
       />
     </>
@@ -137,19 +113,19 @@ function FollowUpScores({
 }) {
   return (
     <>
-      <ScoreCard
-        label="Engagement"
+      <CircularGauge
         score={meetingScore?.engagement_score ?? null}
+        label="Engagement"
         subtitle={meetingScore?.engagement_level ?? undefined}
       />
-      <ScoreCard
-        label="Rep Performance"
+      <CircularGauge
         score={repScore?.rep_performance_score ?? null}
+        label="Rep Performance"
         subtitle={repScore?.meeting_quality_rating ?? undefined}
       />
-      <ScoreCard
-        label="Account Health"
+      <CircularGauge
         score={clientHealthScore}
+        label="Account Health"
         subtitle={meetingScore?.relationship_health ?? undefined}
       />
     </>
@@ -167,19 +143,19 @@ function OnboardingScores({
 }) {
   return (
     <>
-      <ScoreCard
-        label="Delivery"
+      <CircularGauge
         score={meetingScore?.delivery_score ?? null}
+        label="Delivery"
         subtitle={meetingScore?.delivery_status ?? undefined}
       />
-      <ScoreCard
-        label="Rep Performance"
+      <CircularGauge
         score={repScore?.rep_performance_score ?? null}
+        label="Rep Performance"
         subtitle={repScore?.meeting_quality_rating ?? undefined}
       />
-      <ScoreCard
-        label="Client Satisfaction"
+      <CircularGauge
         score={clientHealthScore}
+        label="Client Satisfaction"
         subtitle={meetingScore?.current_phase ?? undefined}
       />
     </>
@@ -192,12 +168,10 @@ function InternalScores({
   meetingScore: InternalMeetingScore | null;
 }) {
   return (
-    <>
-      <ScoreCard
-        label="Meeting Quality"
-        score={meetingScore?.meeting_quality_score ?? null}
-        subtitle={meetingScore?.productivity_rating ?? undefined}
-      />
-    </>
+    <CircularGauge
+      score={meetingScore?.meeting_quality_score ?? null}
+      label="Meeting Quality"
+      subtitle={meetingScore?.productivity_rating ?? undefined}
+    />
   );
 }

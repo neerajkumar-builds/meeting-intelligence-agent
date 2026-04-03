@@ -28,9 +28,9 @@ interface DraftEmailDialogProps {
 }
 
 const TEMPLATES = [
-  { value: "client_followup", label: "Client Follow-Up" },
-  { value: "internal_recap", label: "Internal Recap" },
-  { value: "executive_briefing", label: "Executive Briefing" },
+  { value: "client_followup", label: "Client Follow-Up Email" },
+  { value: "internal_recap", label: "Internal Team Recap" },
+  { value: "executive_briefing", label: "CEO / Leadership Brief" },
 ];
 
 export function DraftEmailDialog({
@@ -81,7 +81,7 @@ export function DraftEmailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Draft Follow-Up Email</DialogTitle>
           <DialogDescription>

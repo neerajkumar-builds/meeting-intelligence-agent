@@ -27,7 +27,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="flex-1 overflow-y-auto py-4">
           <SidebarNav />
         </div>
-        <div className="border-t border-white/10 p-3 flex items-center gap-2">
+        <div className="border-t border-white/10 p-3 flex items-center justify-between">
           <Image
             src="/fullfunnel-logo-white.svg"
             alt="FullFunnel"
@@ -35,6 +35,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             height={16}
             className="opacity-50"
           />
+          <span className="text-[10px] text-white/30 font-mono">v1.0.0</span>
         </div>
       </aside>
 

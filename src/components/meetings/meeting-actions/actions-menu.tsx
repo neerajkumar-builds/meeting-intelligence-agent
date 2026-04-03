@@ -11,7 +11,7 @@ import {
 import { DraftEmailDialog } from "./draft-email-dialog";
 import { ResummarizeDialog } from "./resummarize-dialog";
 import { MeetingPrepDialog } from "./meeting-prep-dialog";
-import { ChevronDown, Mail, FileText, Briefcase, Download } from "lucide-react";
+import { ChevronDown, Mail, FileText, Briefcase, Download, Printer } from "lucide-react";
 
 interface ActionsMenuProps {
   meetingId: string;
@@ -67,6 +67,12 @@ export function ActionsMenu({
               Prepare for Next Call
             </DropdownMenuItem>
           )}
+          <DropdownMenuItem
+            onClick={() => window.open(`/meetings/${meetingId}/print`, "_blank")}
+          >
+            <Printer className="h-4 w-4 mr-2" />
+            Print / Export Report
+          </DropdownMenuItem>
           {transcript && (
             <DropdownMenuItem onClick={downloadTranscript}>
               <Download className="h-4 w-4 mr-2" />

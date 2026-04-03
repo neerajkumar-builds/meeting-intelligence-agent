@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { SummaryCards } from "@/components/scorecard/summary-cards";
 import { RepComparisonTable } from "@/components/scorecard/rep-comparison-table";
 import { ScoreDistributionChart } from "@/components/scorecard/score-distribution-chart";
+import { InsightsPanel } from "@/components/scorecard/insights-panel";
 import { useMeetingsList } from "@/lib/hooks/use-meetings-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -51,6 +52,7 @@ export default function TeamScorecardPage() {
       ) : (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
           <SummaryCards meetings={meetings} />
+          <InsightsPanel meetings={meetings} />
           <RepComparisonTable meetings={meetings} />
           <ScoreDistributionChart meetings={meetings} />
         </div>

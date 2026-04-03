@@ -8,12 +8,16 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMeetingsList } from "@/lib/hooks/use-meetings-list";
 import { CalendarDays } from "lucide-react";
+import type { MeetingsListRow } from "@/types/meetings";
+
+type SortKey = "date" | "score" | "rep" | "company";
 
 export default function MeetingFeedPage() {
   const { data: meetings, isLoading, error } = useMeetingsList();
   const [repFilter, setRepFilter] = useState("all");
   const [stageFilter, setStageFilter] = useState("all");
   const [companyFilter, setCompanyFilter] = useState("");
+  const [sortBy, setSortBy] = useState<SortKey>("date");
 
   const reps = useMemo(() => {
     if (!meetings) return [];
@@ -26,18 +30,38 @@ export default function MeetingFeedPage() {
 
   const filtered = useMemo(() => {
     if (!meetings) return [];
-    return meetings.filter((m) => {
+
+    const result = meetings.filter((m) => {
       if (repFilter !== "all" && m.host_name !== repFilter) return false;
-      if (stageFilter !== "all" && m.scoring_stage_type !== stageFilter)
-        return false;
-      if (
-        companyFilter &&
-        !m.company_name?.toLowerCase().includes(companyFilter.toLowerCase())
-      )
-        return false;
+      if (stageFilter !== "all" && m.scoring_stage_type !== stageFilter) return false;
+      if (companyFilter && !m.company_name?.toLowerCase().includes(companyFilter.toLowerCase())) return false;
       return true;
     });
-  }, [meetings, repFilter, stageFilter, companyFilter]);
+
+    result.sort((a, b) => {
+      switch (sortBy) {
+        case "score":
+          return (b.overall_score ?? 0) - (a.overall_score ?? 0);
+        case "rep":
+          return (a.host_name ?? "").localeCompare(b.host_name ?? "");
+        case "company":
+          return (a.company_name ?? "zzz").localeCompare(b.company_name ?? "zzz");
+        case "date":
+        default:
+          return new Date(b.start_time ?? 0).getTime() - new Date(a.start_time ?? 0).getTime();
+      }
+    });
+
+    return result;
+  }, [meetings, repFilter, stageFilter, companyFilter, sortBy]);
+
+  const hasActiveFilters = repFilter !== "all" || stageFilter !== "all" || companyFilter !== "";
+
+  function clearFilters() {
+    setRepFilter("all");
+    setStageFilter("all");
+    setCompanyFilter("");
+  }
 
   if (error) {
     return (
@@ -62,7 +86,7 @@ export default function MeetingFeedPage() {
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3, 4, 5].map((i) => (
-            <Skeleton key={i} className="h-28 rounded-lg" />
+            <Skeleton key={i} className="h-24 rounded-lg" />
           ))}
         </div>
       ) : (
@@ -74,7 +98,11 @@ export default function MeetingFeedPage() {
             onCompanyFilterChange={setCompanyFilter}
             stageFilter={stageFilter}
             onStageFilterChange={setStageFilter}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
             reps={reps}
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={clearFilters}
           />
 
           {filtered.length === 0 ? (
@@ -85,8 +113,8 @@ export default function MeetingFeedPage() {
             />
           ) : (
             <div className="space-y-3">
-              {filtered.map((meeting) => (
-                <MeetingCard key={meeting.id} meeting={meeting} />
+              {filtered.map((meeting, i) => (
+                <MeetingCard key={meeting.id} meeting={meeting} index={i} />
               ))}
             </div>
           )}

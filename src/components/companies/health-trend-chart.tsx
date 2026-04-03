@@ -1,14 +1,11 @@
 "use client";
 
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
+  LineChart, Line, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
+  AreaChart,
 } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
+import { BrandTooltip } from "@/components/shared/chart-tooltip";
 import type { MeetingsListRow } from "@/types/meetings";
 import { format, parseISO } from "date-fns";
 
@@ -25,8 +22,8 @@ export function HealthTrendChart({ meetings }: HealthTrendChartProps) {
     )
     .map((m) => ({
       date: format(parseISO(m.start_time!), "MMM d"),
-      health: m.client_health_score,
-      score: m.overall_score,
+      "Health Score": m.client_health_score,
+      "Overall Score": m.overall_score,
     }));
 
   if (dataPoints.length < 2) return null;
@@ -34,34 +31,57 @@ export function HealthTrendChart({ meetings }: HealthTrendChartProps) {
   return (
     <Card>
       <CardContent className="p-6">
-        <h3 className="text-sm font-medium mb-4">
+        <h3 className="text-sm font-semibold mb-4">
           Relationship Health Over Time
         </h3>
-        <ResponsiveContainer width="100%" height={220}>
-          <LineChart
+        <ResponsiveContainer width="100%" height={240}>
+          <AreaChart
             data={dataPoints}
             margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
           >
-            <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-            <YAxis domain={[0, 10]} tick={{ fontSize: 12 }} />
-            <Tooltip />
-            <Line
+            <defs>
+              <linearGradient id="healthGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#146DFA" stopOpacity={0.15} />
+                <stop offset="95%" stopColor="#146DFA" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+            <XAxis
+              dataKey="date"
+              tick={{ fontSize: 12 }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <YAxis
+              domain={[0, 10]}
+              tick={{ fontSize: 12 }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <BrandTooltip />
+            <Area
               type="monotone"
-              dataKey="health"
+              dataKey="Health Score"
               stroke="#10b981"
               strokeWidth={2}
-              dot={{ r: 4 }}
-              name="Health Score"
+              fill="url(#healthGradient)"
+              dot={{ r: 4, fill: "#10b981" }}
+              activeDot={{ r: 6 }}
             />
-            <Line
+            <Area
               type="monotone"
-              dataKey="score"
-              stroke="#6366f1"
+              dataKey="Overall Score"
+              stroke="#146DFA"
               strokeWidth={2}
-              dot={{ r: 4 }}
-              name="Overall Score"
+              fill="url(#scoreGradient)"
+              dot={{ r: 4, fill: "#146DFA" }}
+              activeDot={{ r: 6 }}
             />
-          </LineChart>
+          </AreaChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>

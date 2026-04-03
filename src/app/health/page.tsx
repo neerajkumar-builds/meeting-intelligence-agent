@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { SystemMetrics } from "@/components/health/system-metrics";
 import { StatusBreakdown } from "@/components/health/status-breakdown";
 import { ProcessingLog } from "@/components/health/processing-log";
+import { ConnectionStatus } from "@/components/health/connection-status";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePipelineStats } from "@/lib/hooks/use-pipeline-stats";
 import { useScoringRunLog } from "@/lib/hooks/use-scoring-run-log";
@@ -33,6 +34,8 @@ export default function PipelineHealthPage() {
       />
 
       <div className="space-y-6">
+        <ConnectionStatus />
+
         {statsLoading ? (
           <>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

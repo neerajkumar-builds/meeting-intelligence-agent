@@ -3,7 +3,7 @@
 import { useState, useRef, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send } from "lucide-react";
+import { Send, Loader2 } from "lucide-react";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -47,7 +47,11 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         size="icon"
         disabled={disabled || !input.trim()}
       >
-        <Send className="h-4 w-4" />
+        {disabled ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <Send className="h-4 w-4" />
+        )}
       </Button>
     </form>
   );

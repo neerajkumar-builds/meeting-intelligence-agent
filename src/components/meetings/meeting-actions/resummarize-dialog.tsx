@@ -27,10 +27,10 @@ interface ResummarizeDialogProps {
 }
 
 const FORMATS = [
-  { value: "jake_sop", label: "Jake SOP Format" },
-  { value: "executive_summary", label: "Executive Summary" },
-  { value: "bullet_points", label: "Bullet Points" },
-  { value: "client_mom", label: "Client Minutes of Meeting" },
+  { value: "jake_sop", label: "Structured Call Notes (Client + FF Actions)" },
+  { value: "executive_summary", label: "Leadership Brief (3-5 Sentences)" },
+  { value: "bullet_points", label: "Quick Summary (Key Bullets)" },
+  { value: "client_mom", label: "Client-Ready MOM (Shareable)" },
 ];
 
 export function ResummarizeDialog({
@@ -74,7 +74,7 @@ export function ResummarizeDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Summarize As...</DialogTitle>
           <DialogDescription>
