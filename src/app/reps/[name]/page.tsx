@@ -25,6 +25,7 @@ import { useMeetingsList } from "@/lib/hooks/use-meetings-list";
 import { formatScore } from "@/lib/utils/format";
 import { getStageLabel } from "@/lib/utils/stage";
 import { STAGE_CONFIG, type ScoringStageType } from "@/lib/constants";
+import { CoachingSummary } from "@/components/reps/coaching-summary";
 import { ArrowLeft, User, TrendingUp, TrendingDown, Sparkles, ExternalLink, SlidersHorizontal } from "lucide-react";
 import { parseISO, startOfWeek, format } from "date-fns";
 
@@ -302,6 +303,9 @@ export default function RepProfilePage({
           </ChartDownload>
         </Card>
       </div>
+
+      {/* Coaching Insights — from scored_meetings rep_score JSONB (read-only) */}
+      <CoachingSummary repName={repName} />
 
       {/* Meetings — with filters */}
       <div>
