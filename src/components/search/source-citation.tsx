@@ -20,9 +20,9 @@ export function SourceCitation({ sources }: { sources: Source[] }) {
     <div className="mt-3 pt-3 border-t border-border/50">
       <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Sources</p>
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {sources.map((source) => (
+        {sources.map((source, i) => (
           <Link
-            key={source.id}
+            key={`${source.id}-${i}`}
             href={`/meetings/${source.id}`}
             className="flex-shrink-0 flex items-start gap-2 rounded-lg border px-3 py-2 text-xs hover:bg-muted/50 hover:border-primary/30 transition-colors max-w-[240px]"
           >

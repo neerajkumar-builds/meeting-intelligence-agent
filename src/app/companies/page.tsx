@@ -89,7 +89,7 @@ export default function CompaniesIndexPage() {
     <div>
       <PageHeader
         title="Companies"
-        description={`${companies.length} companies with scored meetings`}
+        description={search ? `Showing ${companies.filter(c => c.name.toLowerCase().includes(search.toLowerCase())).length} of ${companies.length} companies` : `${companies.length} companies with scored meetings`}
       />
 
       {isLoading ? (
@@ -121,8 +121,8 @@ export default function CompaniesIndexPage() {
               </button>
             )}
           </div>
-          <div className="flex items-end gap-2">
-            <div className="max-w-[220px] flex-1">
+          <div className="flex flex-col sm:flex-row items-start sm:items-end gap-2">
+            <div className="w-full sm:max-w-[220px] sm:flex-1">
               <label className="text-[10px] font-medium text-muted-foreground mb-1 block">Search</label>
               <div className="relative">
                 <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />

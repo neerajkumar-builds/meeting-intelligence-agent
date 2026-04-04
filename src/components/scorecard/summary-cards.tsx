@@ -115,7 +115,7 @@ export function SummaryCards({ meetings }: SummaryCardsProps) {
       {/* Avg Score */}
       <Card className={`transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${getCardTint(getScoreTint(totalMeetings > 0 ? avgScore : null))}`}>
         <CardContent className="p-5">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Avg Score</p>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider" title="Scale: 0-10. 8+ Strong, 6-8 Average, below 6 Needs Attention">Avg Score <span className="normal-case tracking-normal opacity-60">/ 10</span></p>
           <div className="flex items-center gap-2 mt-1.5">
             <p className="text-3xl font-bold tracking-tight">
               {formatScore(totalMeetings > 0 ? avgScore : null)}
@@ -132,7 +132,7 @@ export function SummaryCards({ meetings }: SummaryCardsProps) {
       {/* Avg Health */}
       <Card className={`transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${getCardTint(getScoreTint(avgHealth))}`}>
         <CardContent className="p-5">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Avg Health</p>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider" title="Scale: 0-10. 8+ Healthy, 5-8 Monitor, below 5 At-Risk">Avg Health <span className="normal-case tracking-normal opacity-60">/ 10</span></p>
           <div className="flex items-center gap-2 mt-1.5">
             <p className="text-3xl font-bold tracking-tight">
               {formatScore(avgHealth)}

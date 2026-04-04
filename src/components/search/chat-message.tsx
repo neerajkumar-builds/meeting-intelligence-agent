@@ -9,7 +9,7 @@ import { BrandTooltip } from "@/components/shared/chart-tooltip";
 import { ChartDownload } from "@/components/shared/chart-download";
 import { SendToSlack } from "@/components/shared/send-to-slack";
 import { SourceCitation } from "./source-citation";
-import { Copy, Mail, Check, Sparkles, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Copy, Mail, Check, Sparkles, ThumbsUp, ThumbsDown, AlertCircle } from "lucide-react";
 import { logChatEvent } from "@/lib/analytics";
 
 interface ChatMessageProps {
@@ -128,10 +128,17 @@ export function ChatMessage({ role, content, isStreaming, onFollowUp, sessionId,
           "relative max-w-[85%] rounded-lg px-4 py-3",
           role === "user"
             ? "bg-primary text-primary-foreground"
-            : "bg-muted"
+            : content.startsWith("Something went wrong") || content.startsWith("No response received")
+              ? "border border-destructive/30 bg-destructive/5"
+              : "bg-muted"
         )}
       >
-        {role === "assistant" ? (
+        {role === "assistant" && (content.startsWith("Something went wrong") || content.startsWith("No response received")) ? (
+          <div className="flex items-start gap-2 text-sm text-destructive">
+            <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+            <p>{content}</p>
+          </div>
+        ) : role === "assistant" ? (
           (() => {
             // Pre-process: ensure fenced code block markers are on their own line
             // Claude sometimes outputs ```chart or ```sources inline without a preceding newline
@@ -236,13 +243,13 @@ export function ChatMessage({ role, content, isStreaming, onFollowUp, sessionId,
                           return (
                             <ChartDownload title={chartData.title} className="my-3 rounded-lg border bg-card p-4">
                               {chartData.title && <p className="text-xs font-semibold mb-3">{chartData.title}</p>}
-                              <div className="flex items-center gap-6">
-                                <ResponsiveContainer width={160} height={160}>
+                              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+                                <ResponsiveContainer width={120} height={120} className="sm:!w-[160px] sm:!h-[160px]">
                                   <PieChart>
                                     <Pie
                                       data={chartData.data}
                                       cx="50%" cy="50%"
-                                      innerRadius={45} outerRadius={70}
+                                      innerRadius={35} outerRadius={55}
                                       dataKey="value"
                                       nameKey="label"
                                       strokeWidth={2}
@@ -301,7 +308,7 @@ export function ChatMessage({ role, content, isStreaming, onFollowUp, sessionId,
                     const isBlock = className?.includes("language-");
                     if (isBlock) {
                       return (
-                        <code className="block bg-[#0A0A0A] text-emerald-400 rounded-md p-3 my-2 text-xs font-mono overflow-x-auto">
+                        <code className="block bg-zinc-900 dark:bg-zinc-950 text-emerald-400 rounded-md p-3 my-2 text-xs font-mono overflow-x-auto">
                           {children}
                         </code>
                       );

@@ -40,7 +40,12 @@ export function SidebarContent({ data, isLoading, error }: SidebarContentProps) 
     );
   }
 
-  if (!data) return null;
+  if (!data) return (
+    <div className="p-4 text-center">
+      <p className="text-sm text-muted-foreground">No intelligence data yet.</p>
+      <p className="text-xs text-muted-foreground mt-1">This company needs more scored meetings for AI analysis.</p>
+    </div>
+  );
 
   return (
     <div className="p-4 space-y-1">

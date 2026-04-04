@@ -46,7 +46,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Ask about meetings, scores, action items..."
+        placeholder="Compare reps, list meetings by date, show score trends, find action items..."
         disabled={disabled}
         rows={1}
         className="flex-1 resize-none bg-transparent text-sm leading-relaxed placeholder:text-muted-foreground focus:outline-none disabled:opacity-50 min-h-[40px] max-h-[160px] py-2"

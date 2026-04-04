@@ -30,6 +30,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   async function handleSignOut() {
+    if (!window.confirm("Sign out?")) return;
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();

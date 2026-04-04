@@ -52,7 +52,7 @@ export const NAV_ITEMS = [
   { label: "Meetings", href: "/meetings", icon: "CalendarDays" as const, group: "Analysis" },
   { label: "Companies", href: "/companies", icon: "Building2" as const, group: "Analysis" },
   { label: "Ask Blarney", href: "/search", icon: "Search" as const, group: "Tools" },
-  { label: "System", href: "/health", icon: "Activity" as const, group: "Tools" },
+  { label: "System Health", href: "/health", icon: "Activity" as const, group: "Tools" },
 ];
 
 export const SUGGESTED_PROMPTS = [

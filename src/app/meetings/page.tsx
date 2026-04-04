@@ -96,7 +96,7 @@ export default function MeetingFeedPage() {
     <div>
       <PageHeader
         title="Meeting Feed"
-        description={`${filtered.length} meeting${filtered.length !== 1 ? "s" : ""}`}
+        description={hasActiveFilters ? `Showing ${filtered.length} of ${meetings?.length ?? 0} meetings` : `${filtered.length} meeting${filtered.length !== 1 ? "s" : ""}`}
       />
 
       {isLoading ? (

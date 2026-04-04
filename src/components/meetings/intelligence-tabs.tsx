@@ -151,7 +151,7 @@ export function IntelligenceTabs({
           return (
             <TabsTrigger key={tab.value} value={tab.value} className="gap-1.5">
               <Icon className="h-3.5 w-3.5" />
-              {tab.label}
+              <span className="hidden sm:inline">{tab.label}</span>
             </TabsTrigger>
           );
         })}

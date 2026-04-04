@@ -53,11 +53,11 @@ export default function CompanyViewPage({
     return (
       <div>
         <Link
-          href="/meetings"
+          href="/companies"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to meetings
+          Back to companies
         </Link>
         <EmptyState
           icon={Building2}
@@ -73,11 +73,11 @@ export default function CompanyViewPage({
       {/* Main content */}
       <div className="flex-1 min-w-0 space-y-6">
         <Link
-          href="/meetings"
+          href="/companies"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to meetings
+          Back to companies
         </Link>
 
         <CompanyHeader companyName={companyName} meetings={meetings} />

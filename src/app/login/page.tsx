@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,7 @@ const TAGLINES = [
 ];
 
 export default function LoginPage() {
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -50,7 +52,8 @@ export default function LoginPage() {
     }
 
     // Full page navigation to force middleware re-evaluation with new auth cookie
-    window.location.href = "/";
+    const redirect = searchParams.get("redirect") ?? "/";
+    window.location.href = redirect;
   }
 
   return (
@@ -81,7 +84,7 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@fullfunnel.co"
               required
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-[#146DFA]"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-[#146DFA]"
             />
           </div>
           <div>
@@ -95,13 +98,13 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
                 required
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-[#146DFA] pr-10"
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-[#146DFA] pr-10"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
-                tabIndex={-1}
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
