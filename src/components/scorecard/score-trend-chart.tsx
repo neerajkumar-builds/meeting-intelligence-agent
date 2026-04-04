@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip,
 } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
 import { BrandTooltip } from "@/components/shared/chart-tooltip";
@@ -48,7 +48,7 @@ export function ScoreTrendChart({ meetings }: ScoreTrendChartProps) {
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
             <XAxis dataKey="week" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
             <YAxis domain={[0, 10]} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-            <BrandTooltip />
+            <Tooltip content={<BrandTooltip />} />
             <Area
               type="monotone"
               dataKey="Avg Score"

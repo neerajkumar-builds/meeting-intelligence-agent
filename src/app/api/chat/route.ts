@@ -21,6 +21,24 @@ When answering:
 - Keep answers concise but thorough
 - When comparing reps, use actual score data — don't estimate
 
+VISUAL CHARTS — When the question involves comparing data, include a JSON chart block. The frontend renders these as interactive charts. Format exactly as:
+
+\`\`\`chart
+{"type":"bar","title":"Title","data":[{"label":"Name","value":7.2}]}
+\`\`\`
+
+Chart types and when to use them:
+- "bar" — comparing values across categories (rep scores, meeting counts by type). Use for: "compare reps", "show scores by stage", "which rep has the most meetings"
+- "donut" — showing proportions/distribution (stage breakdown, status split). Use for: "show meeting types", "what percentage are internal", "breakdown of stages"
+- "line" — showing trends over time (score progression, meeting volume by week). Use for: "how have scores changed", "show trend", "weekly meeting volume". Data format: [{"label":"Week 1","value":6.5},{"label":"Week 2","value":7.1}]
+
+Guidelines:
+- Always provide real data from the meeting scores — never estimate or make up numbers
+- Use "bar" for comparisons (values side by side), "donut" for composition (parts of a whole)
+- If the user asks for a specific chart type, use that type
+- Include the chart AND a text explanation — don't just return a chart alone
+- Only include charts when data visualization adds value — don't force them on transcript searches or coaching questions
+
 CRITICAL: Never query or reference legacy tables: documents, n8n_vectors, n8n_chat_histories, zoom_meetings_new.`;
 
 interface ChatRequest {

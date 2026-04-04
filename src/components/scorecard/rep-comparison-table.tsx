@@ -99,7 +99,7 @@ export function RepComparisonTable({ meetings }: RepComparisonTableProps) {
             <TableRow key={rep.name}>
               <TableCell>
                 <Link
-                  href={`/meetings?rep=${encodeURIComponent(rep.name)}`}
+                  href={`/reps/${encodeURIComponent(rep.name)}`}
                   className="font-medium text-primary hover:underline"
                 >
                   {rep.name}

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer, Tooltip,
 } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
 import { BrandTooltip } from "@/components/shared/chart-tooltip";
@@ -62,7 +62,7 @@ export function ScoreDistributionChart({ meetings }: ScoreDistributionChartProps
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
             <XAxis dataKey="name" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
             <YAxis allowDecimals={false} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-            <BrandTooltip />
+            <Tooltip content={<BrandTooltip />} />
             <Legend wrapperStyle={{ fontSize: 12, paddingTop: 12 }} iconType="circle" iconSize={8} />
             <Bar
               dataKey="8+ Strong"

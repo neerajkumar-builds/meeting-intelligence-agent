@@ -2,7 +2,7 @@
 
 import {
   LineChart, Line, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
-  AreaChart,
+  AreaChart, Tooltip,
 } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
 import { BrandTooltip } from "@/components/shared/chart-tooltip";
@@ -62,7 +62,7 @@ export function HealthTrendChart({ meetings }: HealthTrendChartProps) {
               axisLine={false}
               tickLine={false}
             />
-            <BrandTooltip />
+            <Tooltip content={<BrandTooltip />} />
             <Area
               type="monotone"
               dataKey="Health Score"

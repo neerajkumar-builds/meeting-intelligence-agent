@@ -21,6 +21,8 @@ interface MeetingFiltersProps {
   onStageFilterChange: (value: string) => void;
   sortBy: string;
   onSortChange: (value: string) => void;
+  dateRange: string;
+  onDateRangeChange: (value: string) => void;
   reps: string[];
   hasActiveFilters: boolean;
   onClearFilters: () => void;
@@ -35,6 +37,8 @@ export function MeetingFilters({
   onStageFilterChange,
   sortBy,
   onSortChange,
+  dateRange,
+  onDateRangeChange,
   reps,
   hasActiveFilters,
   onClearFilters,
@@ -81,6 +85,21 @@ export function MeetingFilters({
           onChange={(e) => onCompanyFilterChange(e.target.value)}
           className="w-[180px]"
         />
+      </div>
+
+      <div>
+        <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Period</label>
+        <Select value={dateRange} onValueChange={(v) => onDateRangeChange(v ?? "all")}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Time</SelectItem>
+            <SelectItem value="7d">Last 7 Days</SelectItem>
+            <SelectItem value="30d">Last 30 Days</SelectItem>
+            <SelectItem value="90d">Last 90 Days</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div>

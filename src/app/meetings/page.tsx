@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { subDays, subMonths, parseISO } from "date-fns";
 import { PageHeader } from "@/components/layout/page-header";
 import { MeetingCard } from "@/components/shared/meeting-card";
 import { MeetingFilters } from "@/components/meetings/meeting-filters";
@@ -20,6 +21,7 @@ export default function MeetingFeedPage() {
   const [stageFilter, setStageFilter] = useState(searchParams.get("stage") ?? "all");
   const [companyFilter, setCompanyFilter] = useState(searchParams.get("company") ?? "");
   const [sortBy, setSortBy] = useState<SortKey>((searchParams.get("sort") as SortKey) ?? "date");
+  const [dateRange, setDateRange] = useState(searchParams.get("period") ?? "all");
 
   const reps = useMemo(() => {
     if (!meetings) return [];
@@ -33,10 +35,17 @@ export default function MeetingFeedPage() {
   const filtered = useMemo(() => {
     if (!meetings) return [];
 
+    const now = new Date();
+    const dateCutoff =
+      dateRange === "7d" ? subDays(now, 7) :
+      dateRange === "30d" ? subDays(now, 30) :
+      dateRange === "90d" ? subMonths(now, 3) : null;
+
     const result = meetings.filter((m) => {
       if (repFilter !== "all" && m.host_name !== repFilter) return false;
       if (stageFilter !== "all" && m.scoring_stage_type !== stageFilter) return false;
       if (companyFilter && !m.company_name?.toLowerCase().includes(companyFilter.toLowerCase())) return false;
+      if (dateCutoff && m.start_time && parseISO(m.start_time) < dateCutoff) return false;
       return true;
     });
 
@@ -55,14 +64,15 @@ export default function MeetingFeedPage() {
     });
 
     return result;
-  }, [meetings, repFilter, stageFilter, companyFilter, sortBy]);
+  }, [meetings, repFilter, stageFilter, companyFilter, sortBy, dateRange]);
 
-  const hasActiveFilters = repFilter !== "all" || stageFilter !== "all" || companyFilter !== "";
+  const hasActiveFilters = repFilter !== "all" || stageFilter !== "all" || companyFilter !== "" || dateRange !== "all";
 
   function clearFilters() {
     setRepFilter("all");
     setStageFilter("all");
     setCompanyFilter("");
+    setDateRange("all");
   }
 
   if (error) {
@@ -102,6 +112,8 @@ export default function MeetingFeedPage() {
             onStageFilterChange={setStageFilter}
             sortBy={sortBy}
             onSortChange={setSortBy}
+            dateRange={dateRange}
+            onDateRangeChange={setDateRange}
             reps={reps}
             hasActiveFilters={hasActiveFilters}
             onClearFilters={clearFilters}

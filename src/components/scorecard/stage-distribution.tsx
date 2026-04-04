@@ -1,6 +1,6 @@
 "use client";
 
-import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
 import { BrandTooltip } from "@/components/shared/chart-tooltip";
 import type { MeetingsListRow } from "@/types/meetings";
@@ -55,7 +55,7 @@ export function StageDistribution({ meetings }: StageDistributionProps) {
                   <Cell key={i} fill={entry.color} />
                 ))}
               </Pie>
-              <BrandTooltip />
+              <Tooltip content={<BrandTooltip />} />
             </PieChart>
           </ResponsiveContainer>
           <div className="space-y-2">
