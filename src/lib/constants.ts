@@ -51,7 +51,7 @@ export const NAV_ITEMS = [
   { label: "Scorecard", href: "/", icon: "LayoutDashboard" as const, group: "Analysis" },
   { label: "Meetings", href: "/meetings", icon: "CalendarDays" as const, group: "Analysis" },
   { label: "Companies", href: "/companies", icon: "Building2" as const, group: "Analysis" },
-  { label: "AI Search", href: "/search", icon: "Search" as const, group: "Tools" },
+  { label: "Ask Blarney", href: "/search", icon: "Search" as const, group: "Tools" },
   { label: "System", href: "/health", icon: "Activity" as const, group: "Tools" },
 ];
 

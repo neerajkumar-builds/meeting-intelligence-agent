@@ -6,9 +6,12 @@ import { ChatInput } from "./chat-input";
 import { SuggestedPrompts } from "./suggested-prompts";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { RotateCcw, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
+import { supabase } from "@/lib/supabase/client";
+import { logChatEvent } from "@/lib/analytics";
 
 const STORAGE_KEY = "meeting-intel-chat";
+const SESSION_KEY = "meeting-intel-session";
 
 interface Message {
   id: string;
@@ -38,14 +41,31 @@ function saveMessages(messages: Message[]) {
   }
 }
 
+function getSessionId(): string {
+  let id = sessionStorage.getItem(SESSION_KEY);
+  if (!id) {
+    id = crypto.randomUUID();
+    sessionStorage.setItem(SESSION_KEY, id);
+  }
+  return id;
+}
+
 export function ChatInterface({ initialQuery }: { initialQuery?: string }) {
   const [messages, setMessages] = useState<Message[]>(() =>
     initialQuery ? [] : loadMessages()
   );
   const [isStreaming, setIsStreaming] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const initialSent = useRef(false);
+
+  // Get user email for analytics + rate limiting
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUserEmail(data.user?.email ?? null);
+    });
+  }, []);
 
   // Persist messages whenever they change (and not mid-stream)
   useEffect(() => {
@@ -99,7 +119,7 @@ export function ChatInterface({ initialQuery }: { initialQuery?: string }) {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: content, history }),
+        body: JSON.stringify({ message: content, history, sessionId: getSessionId(), userEmail }),
       });
 
       if (!response.ok) {
@@ -194,8 +214,12 @@ export function ChatInterface({ initialQuery }: { initialQuery?: string }) {
   }
 
   function resetConversation() {
+    if (!window.confirm("Clear this conversation?")) return;
+    logChatEvent({ sessionId: getSessionId(), eventType: "clear", userEmail: userEmail ?? undefined });
     setMessages([]);
     saveMessages([]);
+    // Start a new session
+    sessionStorage.removeItem(SESSION_KEY);
   }
 
   return (
@@ -218,6 +242,7 @@ export function ChatInterface({ initialQuery }: { initialQuery?: string }) {
                     message.id === messages[messages.length - 1]?.id
                   }
                   onFollowUp={!isStreaming ? sendMessage : undefined}
+                  sessionId={getSessionId()}
                 />
               ))}
             </div>
@@ -241,17 +266,21 @@ export function ChatInterface({ initialQuery }: { initialQuery?: string }) {
               </Button>
               {(() => {
                 const turns = Math.floor(messages.length / 2);
-                const isNearLimit = turns >= 8;
-                return (
-                  <span className={`text-xs ${isNearLimit ? "text-amber-600 dark:text-amber-400 font-medium" : "text-muted-foreground"}`}>
-                    {turns} / 10 turns{isNearLimit && turns < 10 ? " — running low" : ""}
-                    {turns >= 10 ? " — limit reached, clear to continue" : ""}
-                  </span>
-                );
+                if (turns >= 15) {
+                  return (
+                    <span className="text-xs text-amber-600 dark:text-amber-400">
+                      {turns} turns — older messages aren&apos;t sent to AI. Clear for best accuracy.
+                    </span>
+                  );
+                }
+                if (turns >= 11) {
+                  return <span className="text-xs text-muted-foreground">{turns} turns</span>;
+                }
+                return null;
               })()}
             </div>
           )}
-          <ChatInput onSend={sendMessage} disabled={isStreaming || Math.floor(messages.length / 2) >= 10} />
+          <ChatInput onSend={sendMessage} disabled={isStreaming} />
         </div>
       </div>
     </div>

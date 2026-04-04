@@ -57,21 +57,64 @@ Make them specific and actionable — not generic. If you mentioned a specific r
 
 CRITICAL: Never query or reference legacy tables: documents, n8n_vectors, n8n_chat_histories, zoom_meetings_new.`;
 
+const DAILY_LIMIT = parseInt(process.env.DAILY_QUERY_LIMIT ?? "50", 10);
+const BURST_LIMIT = parseInt(process.env.BURST_QUERY_LIMIT ?? "10", 10);
+
 interface ChatRequest {
   message: string;
   history: { role: "user" | "assistant"; content: string }[];
+  sessionId?: string;
+  userEmail?: string;
 }
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
   try {
     const body: ChatRequest = await request.json();
-    const { message, history } = body;
+    const { message, history, sessionId, userEmail } = body;
 
     if (!message) {
       return Response.json({ error: "Message is required" }, { status: 400 });
     }
 
     const supabase = createServerSupabase();
+
+    // Rate limiting — check daily + burst limits (silent skip if table doesn't exist)
+    if (userEmail) {
+      try {
+        const today = new Date().toISOString().slice(0, 10);
+        const { count: dailyCount } = await supabase
+          .from("chat_analytics")
+          .select("*", { count: "exact", head: true })
+          .eq("user_email", userEmail)
+          .eq("event_type", "query")
+          .gte("created_at", today);
+
+        if (dailyCount !== null && dailyCount >= DAILY_LIMIT) {
+          return Response.json(
+            { error: `Daily limit reached (${DAILY_LIMIT} queries). Resets at midnight.`, limitReached: true, dailyCount },
+            { status: 429 }
+          );
+        }
+
+        const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+        const { count: burstCount } = await supabase
+          .from("chat_analytics")
+          .select("*", { count: "exact", head: true })
+          .eq("user_email", userEmail)
+          .eq("event_type", "query")
+          .gte("created_at", fiveMinAgo);
+
+        if (burstCount !== null && burstCount >= BURST_LIMIT) {
+          return Response.json(
+            { error: "Too many queries in a short time. Try again in a few minutes.", burstLimited: true },
+            { status: 429 }
+          );
+        }
+      } catch {
+        // Rate limit check failed — allow the query (fail open)
+      }
+    }
 
     // Step 1: Embed query and vector search transcript chunks
     const embedding = await embedQuery(message);
@@ -201,6 +244,17 @@ export async function POST(request: NextRequest) {
       system: RAG_SYSTEM_PROMPT,
       messages,
     });
+
+    // Log query to analytics (fire-and-forget, never blocks response)
+    supabase.from("chat_analytics").insert({
+      session_id: sessionId ?? "unknown",
+      user_email: userEmail ?? null,
+      event_type: "query",
+      query: message,
+      chunks_retrieved: chunks.length,
+      sources_count: matchedMeetingIds?.size ?? 0,
+      latency_ms: Date.now() - startTime,
+    }).then(() => {}, () => {});
 
     return new Response(stream.toReadableStream(), {
       headers: {

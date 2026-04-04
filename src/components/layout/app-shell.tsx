@@ -17,7 +17,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
 
-  // Cmd+K / Ctrl+K shortcut to jump to AI Search
+  // Cmd+K / Ctrl+K shortcut to jump to Ask Blarney
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {

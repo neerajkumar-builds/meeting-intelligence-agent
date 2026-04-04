@@ -8,13 +8,15 @@ import { BrandTooltip } from "@/components/shared/chart-tooltip";
 import { ChartDownload } from "@/components/shared/chart-download";
 import { SendToSlack } from "@/components/shared/send-to-slack";
 import { SourceCitation } from "./source-citation";
-import { Copy, Mail, Check, Sparkles } from "lucide-react";
+import { Copy, Mail, Check, Sparkles, ThumbsUp, ThumbsDown } from "lucide-react";
+import { logChatEvent } from "@/lib/analytics";
 
 interface ChatMessageProps {
   role: "user" | "assistant";
   content: string;
   isStreaming?: boolean;
   onFollowUp?: (question: string) => void;
+  sessionId?: string;
 }
 
 /** Convert ```chart JSON blocks to readable text for copy/email/slack */
@@ -43,8 +45,9 @@ function getExportText(rawContent: string): string {
   return text.trim();
 }
 
-export function ChatMessage({ role, content, isStreaming, onFollowUp }: ChatMessageProps) {
+export function ChatMessage({ role, content, isStreaming, onFollowUp, sessionId }: ChatMessageProps) {
   const [copied, setCopied] = useState(false);
+  const [feedback, setFeedback] = useState<"up" | "down" | null>(null);
 
   function handleCopy() {
     navigator.clipboard.writeText(getExportText(content));
@@ -269,20 +272,48 @@ export function ChatMessage({ role, content, isStreaming, onFollowUp }: ChatMess
             {!isStreaming && content && (
               <div className="flex items-center gap-1 mt-2 pt-2 border-t border-border/50 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
-                  onClick={handleCopy}
+                  onClick={() => {
+                    handleCopy();
+                    if (sessionId) logChatEvent({ sessionId, eventType: "copy" });
+                  }}
                   className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-background/50 transition-colors"
                 >
                   {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
                   {copied ? "Copied" : "Copy"}
                 </button>
                 <button
-                  onClick={handleEmail}
+                  onClick={() => {
+                    handleEmail();
+                    if (sessionId) logChatEvent({ sessionId, eventType: "email_share" });
+                  }}
                   className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-background/50 transition-colors"
                 >
                   <Mail className="h-3 w-3" />
                   Email
                 </button>
-                <SendToSlack title="AI Search Response" body={getExportText(content)} />
+                <SendToSlack title="Ask Blarney Response" body={getExportText(content)} />
+                <div className="ml-auto flex items-center gap-0.5">
+                  <button
+                    onClick={() => {
+                      setFeedback("up");
+                      if (sessionId) logChatEvent({ sessionId, eventType: "thumbs_up", query: content.slice(0, 100) });
+                    }}
+                    className={`rounded p-1 transition-colors ${feedback === "up" ? "text-emerald-500" : "text-muted-foreground/50 hover:text-emerald-500"}`}
+                    disabled={feedback !== null}
+                  >
+                    <ThumbsUp className="h-3 w-3" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      setFeedback("down");
+                      if (sessionId) logChatEvent({ sessionId, eventType: "thumbs_down", query: content.slice(0, 100) });
+                    }}
+                    className={`rounded p-1 transition-colors ${feedback === "down" ? "text-red-500" : "text-muted-foreground/50 hover:text-red-500"}`}
+                    disabled={feedback !== null}
+                  >
+                    <ThumbsDown className="h-3 w-3" />
+                  </button>
+                </div>
               </div>
             )}
 

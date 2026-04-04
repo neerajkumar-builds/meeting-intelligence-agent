@@ -13,19 +13,37 @@ vi.mock("@anthropic-ai/sdk", () => {
   };
 });
 
-vi.mock("@/lib/supabase/server", () => ({
-  createServerSupabase: vi.fn(() => ({
-    rpc: vi.fn().mockResolvedValue({ data: [] }),
-    from: vi.fn().mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        order: vi.fn().mockReturnValue({
-          ascending: vi.fn().mockResolvedValue({ data: [] }),
+vi.mock("@/lib/supabase/server", () => {
+  const chainable = () => {
+    const obj: Record<string, unknown> = {};
+    const proxy = new Proxy(obj, {
+      get(_target, prop) {
+        if (prop === "then") return undefined; // Not a thenable
+        if (prop === "data") return [];
+        if (prop === "count") return 0;
+        return vi.fn().mockReturnValue(proxy);
+      },
+    });
+    return proxy;
+  };
+  return {
+    createServerSupabase: vi.fn(() => ({
+      rpc: vi.fn().mockResolvedValue({ data: [] }),
+      from: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          order: vi.fn().mockResolvedValue({ data: [] }),
+          in: vi.fn().mockResolvedValue({ data: [] }),
+          eq: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              gte: vi.fn().mockResolvedValue({ count: 0 }),
+            }),
+          }),
         }),
-        in: vi.fn().mockResolvedValue({ data: [] }),
+        insert: vi.fn().mockReturnValue({ then: (resolve: () => void) => resolve() }),
       }),
-    }),
-  })),
-}));
+    })),
+  };
+});
 
 // Set env vars
 process.env.NEXT_PUBLIC_SUPABASE_URL = "https://test.supabase.co";

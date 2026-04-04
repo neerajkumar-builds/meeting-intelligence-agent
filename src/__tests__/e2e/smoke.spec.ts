@@ -101,7 +101,7 @@ test.describe("Companies", () => {
   });
 });
 
-test.describe("AI Search", () => {
+test.describe("Ask Blarney", () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
   });

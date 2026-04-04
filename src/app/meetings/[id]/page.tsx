@@ -129,7 +129,7 @@ export default function MeetingDetailPage({
             className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-2.5 py-1.5 text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
           >
             <Sparkles className="h-3.5 w-3.5" />
-            Ask AI
+            Ask Blarney
           </button>
           </div>
         </div>
