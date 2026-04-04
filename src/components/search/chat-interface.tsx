@@ -26,6 +26,7 @@ export function ChatInterface({ initialQuery }: { initialQuery?: string }) {
       initialSent.current = true;
       sendMessage(initialQuery);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: run once when initialQuery arrives, guarded by initialSent ref
   }, [initialQuery]);
 
   const scrollToBottom = useCallback(() => {

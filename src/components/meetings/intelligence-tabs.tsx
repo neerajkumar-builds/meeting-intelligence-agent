@@ -6,11 +6,8 @@ import { FileText, GraduationCap, ListChecks, Gavel, Users } from "lucide-react"
 import type { ScoringStageType } from "@/lib/constants";
 import type {
   DiscoveryMeetingScore,
-  DiscoveryRepScore,
   FollowUpMeetingScore,
-  FollowUpRepScore,
   OnboardingMeetingScore,
-  OnboardingRepScore,
   InternalSummary,
 } from "@/types/scores";
 

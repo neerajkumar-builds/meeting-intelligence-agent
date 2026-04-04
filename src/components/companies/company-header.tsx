@@ -27,14 +27,6 @@ export function CompanyHeader({ companyName, meetings }: CompanyHeaderProps) {
       ? healthScores.reduce((a, b) => a + b, 0) / healthScores.length
       : null;
 
-  const avgScore =
-    meetings.filter((m) => m.overall_score !== null).length > 0
-      ? meetings
-          .filter((m) => m.overall_score !== null)
-          .reduce((s, m) => s + m.overall_score!, 0) /
-        meetings.filter((m) => m.overall_score !== null).length
-      : null;
-
   return (
     <div className="space-y-3">
       <h1 className="text-2xl font-bold">{companyName}</h1>

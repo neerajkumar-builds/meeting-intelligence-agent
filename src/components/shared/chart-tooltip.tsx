@@ -1,18 +1,18 @@
 "use client";
 
-import type { TooltipProps } from "recharts";
+interface ChartTooltipProps {
+  active?: boolean;
+  payload?: Array<{ name: string; value: number; color: string }>;
+  label?: string;
+}
 
-export function BrandTooltip({
-  active,
-  payload,
-  label,
-}: TooltipProps<number, string>) {
+export function BrandTooltip({ active, payload, label }: ChartTooltipProps) {
   if (!active || !payload?.length) return null;
 
   return (
     <div className="rounded-lg border bg-popover px-3 py-2 shadow-lg">
       <p className="text-xs font-medium mb-1">{label}</p>
-      {payload.map((entry, i) => (
+      {payload.map((entry: { name: string; value: number; color: string }, i: number) => (
         <div key={i} className="flex items-center gap-2 text-xs">
           <div
             className="h-2 w-2 rounded-full"

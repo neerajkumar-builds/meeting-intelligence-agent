@@ -38,8 +38,8 @@ export function ScoreSection(props: ScoreSectionProps) {
         <span className="text-sm text-muted-foreground">overall</span>
       </div>
 
-      <div className="rounded-lg border bg-card p-6">
-        <div className="flex flex-wrap items-start justify-center gap-8 md:gap-12">
+      <div className="rounded-lg border bg-card p-4">
+        <div className="flex flex-wrap items-start justify-center gap-6 md:gap-10">
           {stageType === "discovery_scoping" && (
             <DiscoveryScores
               meetingScore={props.meetingScore as DiscoveryMeetingScore | null}
@@ -84,16 +84,19 @@ function DiscoveryScores({
   return (
     <>
       <CircularGauge
+        size={90}
         score={meetingScore?.lead_score ?? null}
         label="Meeting Outcome"
         subtitle={meetingScore?.deal_sentiment ?? undefined}
       />
       <CircularGauge
+        size={90}
         score={repScore?.rep_performance_score ?? null}
         label="Rep Performance"
         subtitle={repScore?.meeting_quality_rating ?? undefined}
       />
       <CircularGauge
+        size={90}
         score={icpScore?.icp_fit_score ?? null}
         label="ICP Fit"
         subtitle={icpScore?.confidence_level ?? undefined}
@@ -114,16 +117,19 @@ function FollowUpScores({
   return (
     <>
       <CircularGauge
+        size={90}
         score={meetingScore?.engagement_score ?? null}
         label="Engagement"
         subtitle={meetingScore?.engagement_level ?? undefined}
       />
       <CircularGauge
+        size={90}
         score={repScore?.rep_performance_score ?? null}
         label="Rep Performance"
         subtitle={repScore?.meeting_quality_rating ?? undefined}
       />
       <CircularGauge
+        size={90}
         score={clientHealthScore}
         label="Account Health"
         subtitle={meetingScore?.relationship_health ?? undefined}
@@ -144,16 +150,19 @@ function OnboardingScores({
   return (
     <>
       <CircularGauge
+        size={90}
         score={meetingScore?.delivery_score ?? null}
         label="Delivery"
         subtitle={meetingScore?.delivery_status ?? undefined}
       />
       <CircularGauge
+        size={90}
         score={repScore?.rep_performance_score ?? null}
         label="Rep Performance"
         subtitle={repScore?.meeting_quality_rating ?? undefined}
       />
       <CircularGauge
+        size={90}
         score={clientHealthScore}
         label="Client Satisfaction"
         subtitle={meetingScore?.current_phase ?? undefined}

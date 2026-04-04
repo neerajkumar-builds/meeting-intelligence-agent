@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useMeetingDetail } from "@/lib/hooks/use-meeting-detail";
 import { formatDateTime, formatDuration } from "@/lib/utils/format";
 import { useRouter } from "next/navigation";
+import { IntelligenceSidebar } from "@/components/companies/intelligence-sidebar";
 import { ExternalLink, ArrowLeft, Sparkles } from "lucide-react";
 import type { ScoringStageType } from "@/lib/constants";
 
@@ -64,7 +65,8 @@ export default function MeetingDetailPage({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex gap-6">
+      <div className="flex-1 min-w-0 space-y-6">
       {/* Back link */}
       <Link
         href="/meetings"
@@ -88,14 +90,15 @@ export default function MeetingDetailPage({
           )}
         </div>
         <h1 className="text-2xl font-bold">{meeting.topic ?? "Untitled Meeting"}</h1>
-        <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-          <span>Rep: {meeting.host_name ?? "Unknown"}</span>
-          {meeting.company_name && <span>Company: {meeting.company_name}</span>}
-          {meeting.primary_participant_name && (
-            <span>Contact: {meeting.primary_participant_name}</span>
-          )}
-        </div>
-        <div className="flex items-center gap-2 mt-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 mt-2">
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <span>Rep: {meeting.host_name ?? "Unknown"}</span>
+            {meeting.company_name && <span>Company: {meeting.company_name}</span>}
+            {meeting.primary_participant_name && (
+              <span>Contact: {meeting.primary_participant_name}</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
           {meeting.google_doc_url && (
             <a
               href={meeting.google_doc_url}
@@ -123,6 +126,7 @@ export default function MeetingDetailPage({
             <Sparkles className="h-3.5 w-3.5" />
             Ask AI
           </button>
+          </div>
         </div>
       </div>
 
@@ -150,6 +154,12 @@ export default function MeetingDetailPage({
 
       {/* Transcript */}
       <TranscriptViewer transcript={meeting.transcript_text} />
+      </div>
+
+      {/* Intelligence Sidebar — only for external meetings with a company */}
+      {meeting.company_name && (
+        <IntelligenceSidebar companyName={meeting.company_name} />
+      )}
     </div>
   );
 }

@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SendToSlack } from "@/components/shared/send-to-slack";
 import { Copy, ExternalLink, RotateCcw, Mail, Sparkles } from "lucide-react";
 
 interface DraftEmailDialogProps {
@@ -82,7 +83,7 @@ export function DraftEmailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader className="pb-4 border-b">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -178,6 +179,7 @@ export function DraftEmailDialog({
               <ExternalLink className="h-3.5 w-3.5" />
               Open in Gmail
             </Button>
+            <SendToSlack title={subject} body={body} />
             <div className="flex-1" />
             <Button onClick={reset} variant="ghost" size="sm" className="gap-1.5 text-muted-foreground">
               <RotateCcw className="h-3.5 w-3.5" />

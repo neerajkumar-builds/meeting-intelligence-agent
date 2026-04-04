@@ -30,6 +30,17 @@ const PERIODS = [
   { value: "90d", label: "Last 90 Days" },
 ];
 
+function SectionHeader({ title }: { title: string }) {
+  return (
+    <div className="flex items-center gap-3 pt-2">
+      <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </h2>
+      <div className="flex-1 h-px bg-border" />
+    </div>
+  );
+}
+
 export default function TeamScorecardPage() {
   const { data: meetings, isLoading, error } = useMeetingsList();
   const [period, setPeriod] = useState("all");
@@ -102,18 +113,30 @@ export default function TeamScorecardPage() {
         />
       ) : (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+          {/* KPI Summary — what matters at a glance */}
           <SummaryCards meetings={filtered} />
+
+          {/* Insights — what needs attention right now */}
+          <InsightsPanel meetings={filtered} />
+
+          {/* Team — how are reps doing */}
+          <SectionHeader title="Team" />
+          <RepComparisonTable meetings={filtered} />
+
+          {/* Performance — trends and distribution */}
+          <SectionHeader title="Performance" />
           <div className="grid gap-6 lg:grid-cols-2">
             <ScoreTrendChart meetings={filtered} />
             <StageDistribution meetings={filtered} />
           </div>
-          <InsightsPanel meetings={filtered} />
-          <RepComparisonTable meetings={filtered} />
           <ScoreDistributionChart meetings={filtered} />
-          <div className="grid gap-6 lg:grid-cols-2">
-            <RecentActivity meetings={filtered} />
-            <CompetitorMentions />
-          </div>
+
+          {/* Intelligence — market signals */}
+          <SectionHeader title="Intelligence" />
+          <CompetitorMentions />
+
+          {/* Activity — recent timeline */}
+          <RecentActivity meetings={filtered} />
         </div>
       )}
     </div>

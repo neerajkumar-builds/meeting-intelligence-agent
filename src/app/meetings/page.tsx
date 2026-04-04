@@ -10,8 +10,6 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMeetingsList } from "@/lib/hooks/use-meetings-list";
 import { CalendarDays } from "lucide-react";
-import type { MeetingsListRow } from "@/types/meetings";
-
 type SortKey = "date" | "score" | "rep" | "company";
 
 export default function MeetingFeedPage() {
@@ -22,6 +20,8 @@ export default function MeetingFeedPage() {
   const [companyFilter, setCompanyFilter] = useState(searchParams.get("company") ?? "");
   const [sortBy, setSortBy] = useState<SortKey>((searchParams.get("sort") as SortKey) ?? "date");
   const [dateRange, setDateRange] = useState(searchParams.get("period") ?? "all");
+  const [dateFrom, setDateFrom] = useState(searchParams.get("from") ?? "");
+  const [dateTo, setDateTo] = useState(searchParams.get("to") ?? "");
 
   const reps = useMemo(() => {
     if (!meetings) return [];
@@ -46,6 +46,8 @@ export default function MeetingFeedPage() {
       if (stageFilter !== "all" && m.scoring_stage_type !== stageFilter) return false;
       if (companyFilter && !m.company_name?.toLowerCase().includes(companyFilter.toLowerCase())) return false;
       if (dateCutoff && m.start_time && parseISO(m.start_time) < dateCutoff) return false;
+      if (dateFrom && m.start_time && m.start_time < dateFrom) return false;
+      if (dateTo && m.start_time && m.start_time > dateTo + "T23:59:59") return false;
       return true;
     });
 
@@ -64,15 +66,17 @@ export default function MeetingFeedPage() {
     });
 
     return result;
-  }, [meetings, repFilter, stageFilter, companyFilter, sortBy, dateRange]);
+  }, [meetings, repFilter, stageFilter, companyFilter, sortBy, dateRange, dateFrom, dateTo]);
 
-  const hasActiveFilters = repFilter !== "all" || stageFilter !== "all" || companyFilter !== "" || dateRange !== "all";
+  const hasActiveFilters = repFilter !== "all" || stageFilter !== "all" || companyFilter !== "" || dateRange !== "all" || dateFrom !== "" || dateTo !== "";
 
   function clearFilters() {
     setRepFilter("all");
     setStageFilter("all");
     setCompanyFilter("");
     setDateRange("all");
+    setDateFrom("");
+    setDateTo("");
   }
 
   if (error) {
@@ -111,9 +115,13 @@ export default function MeetingFeedPage() {
             stageFilter={stageFilter}
             onStageFilterChange={setStageFilter}
             sortBy={sortBy}
-            onSortChange={setSortBy}
+            onSortChange={(v: string) => setSortBy(v as SortKey)}
             dateRange={dateRange}
             onDateRangeChange={setDateRange}
+            dateFrom={dateFrom}
+            onDateFromChange={setDateFrom}
+            dateTo={dateTo}
+            onDateToChange={setDateTo}
             reps={reps}
             hasActiveFilters={hasActiveFilters}
             onClearFilters={clearFilters}
@@ -126,7 +134,7 @@ export default function MeetingFeedPage() {
               description="Try adjusting your filters or clearing the search."
             />
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {filtered.map((meeting, i) => (
                 <MeetingCard key={meeting.id} meeting={meeting} index={i} />
               ))}

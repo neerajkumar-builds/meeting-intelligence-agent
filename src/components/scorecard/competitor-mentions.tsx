@@ -22,10 +22,7 @@ export function CompetitorMentions() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    findMentions();
-  }, []);
-
-  async function findMentions() {
+    async function findMentions() {
     const results: VendorMention[] = [];
 
     for (const term of TRACKED_VENDORS) {
@@ -78,7 +75,9 @@ export function CompetitorMentions() {
     external.sort((a, b) => b.topic.localeCompare(a.topic));
     setMentions(external.slice(0, 12));
     setLoading(false);
-  }
+    }
+    findMentions();
+  }, []);
 
   if (loading) return null;
   if (mentions.length === 0) return null;
@@ -89,6 +88,11 @@ export function CompetitorMentions() {
     list.push(m);
     grouped.set(m.vendor, list);
   }
+
+  // Sort by most mentions first
+  const sortedEntries = Array.from(grouped.entries()).sort(
+    (a, b) => b[1].length - a[1].length
+  );
 
   return (
     <Card>
@@ -101,8 +105,8 @@ export function CompetitorMentions() {
           </span>
         </div>
 
-        <div className="space-y-3">
-          {Array.from(grouped.entries()).map(([vendor, items]) => (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {sortedEntries.slice(0, 6).map(([vendor, items]) => (
             <div key={vendor} className="rounded-lg border p-3">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium">{vendor}</span>

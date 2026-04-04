@@ -70,7 +70,7 @@ function generateInsights(meetings: MeetingsListRow[]): Insight[] {
   const repStats = new Map<string, { scores: number[]; stages: Map<string, number[]> }>();
   for (const m of meetings) {
     if (!m.host_name || m.overall_score === null) continue;
-    const entry = repStats.get(m.host_name) ?? { scores: [], stages: new Map() };
+    const entry = repStats.get(m.host_name) ?? { scores: [] as number[], stages: new Map<string, number[]>() };
     entry.scores.push(m.overall_score);
     if (m.scoring_stage_type) {
       const stageScores = entry.stages.get(m.scoring_stage_type) ?? [];
@@ -110,7 +110,7 @@ function generateInsights(meetings: MeetingsListRow[]): Insight[] {
     stageCounts.set(m.scoring_stage_type, (stageCounts.get(m.scoring_stage_type) ?? 0) + 1);
   }
   const stageAvgs = new Map<string, number>();
-  for (const [stage, count] of stageCounts) {
+  for (const [stage] of stageCounts) {
     const staged = meetings.filter(
       (m) => m.scoring_stage_type === stage && m.overall_score !== null
     );

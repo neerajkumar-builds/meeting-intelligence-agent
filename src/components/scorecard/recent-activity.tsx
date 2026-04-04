@@ -23,22 +23,24 @@ export function RecentActivity({ meetings }: RecentActivityProps) {
           <Clock className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-semibold">Recent Activity</h3>
         </div>
-        <div className="space-y-2">
+        <div className="grid gap-2 sm:grid-cols-2">
           {recent.map((m) => (
             <Link
               key={m.id}
               href={`/meetings/${m.id}`}
-              className="flex items-center gap-3 rounded-lg p-2.5 -mx-1 hover:bg-muted/50 transition-colors"
+              className="flex items-center gap-3 rounded-lg border px-3 py-2.5 hover:bg-muted/50 hover:border-primary/30 transition-colors"
             >
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{m.topic ?? "Untitled"}</p>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium truncate">{m.topic ?? "Untitled"}</p>
+                  <ScoreBadge score={m.overall_score} size="sm" />
+                </div>
                 <div className="flex items-center gap-2 mt-0.5">
                   <StageTypeBadge stage={m.scoring_stage_type} />
                   <span className="text-xs text-muted-foreground">{m.host_name}</span>
                   <span className="text-xs text-muted-foreground">{formatRelativeDate(m.start_time)}</span>
                 </div>
               </div>
-              <ScoreBadge score={m.overall_score} />
             </Link>
           ))}
         </div>

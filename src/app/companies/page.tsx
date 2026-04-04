@@ -10,7 +10,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useMeetingsList } from "@/lib/hooks/use-meetings-list";
 import { formatDate, formatScore } from "@/lib/utils/format";
 import { Input } from "@/components/ui/input";
-import { Building2, ArrowRight, Calendar, Hash, Heart, Search } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Building2, Heart, Search } from "lucide-react";
 
 interface CompanyStats {
   name: string;
@@ -24,6 +31,7 @@ interface CompanyStats {
 export default function CompaniesIndexPage() {
   const { data: meetings, isLoading, error } = useMeetingsList();
   const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState<"recent" | "az" | "za" | "score" | "health" | "meetings">("recent");
 
   const companies = useMemo(() => {
     if (!meetings) return [];
@@ -98,60 +106,80 @@ export default function CompaniesIndexPage() {
         />
       ) : (
         <>
-        <div className="relative mb-4 max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search companies..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
+        {/* Filters row */}
+        <div className="flex items-end gap-3 mb-4">
+          <div className="flex-1 max-w-sm relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search companies..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Sort by</label>
+            <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="recent">Most Recent</SelectItem>
+                <SelectItem value="az">A → Z</SelectItem>
+                <SelectItem value="za">Z → A</SelectItem>
+                <SelectItem value="meetings">Most Meetings</SelectItem>
+                <SelectItem value="score">Avg Score</SelectItem>
+                <SelectItem value="health">Health Score</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {companies.filter(c => c.name.toLowerCase().includes(search.toLowerCase())).map((company, i) => (
-            <Link
-              key={company.name}
-              href={`/companies/${encodeURIComponent(company.name)}`}
-              className="block"
-            >
-              <Card className="h-full transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30">
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <Building2 className="h-4 w-4 text-primary" />
+        <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {companies
+            .filter(c => c.name.toLowerCase().includes(search.toLowerCase()))
+            .sort((a, b) => {
+              switch (sortBy) {
+                case "az": return a.name.localeCompare(b.name);
+                case "za": return b.name.localeCompare(a.name);
+                case "meetings": return b.meetingCount - a.meetingCount;
+                case "score": return (b.avgScore ?? 0) - (a.avgScore ?? 0);
+                case "health": return (b.avgHealth ?? 0) - (a.avgHealth ?? 0);
+                default: return (b.lastMeeting ?? "").localeCompare(a.lastMeeting ?? "");
+              }
+            })
+            .map((company) => {
+              const healthColor = company.avgHealth !== null
+                ? company.avgHealth >= 7 ? "border-l-emerald-500"
+                : company.avgHealth >= 5 ? "border-l-yellow-500"
+                : "border-l-red-500"
+                : "border-l-gray-200 dark:border-l-gray-700";
+              return (
+                <Link
+                  key={company.name}
+                  href={`/companies/${encodeURIComponent(company.name)}`}
+                  className="block"
+                >
+                  <Card className={`h-full border-l-4 ${healthColor} transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30`}>
+                    <CardContent className="px-3 py-2.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <h3 className="font-semibold text-sm truncate">{company.name}</h3>
+                        <ScoreBadge score={company.avgScore} size="sm" />
                       </div>
-                      <div>
-                        <h3 className="font-semibold text-sm">{company.name}</h3>
-                        <p className="text-xs text-muted-foreground">
-                          {formatDate(company.lastMeeting)}
-                        </p>
+                      <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                        <span>{company.meetingCount} meetings</span>
+                        <span>{formatDate(company.lastMeeting)}</span>
+                        {company.avgHealth !== null && (
+                          <span className="flex items-center gap-1">
+                            <Heart className="h-2.5 w-2.5" />
+                            {formatScore(company.avgHealth)}
+                          </span>
+                        )}
                       </div>
-                    </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground/40" />
-                  </div>
-
-                  <div className="flex items-center gap-4 text-xs">
-                    <div className="flex items-center gap-1.5">
-                      <Hash className="h-3 w-3 text-muted-foreground" />
-                      <span className="font-medium">{company.meetingCount}</span>
-                      <span className="text-muted-foreground">meetings</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-muted-foreground">Score</span>
-                      <ScoreBadge score={company.avgScore} size="sm" />
-                    </div>
-                    {company.avgHealth !== null && (
-                      <div className="flex items-center gap-1.5">
-                        <Heart className="h-3 w-3 text-muted-foreground" />
-                        <span className="font-medium">{formatScore(company.avgHealth)}</span>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
         </div>
         </>
       )}

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SendToSlack } from "@/components/shared/send-to-slack";
 import { Copy } from "lucide-react";
 
 interface MeetingPrepDialogProps {
@@ -73,7 +74,7 @@ export function MeetingPrepDialog({
         }
       }}
     >
-      <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Prepare for Next Call — {companyName}</DialogTitle>
           <DialogDescription>
@@ -107,6 +108,7 @@ export function MeetingPrepDialog({
                 <Copy className="h-3.5 w-3.5" />
                 Copy
               </Button>
+              <SendToSlack title={`Meeting Prep — ${companyName}`} body={brief} />
             </div>
           </div>
         )}

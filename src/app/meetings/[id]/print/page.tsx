@@ -6,14 +6,6 @@ import { useMeetingDetail } from "@/lib/hooks/use-meeting-detail";
 import { formatDateTime, formatDuration, formatScore } from "@/lib/utils/format";
 import { getStageLabel } from "@/lib/utils/stage";
 import {
-  type DiscoveryMeetingScore,
-  type DiscoveryRepScore,
-  type IcpScore,
-  type FollowUpMeetingScore,
-  type FollowUpRepScore,
-  type OnboardingMeetingScore,
-  type OnboardingRepScore,
-  type InternalMeetingScore,
   type InternalSummary,
 } from "@/types/scores";
 

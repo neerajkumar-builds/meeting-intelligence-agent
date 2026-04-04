@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  LineChart, Line, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
+  Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
   AreaChart, Tooltip,
 } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";

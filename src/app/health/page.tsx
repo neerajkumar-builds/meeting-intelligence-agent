@@ -5,10 +5,11 @@ import { SystemMetrics } from "@/components/health/system-metrics";
 import { StatusBreakdown } from "@/components/health/status-breakdown";
 import { ProcessingLog } from "@/components/health/processing-log";
 import { ConnectionStatus } from "@/components/health/connection-status";
+import { PipelineStatus } from "@/components/health/pipeline-status";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePipelineStats } from "@/lib/hooks/use-pipeline-stats";
 import { useScoringRunLog } from "@/lib/hooks/use-scoring-run-log";
-import { Wifi, BarChart3, Activity, ScrollText } from "lucide-react";
+import { Wifi, BarChart3, Activity, ScrollText, RefreshCw } from "lucide-react";
 
 function SectionHeader({
   icon: Icon,
@@ -52,6 +53,12 @@ export default function PipelineHealthPage() {
       />
 
       <div className="space-y-8">
+        {/* Section 0: Pipeline Sync Status */}
+        <section>
+          <SectionHeader icon={RefreshCw} title="Pipeline Sync" />
+          <PipelineStatus />
+        </section>
+
         {/* Section 1: Connection Status */}
         <section>
           <SectionHeader icon={Wifi} title="Service Status" />

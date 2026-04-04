@@ -142,8 +142,8 @@ export interface InternalSummary {
 export function getPrimaryScore(
   stageType: string | null,
   meetingScore: unknown,
-  internalSummary: unknown,
-  clientHealthScore: number | null
+  _internalSummary?: unknown, // eslint-disable-line @typescript-eslint/no-unused-vars
+  _clientHealthScore?: number | null // eslint-disable-line @typescript-eslint/no-unused-vars
 ): number | null {
   if (!stageType) return null;
 

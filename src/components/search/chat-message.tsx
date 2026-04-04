@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, Tooltip, AreaChart, Area } from "recharts";
 import { cn } from "@/lib/utils";
 import { BrandTooltip } from "@/components/shared/chart-tooltip";
+import { SendToSlack } from "@/components/shared/send-to-slack";
 import { Copy, Mail, Check } from "lucide-react";
 
 interface ChatMessageProps {
@@ -223,6 +224,7 @@ export function ChatMessage({ role, content, isStreaming }: ChatMessageProps) {
                   <Mail className="h-3 w-3" />
                   Email
                 </button>
+                <SendToSlack title="AI Search Response" body={content} />
               </div>
             )}
           </>

@@ -8,7 +8,6 @@ import {
 } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
 import { MeetingCard } from "@/components/shared/meeting-card";
-import { ScoreBadge } from "@/components/shared/score-badge";
 import { CircularGauge } from "@/components/shared/circular-gauge";
 import { BrandTooltip } from "@/components/shared/chart-tooltip";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,7 +15,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { useMeetingsList } from "@/lib/hooks/use-meetings-list";
 import { formatScore } from "@/lib/utils/format";
 import { getStageLabel } from "@/lib/utils/stage";
-import { ArrowLeft, User, TrendingUp, Target, Calendar } from "lucide-react";
+import { ArrowLeft, User, TrendingUp } from "lucide-react";
 import { parseISO, startOfWeek, format } from "date-fns";
 
 const STAGE_COLORS: Record<string, string> = {
@@ -40,7 +39,7 @@ export default function RepProfilePage({
     [allMeetings, repName]
   );
 
-  const teamMeetings = allMeetings ?? [];
+  const teamMeetings = useMemo(() => allMeetings ?? [], [allMeetings]);
 
   const stats = useMemo(() => {
     if (meetings.length === 0) return null;

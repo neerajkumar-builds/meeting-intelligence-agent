@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SendToSlack } from "@/components/shared/send-to-slack";
 import { Copy, RotateCcw, FileText, Sparkles } from "lucide-react";
 
 interface ResummarizeDialogProps {
@@ -77,7 +78,7 @@ export function ResummarizeDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader className="pb-4 border-b">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -151,6 +152,7 @@ export function ResummarizeDialog({
               <Copy className="h-3.5 w-3.5" />
               {copied ? "Copied!" : "Copy"}
             </Button>
+            <SendToSlack title={FORMATS.find((f) => f.value === format)?.label ?? "Meeting Summary"} body={summary} />
             <div className="flex-1" />
             <Button onClick={reset} variant="ghost" size="sm" className="gap-1.5 text-muted-foreground">
               <RotateCcw className="h-3.5 w-3.5" />

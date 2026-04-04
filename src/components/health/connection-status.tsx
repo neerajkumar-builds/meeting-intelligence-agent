@@ -33,15 +33,12 @@ export function ConnectionStatus() {
   ]);
 
   useEffect(() => {
-    checkServices();
-  }, []);
-
-  async function checkServices() {
+    async function checkServices() {
     const results: ServiceStatus[] = [];
 
     // Check Supabase
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("scoring_run_log")
         .select("id")
         .limit(1);
@@ -116,7 +113,9 @@ export function ConnectionStatus() {
     }
 
     setServices(results);
-  }
+    }
+    checkServices();
+  }, []);
 
   return (
     <div className="grid gap-3 sm:grid-cols-3">

@@ -39,9 +39,10 @@ export function ScoreDistributionChart({ meetings }: ScoreDistributionChartProps
 
   if (data.length === 0) return null;
 
-  function handleBarClick(entry: { fullName?: string }) {
-    if (entry.fullName) {
-      router.push(`/meetings?rep=${encodeURIComponent(entry.fullName)}`);
+  function handleBarClick(entry: unknown) {
+    const fullName = (entry as { fullName?: string }).fullName;
+    if (fullName) {
+      router.push(`/meetings?rep=${encodeURIComponent(fullName)}`);
     }
   }
 

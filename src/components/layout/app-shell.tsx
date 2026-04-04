@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,10 +9,24 @@ import { MobileNav } from "./mobile-nav";
 import { ThemeToggle } from "./theme-toggle";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/lib/supabase/client";
-import { LogOut } from "lucide-react";
+import { SyncIndicator } from "@/components/shared/sync-indicator";
+import { LogOut, PanelLeftClose, PanelLeft } from "lucide-react";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const [collapsed, setCollapsed] = useState(false);
+
+  // Cmd+K / Ctrl+K shortcut to jump to AI Search
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        router.push("/search");
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [router]);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -22,7 +37,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen">
       {/* Desktop Sidebar — dark background per brand guidelines */}
-      <aside className="hidden lg:flex lg:w-56 lg:flex-col bg-[#0A0A0A] text-white">
+      <aside
+        className={`hidden lg:flex lg:flex-col bg-[#0A0A0A] text-white transition-all duration-200 ${
+          collapsed ? "lg:w-14" : "lg:w-56"
+        }`}
+      >
         <Link href="/" className="flex h-14 items-center px-4 gap-2 hover:opacity-80 transition-opacity">
           <Image
             src="/favicon.svg"
@@ -31,23 +50,39 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             height={24}
             className="shrink-0"
           />
-          <span className="text-sm font-semibold tracking-tight text-white">
-            Meeting Intel
-          </span>
+          {!collapsed && (
+            <span className="text-sm font-semibold tracking-tight text-white">
+              Meeting Intel
+            </span>
+          )}
         </Link>
         <Separator className="bg-white/10" />
         <div className="flex-1 overflow-y-auto py-4">
-          <SidebarNav />
+          <SidebarNav collapsed={collapsed} />
         </div>
-        <div className="border-t border-white/10 p-3 flex items-center justify-between">
-          <Image
-            src="/fullfunnel-logo-white.svg"
-            alt="FullFunnel"
-            width={100}
-            height={16}
-            className="opacity-50"
-          />
-          <span className="text-[10px] text-white/30 font-mono">v1.0.0</span>
+
+        {/* Collapse toggle + footer */}
+        <div className="border-t border-white/10 p-2 flex items-center justify-between">
+          {!collapsed && (
+            <Image
+              src="/fullfunnel-logo-white.svg"
+              alt="FullFunnel"
+              width={100}
+              height={16}
+              className="opacity-50"
+            />
+          )}
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="p-1.5 rounded-md text-white/40 hover:text-white hover:bg-white/10 transition-colors"
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {collapsed ? (
+              <PanelLeft className="h-3.5 w-3.5" />
+            ) : (
+              <PanelLeftClose className="h-3.5 w-3.5" />
+            )}
+          </button>
         </div>
       </aside>
 
@@ -56,23 +91,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Top Bar */}
         <header className="flex h-14 items-center justify-between border-b px-4 bg-background">
           <MobileNav />
-          <Link href="/" className="hidden lg:flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <Image
-              src="/fullfunnel-logo.svg"
-              alt="FullFunnel"
-              width={120}
-              height={20}
-              className="dark:hidden"
-            />
-            <Image
-              src="/fullfunnel-logo-white.svg"
-              alt="FullFunnel"
-              width={120}
-              height={20}
-              className="hidden dark:block"
-            />
-          </Link>
+          <div className="hidden lg:block" />
           <div className="flex items-center gap-2">
+            <SyncIndicator />
+            {/* Cmd+K hint */}
+            <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded border bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground font-mono">
+              <span className="text-xs">&#8984;</span>K
+            </kbd>
             <ThemeToggle />
             <button
               onClick={handleSignOut}
