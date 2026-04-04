@@ -116,23 +116,29 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Step 1: Embed query and vector search transcript chunks
+    // Step 1: Embed query + fetch scores IN PARALLEL (scores don't depend on embedding)
     const embedding = await embedQuery(message);
-    let chunks: { id: string; content: string; metadata?: Record<string, unknown>; similarity: number }[] = [];
 
-    if (embedding) {
-      const { data } = await supabase.rpc("match_meeting_chunks", {
-        query_embedding: `[${embedding.join(",")}]`,
-        match_count: 8,
-      });
-      chunks = data ?? [];
-    }
+    // Dynamic chunk count based on query breadth
+    const chunkCount = /compare|all reps|across|every|breakdown|overview/i.test(message) ? 15
+      : message.split(/\s+/).length > 30 ? 12
+      : 8;
 
-    // Step 2: Fetch score summary for all meetings
-    const { data: meetingScores } = await supabase
-      .from("meetings_list")
-      .select("*")
-      .order("start_time", { ascending: false });
+    type Chunk = { id: string; content: string; metadata?: Record<string, unknown>; similarity: number };
+
+    // Run vector search + score fetch in parallel
+    const [chunks, { data: meetingScores }] = await Promise.all([
+      (async (): Promise<Chunk[]> => {
+        if (!embedding) return [];
+        const { data } = await supabase.rpc("match_meeting_chunks", {
+          query_embedding: `[${embedding.join(",")}]`,
+          match_count: chunkCount,
+        });
+        // Filter out low-similarity chunks
+        return (data ?? []).filter((c: Chunk) => c.similarity > 0.3);
+      })(),
+      supabase.from("meetings_list").select("*").order("start_time", { ascending: false }),
+    ]);
 
     const scoresSummary = (meetingScores ?? [])
       .map(
@@ -223,7 +229,7 @@ export async function POST(request: NextRequest) {
     const anthropic = new Anthropic();
 
     const messages: Anthropic.MessageParam[] = [
-      ...history.slice(-8).map((msg) => ({
+      ...history.slice(-16).map((msg) => ({
         role: msg.role as "user" | "assistant",
         content: msg.content,
       })),
@@ -240,7 +246,7 @@ export async function POST(request: NextRequest) {
 
     const stream = anthropic.messages.stream({
       model: "claude-sonnet-4-20250514",
-      max_tokens: 2048,
+      max_tokens: 4096,
       system: RAG_SYSTEM_PROMPT,
       messages,
     });
