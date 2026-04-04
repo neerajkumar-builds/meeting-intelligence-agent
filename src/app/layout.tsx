@@ -3,6 +3,7 @@ import { Montserrat, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/lib/providers";
 import { ConditionalShell } from "@/components/layout/conditional-shell";
+import { Toaster } from "sonner";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -38,6 +39,7 @@ export default function RootLayout({
       <body className="h-full">
         <Providers>
           <ConditionalShell>{children}</ConditionalShell>
+          <Toaster position="bottom-right" richColors closeButton />
         </Providers>
       </body>
     </html>

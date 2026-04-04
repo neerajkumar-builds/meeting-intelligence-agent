@@ -6,6 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, CartesianGrid, PieCha
 import { cn } from "@/lib/utils";
 import { BrandTooltip } from "@/components/shared/chart-tooltip";
 import { SendToSlack } from "@/components/shared/send-to-slack";
+import { SourceCitation } from "./source-citation";
 import { Copy, Mail, Check } from "lucide-react";
 
 interface ChatMessageProps {
@@ -43,7 +44,20 @@ export function ChatMessage({ role, content, isStreaming }: ChatMessageProps) {
         )}
       >
         {role === "assistant" ? (
-          <>
+          (() => {
+            // Extract sources block from content
+            const sourcesMatch = content.match(/```sources\n([\s\S]*?)```/);
+            let sources: { topic: string; rep: string; date: string; company?: string; id: string; score?: number }[] = [];
+            let cleanContent = content;
+            if (sourcesMatch) {
+              try {
+                sources = JSON.parse(sourcesMatch[1].trim());
+                cleanContent = content.replace(/```sources\n[\s\S]*?```/, "").trim();
+              } catch {
+                // Invalid sources JSON — ignore
+              }
+            }
+            return <>
             <div className="text-sm leading-relaxed">
               <ReactMarkdown
                 components={{
@@ -160,7 +174,11 @@ export function ChatMessage({ role, content, isStreaming }: ChatMessageProps) {
                           );
                         }
                       } catch {
-                        // Invalid JSON — fall through to code block
+                        return (
+                          <div className="my-3 rounded-lg border border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950 p-3 text-xs text-muted-foreground">
+                            Chart data unavailable
+                          </div>
+                        );
                       }
                     }
                     const isBlock = className?.includes("language-");
@@ -200,7 +218,7 @@ export function ChatMessage({ role, content, isStreaming }: ChatMessageProps) {
                   ),
                 }}
               >
-                {content}
+                {cleanContent}
               </ReactMarkdown>
               {isStreaming && (
                 <span className="inline-block w-1.5 h-4 bg-foreground/50 animate-pulse ml-0.5" />
@@ -224,10 +242,14 @@ export function ChatMessage({ role, content, isStreaming }: ChatMessageProps) {
                   <Mail className="h-3 w-3" />
                   Email
                 </button>
-                <SendToSlack title="AI Search Response" body={content} />
+                <SendToSlack title="AI Search Response" body={cleanContent} />
               </div>
             )}
-          </>
+
+            {/* Source citations */}
+            {sources.length > 0 && <SourceCitation sources={sources} />}
+          </>;
+          })()
         ) : (
           <p className="text-sm whitespace-pre-wrap">{content}</p>
         )}

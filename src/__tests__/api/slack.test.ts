@@ -20,7 +20,7 @@ describe("Slack Notification API", () => {
     const response = await POST(request as unknown as Parameters<typeof POST>[0]);
     expect(response.status).toBe(503);
     const data = await response.json();
-    expect(data.error).toContain("webhook");
+    expect(data.error).toContain("not configured");
   });
 
   it("returns 400 when title is missing", async () => {

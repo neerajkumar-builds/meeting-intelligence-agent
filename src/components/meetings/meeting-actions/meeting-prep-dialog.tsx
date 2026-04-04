@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SendToSlack } from "@/components/shared/send-to-slack";
+import { toast } from "sonner";
 import { Copy } from "lucide-react";
 
 interface MeetingPrepDialogProps {
@@ -56,6 +57,7 @@ export function MeetingPrepDialog({
 
   function copyToClipboard() {
     navigator.clipboard.writeText(brief);
+    toast.success("Copied to clipboard");
   }
 
   // Auto-generate when dialog opens

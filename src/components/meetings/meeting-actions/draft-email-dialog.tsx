@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SendToSlack } from "@/components/shared/send-to-slack";
+import { toast } from "sonner";
 import { Copy, ExternalLink, RotateCcw, Mail, Sparkles } from "lucide-react";
 
 interface DraftEmailDialogProps {
@@ -67,6 +68,7 @@ export function DraftEmailDialog({
   function copyToClipboard() {
     navigator.clipboard.writeText(`Subject: ${subject}\n\n${body}`);
     setCopied(true);
+    toast.success("Copied to clipboard");
     setTimeout(() => setCopied(false), 2000);
   }
 

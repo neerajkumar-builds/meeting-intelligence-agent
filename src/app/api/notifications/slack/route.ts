@@ -4,15 +4,17 @@ interface SlackPayload {
   title: string;
   body: string;
   meetingUrl?: string;
-  channel?: string;
+  channelId?: string;
 }
 
 export async function POST(request: NextRequest) {
   try {
+    const botToken = process.env.SLACK_BOT_TOKEN;
     const webhookUrl = process.env.SLACK_WEBHOOK_URL;
-    if (!webhookUrl) {
+
+    if (!botToken && !webhookUrl) {
       return Response.json(
-        { error: "Slack webhook URL not configured. Add SLACK_WEBHOOK_URL to environment variables." },
+        { error: "Slack not configured. Add SLACK_BOT_TOKEN or SLACK_WEBHOOK_URL to environment variables." },
         { status: 503 }
       );
     }
@@ -23,8 +25,8 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: "title and body are required" }, { status: 400 });
     }
 
-    // Build Slack Block Kit message
-    const blocks = [
+    // Build Slack Block Kit blocks
+    const blocks: Record<string, unknown>[] = [
       {
         type: "header",
         text: { type: "plain_text", text: payload.title.slice(0, 150), emoji: true },
@@ -35,11 +37,9 @@ export async function POST(request: NextRequest) {
       },
     ];
 
-    // Add "View in Dashboard" button if URL provided
     if (payload.meetingUrl) {
       blocks.push({
-        type: "actions" as "section",
-        text: undefined as unknown as { type: "mrkdwn"; text: string },
+        type: "actions",
         elements: [
           {
             type: "button",
@@ -48,39 +48,60 @@ export async function POST(request: NextRequest) {
             style: "primary",
           },
         ],
-      } as typeof blocks[number]);
+      });
     }
 
     blocks.push({
       type: "context",
-      text: undefined as unknown as { type: "mrkdwn"; text: string },
       elements: [
         { type: "mrkdwn", text: `Sent from _Meeting Intelligence Dashboard_ at ${new Date().toLocaleString()}` },
       ],
-    } as typeof blocks[number]);
-
-    const slackBody: Record<string, unknown> = {
-      blocks,
-      text: `${payload.title}: ${payload.body.slice(0, 200)}`, // Fallback for notifications
-    };
-
-    if (payload.channel) {
-      slackBody.channel = payload.channel;
-    }
-
-    const response = await fetch(webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(slackBody),
     });
 
-    if (!response.ok) {
-      const text = await response.text();
-      console.error("Slack API error:", text);
-      return Response.json({ error: "Failed to send to Slack" }, { status: 502 });
+    const fallbackText = `${payload.title}: ${payload.body.slice(0, 200)}`;
+
+    // Prefer bot token (supports channel selection), fall back to webhook
+    if (botToken && payload.channelId) {
+      const res = await fetch("https://slack.com/api/chat.postMessage", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${botToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          channel: payload.channelId,
+          blocks,
+          text: fallbackText,
+        }),
+      });
+
+      const data = await res.json();
+      if (!data.ok) {
+        console.error("Slack chat.postMessage error:", data.error);
+        return Response.json({ error: `Slack error: ${data.error}` }, { status: 502 });
+      }
+
+      return Response.json({ success: true, channel: data.channel });
     }
 
-    return Response.json({ success: true });
+    // Fallback: webhook (posts to default channel)
+    if (webhookUrl) {
+      const res = await fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ blocks, text: fallbackText }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("Slack webhook error:", text);
+        return Response.json({ error: "Failed to send to Slack" }, { status: 502 });
+      }
+
+      return Response.json({ success: true });
+    }
+
+    return Response.json({ error: "No valid Slack credentials" }, { status: 503 });
   } catch (error) {
     console.error("Slack notification error:", error);
     return Response.json({ error: "Internal server error" }, { status: 500 });

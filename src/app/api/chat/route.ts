@@ -39,6 +39,14 @@ Guidelines:
 - Include the chart AND a text explanation — don't just return a chart alone
 - Only include charts when data visualization adds value — don't force them on transcript searches or coaching questions
 
+SOURCE CITATIONS — At the end of your response, include a sources block listing meetings you referenced. Format exactly as:
+
+\`\`\`sources
+[{"topic":"Meeting Topic","rep":"Rep Name","date":"Apr 3, 2026","company":"Company","id":"meeting-uuid","score":7.3}]
+\`\`\`
+
+Include 1-5 sources. Only include meetings you actually referenced in your answer. The frontend renders these as clickable cards linking to the meeting detail page.
+
 CRITICAL: Never query or reference legacy tables: documents, n8n_vectors, n8n_chat_histories, zoom_meetings_new.`;
 
 interface ChatRequest {

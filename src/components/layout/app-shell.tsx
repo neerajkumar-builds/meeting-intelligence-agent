@@ -10,6 +10,7 @@ import { ThemeToggle } from "./theme-toggle";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/lib/supabase/client";
 import { SyncIndicator } from "@/components/shared/sync-indicator";
+import { NotificationsBell } from "@/components/shared/notifications-bell";
 import { LogOut, PanelLeftClose, PanelLeft } from "lucide-react";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -94,6 +95,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="hidden lg:block" />
           <div className="flex items-center gap-2">
             <SyncIndicator />
+            <NotificationsBell />
             {/* Cmd+K hint */}
             <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded border bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground font-mono">
               <span className="text-xs">&#8984;</span>K
