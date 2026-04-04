@@ -56,10 +56,18 @@ export const NAV_ITEMS = [
 ];
 
 export const SUGGESTED_PROMPTS = [
+  "Compare all reps' average meeting scores",
   "What action items came from last week's internal meetings?",
-  "Compare Tyler's meeting scores vs the team average",
-  "What did we discuss with Consensus in our latest call?",
-  "Show me all follow-up meetings with low engagement scores",
-  "What are the open action items for FullFunnel?",
   "Which accounts need attention based on recent health scores?",
+  "What competitors were mentioned in recent calls?",
+  "Show coaching insights for Tyler across all meetings",
+  "What's the breakdown of meeting stages across all reps?",
+];
+
+export const COMPETITORS = [
+  "Gong", "Chorus", "Salesloft", "Outreach", "Apollo", "6Sense", "6sense",
+  "ZoomInfo", "Clari", "Fireflies", "Fathom", "Granola", "Sybill",
+  "HubSpot", "Salesforce", "Pardot", "Marketo", "Drift", "Intercom",
+  "Clay", "Instantly", "Lemlist", "Lavender", "Regie", "Orum",
+  "Definitive Healthcare", "Conversica", "HeyReach",
 ];

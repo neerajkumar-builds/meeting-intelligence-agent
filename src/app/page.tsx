@@ -9,6 +9,7 @@ import { InsightsPanel } from "@/components/scorecard/insights-panel";
 import { ScoreTrendChart } from "@/components/scorecard/score-trend-chart";
 import { StageDistribution } from "@/components/scorecard/stage-distribution";
 import { RecentActivity } from "@/components/scorecard/recent-activity";
+import { CompetitorMentions } from "@/components/scorecard/competitor-mentions";
 import { useMeetingsList } from "@/lib/hooks/use-meetings-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -109,7 +110,10 @@ export default function TeamScorecardPage() {
           <InsightsPanel meetings={filtered} />
           <RepComparisonTable meetings={filtered} />
           <ScoreDistributionChart meetings={filtered} />
-          <RecentActivity meetings={filtered} />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <RecentActivity meetings={filtered} />
+            <CompetitorMentions />
+          </div>
         </div>
       )}
     </div>

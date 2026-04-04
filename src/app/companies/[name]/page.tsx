@@ -2,13 +2,14 @@
 
 import { use } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { CompanyHeader } from "@/components/companies/company-header";
 import { MeetingTimeline } from "@/components/companies/meeting-timeline";
 import { HealthTrendChart } from "@/components/companies/health-trend-chart";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCompanyMeetings } from "@/lib/hooks/use-company-meetings";
-import { ArrowLeft, Building2 } from "lucide-react";
+import { ArrowLeft, Building2, Sparkles, Target, Swords } from "lucide-react";
 
 export default function CompanyViewPage({
   params,
@@ -18,6 +19,7 @@ export default function CompanyViewPage({
   const { name } = use(params);
   const companyName = decodeURIComponent(name);
   const { data: meetings, isLoading, error } = useCompanyMeetings(companyName);
+  const router = useRouter();
 
   if (error) {
     return (
@@ -76,6 +78,41 @@ export default function CompanyViewPage({
       </Link>
 
       <CompanyHeader companyName={companyName} meetings={meetings} />
+
+      {/* Quick AI actions */}
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => {
+            const q = encodeURIComponent(`Give me a MEDDIC analysis for ${companyName} based on all meeting data. For each element (Metrics, Economic Buyer, Decision Criteria, Decision Process, Identify Pain, Champion), cite specific evidence from meetings or note where data is missing.`);
+            router.push(`/search?q=${q}`);
+          }}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
+        >
+          <Target className="h-3.5 w-3.5" />
+          MEDDIC Analysis
+        </button>
+        <button
+          onClick={() => {
+            const q = encodeURIComponent(`Summarize the full relationship history with ${companyName}. Include deal status, key stakeholders, account health trend, and recommended next steps.`);
+            router.push(`/search?q=${q}`);
+          }}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
+        >
+          <Sparkles className="h-3.5 w-3.5" />
+          Account Intelligence
+        </button>
+        <button
+          onClick={() => {
+            const q = encodeURIComponent(`Were any competitors mentioned in meetings with ${companyName}? If so, which competitors, in what context, and what was the sentiment?`);
+            router.push(`/search?q=${q}`);
+          }}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
+        >
+          <Swords className="h-3.5 w-3.5" />
+          Competitor Intel
+        </button>
+      </div>
+
       <HealthTrendChart meetings={meetings} />
 
       <div>
