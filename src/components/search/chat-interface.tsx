@@ -243,6 +243,7 @@ export function ChatInterface({ initialQuery }: { initialQuery?: string }) {
                   }
                   onFollowUp={!isStreaming ? sendMessage : undefined}
                   sessionId={getSessionId()}
+                  userEmail={userEmail ?? undefined}
                 />
               ))}
             </div>

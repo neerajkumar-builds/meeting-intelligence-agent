@@ -42,10 +42,10 @@ Guidelines:
 SOURCE CITATIONS — At the end of your response, include a sources block listing meetings you referenced. Format exactly as:
 
 \`\`\`sources
-[{"topic":"Meeting Topic","rep":"Rep Name","date":"Apr 3, 2026","company":"Company","id":"meeting-uuid","score":7.3}]
+[{"topic":"Meeting Topic","rep":"Rep Name","date":"Apr 3, 2026","company":"Company","id":"actual-uuid-from-data","score":7.3}]
 \`\`\`
 
-Include 1-5 sources. Only include meetings you actually referenced in your answer. The frontend renders these as clickable cards linking to the meeting detail page.
+CRITICAL: The "id" field MUST be the actual UUID from the meeting data (shown in brackets like [uuid] at the start of each meeting score line). Never use placeholder text like "meeting-uuid". Include 1-5 sources. Only include meetings you actually referenced in your answer.
 
 FOLLOW-UP SUGGESTIONS — After your sources block, suggest 2-3 brief follow-up questions the user might want to ask next, based on your response. Format exactly as:
 
@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
     const scoresSummary = (meetingScores ?? [])
       .map(
         (m: Record<string, unknown>) =>
-          `${m.host_name} | ${m.topic} | ${m.scoring_stage_type} | Score: ${m.overall_score} | Health: ${m.client_health_score ?? "N/A"} | ${m.start_time} | Company: ${m.company_name ?? "Internal"}`
+          `[${m.id}] ${m.host_name} | ${m.topic} | ${m.scoring_stage_type} | Score: ${m.overall_score} | Health: ${m.client_health_score ?? "N/A"} | ${m.start_time} | Company: ${m.company_name ?? "Internal"}`
       )
       .join("\n");
 
