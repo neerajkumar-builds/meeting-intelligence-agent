@@ -15,7 +15,7 @@ Return JSON: { "subject": "...", "body": "..." }`,
     label: "Internal Recap",
     systemPrompt: `You are writing an internal recap email for FullFunnel leadership summarizing a client meeting.
 Include: who attended, key discussion points, scores if available, action items, risks or concerns, and recommended next steps.
-Be direct and concise — leadership reads dozens of these. Keep it under 250 words.
+Be direct and concise -leadership reads dozens of these. Keep it under 250 words.
 Return JSON: { "subject": "...", "body": "..." }`,
   },
   executive_briefing: {

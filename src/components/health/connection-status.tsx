@@ -73,14 +73,14 @@ export function ConnectionStatus() {
             name: "Scoring Pipeline",
             status: "yellow",
             detail: `Last run ${Math.round(hoursAgo)}h ago`,
-            help: "Pipeline usually runs every 4h — check n8n workflows",
+            help: "Pipeline usually runs every 4h - check n8n workflows",
           });
         } else {
           results.push({
             name: "Scoring Pipeline",
             status: "red",
             detail: `Last run ${Math.round(hoursAgo)}h ago`,
-            help: "Pipeline may be paused — check n8n Cloud dashboard",
+            help: "Pipeline may be paused - check n8n Cloud dashboard",
           });
         }
       } else {

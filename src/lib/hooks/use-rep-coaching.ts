@@ -2,13 +2,19 @@
 
 import { useQuery } from "@tanstack/react-query";
 
+export interface CoachingInsight {
+  text: string;
+  meetingId: string;
+  topic: string;
+}
+
 export interface RepCoaching {
   meetingsAnalyzed: number;
-  strengths: string[];
-  improvements: string[];
-  blindSpots: string[];
-  recommendations: string[];
-  dealProgressions: string[];
+  strengths: CoachingInsight[];
+  improvements: CoachingInsight[];
+  blindSpots: CoachingInsight[];
+  recommendations: CoachingInsight[];
+  dealProgressions: CoachingInsight[];
 }
 
 export function useRepCoaching(repName: string) {

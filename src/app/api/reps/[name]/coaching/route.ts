@@ -6,6 +6,13 @@ import { createServerSupabase } from "@/lib/supabase/server";
  * READ-ONLY — fetches rep_score JSONB from scored_meetings, aggregates coaching patterns.
  * Never writes to any table.
  */
+
+interface Insight {
+  text: string;
+  meetingId: string;
+  topic: string;
+}
+
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ name: string }> }
@@ -31,31 +38,31 @@ export async function GET(
       return Response.json({ coaching: null });
     }
 
-    // Aggregate coaching insights across all meetings
-    const strengths: string[] = [];
-    const improvements: string[] = [];
-    const blindSpots: string[] = [];
-    const recommendations: string[] = [];
-    const dealProgressions: string[] = [];
+    const strengths: Insight[] = [];
+    const improvements: Insight[] = [];
+    const blindSpots: Insight[] = [];
+    const recommendations: Insight[] = [];
+    const dealProgressions: Insight[] = [];
 
     for (const m of meetings) {
       const rs = m.rep_score as Record<string, unknown> | null;
       if (!rs) continue;
+      const ref = { meetingId: m.id as string, topic: (m.topic as string) ?? "Meeting" };
 
       if (typeof rs.strengths === "string" && rs.strengths.trim()) {
-        strengths.push(rs.strengths.trim());
+        strengths.push({ text: rs.strengths.trim(), ...ref });
       }
       if (typeof rs.areas_for_improvement === "string" && rs.areas_for_improvement.trim()) {
-        improvements.push(rs.areas_for_improvement.trim());
+        improvements.push({ text: rs.areas_for_improvement.trim(), ...ref });
       }
       if (typeof rs.blind_spots === "string" && rs.blind_spots.trim()) {
-        blindSpots.push(rs.blind_spots.trim());
+        blindSpots.push({ text: rs.blind_spots.trim(), ...ref });
       }
       if (typeof rs.coaching_recommendations === "string" && rs.coaching_recommendations.trim()) {
-        recommendations.push(rs.coaching_recommendations.trim());
+        recommendations.push({ text: rs.coaching_recommendations.trim(), ...ref });
       }
       if (typeof rs.deal_progression_assessment === "string" && rs.deal_progression_assessment.trim()) {
-        dealProgressions.push(rs.deal_progression_assessment.trim());
+        dealProgressions.push({ text: rs.deal_progression_assessment.trim(), ...ref });
       }
     }
 

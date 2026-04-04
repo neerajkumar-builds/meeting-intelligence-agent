@@ -34,7 +34,7 @@ export function useNotifications() {
       result.push({
         id: `risk-${company}`,
         type: "at_risk",
-        text: `${company} health at ${health.toFixed(1)} — needs attention`,
+        text: `${company} health at ${health.toFixed(1)} - needs attention`,
         href: `/companies/${encodeURIComponent(company)}`,
         severity: "red",
       });
@@ -54,7 +54,7 @@ export function useNotifications() {
         result.push({
           id: `coach-${name}`,
           type: "coaching",
-          text: `${name.split(" ")[0]} averaging ${(total / count).toFixed(1)} — coaching focus`,
+          text: `${name.split(" ")[0]} averaging ${(total / count).toFixed(1)} - coaching focus`,
           href: `/reps/${encodeURIComponent(name)}`,
           severity: "yellow",
         });
@@ -67,8 +67,8 @@ export function useNotifications() {
         id: "pipeline-stale",
         type: "pipeline",
         text: syncStatus.status === "critical"
-          ? "Pipeline overdue — last sync >24h ago"
-          : "Pipeline may need attention — sync overdue",
+          ? "Pipeline overdue - last sync >24h ago"
+          : "Pipeline may need attention - sync overdue",
         href: "/health",
         severity: syncStatus.status === "critical" ? "red" : "yellow",
       });

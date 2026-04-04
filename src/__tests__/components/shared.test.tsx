@@ -13,7 +13,7 @@ describe("ScoreBadge", () => {
 
   it("renders dash for null score", () => {
     render(<ScoreBadge score={null} />);
-    expect(screen.getByText("—")).toBeInTheDocument();
+    expect(screen.getByText("-")).toBeInTheDocument();
   });
 
   it("applies green style for high scores (8+)", () => {

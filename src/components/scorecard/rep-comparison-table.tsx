@@ -48,7 +48,7 @@ function buildWeeklyTrend(meetings: MeetingsListRow[]): { week: string; score: n
 
 function MiniSparkline({ data }: { data: { week: string; score: number }[] }) {
   const id = useId();
-  if (data.length < 2) return <span className="text-xs text-muted-foreground">—</span>;
+  if (data.length < 2) return <span className="text-xs text-muted-foreground">-</span>;
   const lastScore = data[data.length - 1].score;
   const prevScore = data[data.length - 2].score;
   const color = lastScore >= prevScore ? "#10b981" : "#ef4444";
@@ -161,7 +161,7 @@ export function RepComparisonTable({ meetings }: RepComparisonTableProps) {
               <TableCell className="text-center">
                 {rep.avgHealthScore !== null
                   ? formatScore(rep.avgHealthScore)
-                  : "—"}
+                  : "-"}
               </TableCell>
               <TableCell>
                 {rep.bestCall ? (
@@ -174,7 +174,7 @@ export function RepComparisonTable({ meetings }: RepComparisonTableProps) {
                     {formatScore(rep.bestCall.score)})
                   </Link>
                 ) : (
-                  "—"
+                  "-"
                 )}
               </TableCell>
               <TableCell>
@@ -188,7 +188,7 @@ export function RepComparisonTable({ meetings }: RepComparisonTableProps) {
                     {formatScore(rep.worstCall.score)})
                   </Link>
                 ) : (
-                  "—"
+                  "-"
                 )}
               </TableCell>
             </TableRow>

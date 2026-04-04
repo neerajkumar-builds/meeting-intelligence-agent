@@ -279,7 +279,7 @@ export function ChatInterface({ initialQuery }: { initialQuery?: string }) {
                 if (turns >= 15) {
                   return (
                     <span className="text-xs text-amber-600 dark:text-amber-400">
-                      {turns} turns — older messages aren&apos;t sent to AI. Clear for best accuracy.
+                      {turns} turns - older messages aren&apos;t sent to AI. Clear for best accuracy.
                     </span>
                   );
                 }

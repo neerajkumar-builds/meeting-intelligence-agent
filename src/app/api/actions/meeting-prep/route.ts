@@ -77,7 +77,7 @@ Generate a structured prep brief that includes:
 ## Suggested Talking Points
 - 3-5 specific topics to raise based on prior meeting context
 
-Be specific — cite meeting dates and scores. Use first names.`,
+Be specific - cite meeting dates and scores. Use first names.`,
       messages: [
         {
           role: "user",

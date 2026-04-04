@@ -54,21 +54,28 @@ const ACCENT_BORDERS: Record<string, string> = {
   indigo: "border-l-4 border-l-indigo-400 dark:border-l-indigo-600",
 };
 
-// Detect numbered lists like "1. First item\n2. Second item"
+/** Replace em dashes with spaced hyphens — display only, never modifies source data */
+function cleanText(text: string): string {
+  return text.replace(/\u2014/g, " - ").replace(/—/g, " - ");
+}
+
+// Detect numbered lists like "1. First 2. Second" (with or without newlines)
 function isNumberedList(text: string): boolean {
-  return /^\s*1[\.\)]\s/.test(text) && /\d+[\.\)]\s/.test(text.slice(text.indexOf("\n") || 0));
+  // Must start with "1." or "1)" and have at least a "2." or "2)" somewhere
+  return /^\s*1[\.\)]\s/.test(text) && /2[\.\)]\s/.test(text);
 }
 
 function parseNumberedList(text: string): string[] {
   return text
-    .split(/\n?\s*\d+[\.\)]\s+/)
+    .split(/\s*(?=\d+[\.\)]\s)/)
     .filter((s) => s.trim().length > 0)
-    .map((s) => s.trim());
+    .map((s) => s.replace(/^\d+[\.\)]\s+/, "").trim());
 }
 
 function TextBlock({ label, text, icon, sentiment, accent }: { label: string; text: string | null | undefined; icon?: React.ReactNode; sentiment?: boolean; accent?: "emerald" | "amber" | "red" | "blue" | "purple" | "indigo" }) {
   if (!text) return null;
-  const sentimentClass = sentiment ? getSentimentClass(text) : null;
+  const clean = cleanText(text);
+  const sentimentClass = sentiment ? getSentimentClass(clean) : null;
   const accentClass = accent ? ACCENT_BORDERS[accent] ?? "" : "";
 
   return (
@@ -78,18 +85,18 @@ function TextBlock({ label, text, icon, sentiment, accent }: { label: string; te
         <h4 className="text-sm font-semibold">{label}</h4>
         {sentimentClass && (
           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${sentimentClass}`}>
-            {text}
+            {clean}
           </span>
         )}
       </div>
       {!sentimentClass && (
-        isNumberedList(text)
+        isNumberedList(clean)
           ? <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground leading-relaxed">
-              {parseNumberedList(text).map((item, i) => (
+              {parseNumberedList(clean).map((item, i) => (
                 <li key={i}>{item}</li>
               ))}
             </ol>
-          : <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{text}</p>
+          : <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{clean}</p>
       )}
     </div>
   );

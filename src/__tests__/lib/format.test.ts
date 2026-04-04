@@ -9,7 +9,7 @@ describe("formatScore", () => {
   });
 
   it("returns dash for null", () => {
-    expect(formatScore(null)).toBe("—");
+    expect(formatScore(null)).toBe("-");
   });
 
   it("handles zero", () => {
@@ -31,11 +31,11 @@ describe("formatDate", () => {
   });
 
   it("returns dash for null", () => {
-    expect(formatDate(null)).toBe("—");
+    expect(formatDate(null)).toBe("-");
   });
 
   it("returns dash for invalid date", () => {
-    expect(formatDate("not-a-date")).toBe("—");
+    expect(formatDate("not-a-date")).toBe("-");
   });
 });
 
@@ -44,11 +44,11 @@ describe("formatDateTime", () => {
     const result = formatDateTime("2026-03-20T14:30:00Z");
     expect(result).toContain("2026");
     expect(result).toContain("Mar");
-    expect(result).not.toBe("—");
+    expect(result).not.toBe("-");
   });
 
   it("returns dash for null", () => {
-    expect(formatDateTime(null)).toBe("—");
+    expect(formatDateTime(null)).toBe("-");
   });
 });
 
@@ -60,7 +60,7 @@ describe("formatRelativeDate", () => {
   });
 
   it("returns dash for null", () => {
-    expect(formatRelativeDate(null)).toBe("—");
+    expect(formatRelativeDate(null)).toBe("-");
   });
 });
 
@@ -80,7 +80,7 @@ describe("formatDuration", () => {
   });
 
   it("handles null", () => {
-    expect(formatDuration(null)).toBe("—");
+    expect(formatDuration(null)).toBe("-");
   });
 
   it("handles zero", () => {

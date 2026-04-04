@@ -50,7 +50,7 @@ export function NotificationsBell() {
         </div>
         {alerts.length === 0 ? (
           <div className="px-3 py-6 text-center text-sm text-muted-foreground">
-            All clear — no alerts
+            All clear - no alerts
           </div>
         ) : (
           <div className="max-h-80 overflow-y-auto">

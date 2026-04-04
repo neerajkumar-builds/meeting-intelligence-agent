@@ -24,7 +24,7 @@ export function ScoreBadge({ score, size = "md" }: ScoreBadgeProps) {
       <span
         className={`inline-flex items-center rounded-full bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 ${SIZE_CLASSES[size]}`}
       >
-        —
+        -
       </span>
     );
   }

@@ -78,7 +78,7 @@ export function MeetingPrepDialog({
     >
       <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Prepare for Next Call — {companyName}</DialogTitle>
+          <DialogTitle>Prepare for Next Call - {companyName}</DialogTitle>
           <DialogDescription>
             AI-generated prep brief based on all previous meetings with this company.
           </DialogDescription>
@@ -110,7 +110,7 @@ export function MeetingPrepDialog({
                 <Copy className="h-3.5 w-3.5" />
                 Copy
               </Button>
-              <SendToSlack title={`Meeting Prep — ${companyName}`} body={brief} />
+              <SendToSlack title={`Meeting Prep - ${companyName}`} body={brief} />
             </div>
           </div>
         )}

@@ -19,36 +19,37 @@ When answering:
 - Reference coaching insights, action items, or deal sentiment when the question relates to performance or account health
 - Format your response with markdown for readability
 - Keep answers concise but thorough
-- When comparing reps, use actual score data — don't estimate
+- When comparing reps, use actual score data - don't estimate
+- NEVER use em dashes in your response. Use regular hyphens (-) instead.
 
-TABLES — When listing multiple meetings or structured data, use proper markdown tables with each row on its own line:
+TABLES - When listing multiple meetings or structured data, use proper markdown tables with each row on its own line:
 
 | Rep | Topic | Score | Date |
 |-----|-------|-------|------|
 | Tyler | Discovery Call | 7.3 | Apr 3 |
 | David | Follow-Up | 8.0 | Apr 2 |
 
-CRITICAL: Each table row MUST be on its own line. Never put multiple rows on one line. Use tables for lists of 5+ items instead of bullet points — they are much more readable. For shorter lists (under 5 items), bullet points are fine.
+CRITICAL: Each table row MUST be on its own line. Never put multiple rows on one line. Use tables for lists of 5+ items instead of bullet points -they are much more readable. For shorter lists (under 5 items), bullet points are fine.
 
-VISUAL CHARTS — When the question involves comparing data, include a JSON chart block. The frontend renders these as interactive charts. Format exactly as:
+VISUAL CHARTS -When the question involves comparing data, include a JSON chart block. The frontend renders these as interactive charts. Format exactly as:
 
 \`\`\`chart
 {"type":"bar","title":"Title","data":[{"label":"Name","value":7.2}]}
 \`\`\`
 
 Chart types and when to use them:
-- "bar" — comparing values across categories (rep scores, meeting counts by type). Use for: "compare reps", "show scores by stage", "which rep has the most meetings"
-- "donut" — showing proportions/distribution (stage breakdown, status split). Use for: "show meeting types", "what percentage are internal", "breakdown of stages"
-- "line" — showing trends over time (score progression, meeting volume by week). Use for: "how have scores changed", "show trend", "weekly meeting volume". Data format: [{"label":"Week 1","value":6.5},{"label":"Week 2","value":7.1}]
+- "bar" -comparing values across categories (rep scores, meeting counts by type). Use for: "compare reps", "show scores by stage", "which rep has the most meetings"
+- "donut" -showing proportions/distribution (stage breakdown, status split). Use for: "show meeting types", "what percentage are internal", "breakdown of stages"
+- "line" -showing trends over time (score progression, meeting volume by week). Use for: "how have scores changed", "show trend", "weekly meeting volume". Data format: [{"label":"Week 1","value":6.5},{"label":"Week 2","value":7.1}]
 
 Guidelines:
-- Always provide real data from the meeting scores — never estimate or make up numbers
+- Always provide real data from the meeting scores -never estimate or make up numbers
 - Use "bar" for comparisons (values side by side), "donut" for composition (parts of a whole)
 - If the user asks for a specific chart type, use that type
-- Include the chart AND a text explanation — don't just return a chart alone
-- Only include charts when data visualization adds value — don't force them on transcript searches or coaching questions
+- Include the chart AND a text explanation -don't just return a chart alone
+- Only include charts when data visualization adds value -don't force them on transcript searches or coaching questions
 
-SOURCE CITATIONS — At the end of your response, include a sources block listing meetings you referenced. Format exactly as:
+SOURCE CITATIONS -At the end of your response, include a sources block listing meetings you referenced. Format exactly as:
 
 \`\`\`sources
 [{"topic":"Meeting Topic","rep":"Rep Name","date":"Apr 3, 2026","company":"Company","id":"actual-uuid-from-data","score":7.3}]
@@ -56,13 +57,13 @@ SOURCE CITATIONS — At the end of your response, include a sources block listin
 
 CRITICAL: The "id" field MUST be the actual UUID from the meeting data (shown in brackets like [uuid] at the start of each meeting score line). Never use placeholder text like "meeting-uuid". Include 1-5 sources. Only include meetings you actually referenced in your answer.
 
-FOLLOW-UP SUGGESTIONS — After your sources block, suggest 2-3 brief follow-up questions the user might want to ask next, based on your response. Format exactly as:
+FOLLOW-UP SUGGESTIONS -After your sources block, suggest 2-3 brief follow-up questions the user might want to ask next, based on your response. Format exactly as:
 
 \`\`\`followups
 ["Follow-up question 1?", "Follow-up question 2?", "Follow-up question 3?"]
 \`\`\`
 
-Make them specific and actionable — not generic. If you mentioned a specific rep, suggest digging into their coaching. If you mentioned a risk, suggest exploring it further.
+Make them specific and actionable -not generic. If you mentioned a specific rep, suggest digging into their coaching. If you mentioned a risk, suggest exploring it further.
 
 CRITICAL: Never query or reference legacy tables: documents, n8n_vectors, n8n_chat_histories, zoom_meetings_new.`;
 
@@ -88,7 +89,7 @@ export async function POST(request: NextRequest) {
 
     const supabase = createServerSupabase();
 
-    // Rate limiting — check daily + burst limits (silent skip if table doesn't exist)
+    // Rate limiting -check daily + burst limits (silent skip if table doesn't exist)
     if (userEmail) {
       try {
         const today = new Date().toISOString().slice(0, 10);
@@ -121,7 +122,7 @@ export async function POST(request: NextRequest) {
           );
         }
       } catch {
-        // Rate limit check failed — allow the query (fail open)
+        // Rate limit check failed -allow the query (fail open)
       }
     }
 
@@ -152,7 +153,7 @@ export async function POST(request: NextRequest) {
     const scoresSummary = (meetingScores ?? [])
       .map(
         (m: Record<string, unknown>) =>
-          `[${m.id}] ${m.host_name} — ${m.topic} (${m.scoring_stage_type}) · Score: ${m.overall_score} · Health: ${m.client_health_score ?? "N/A"} · ${m.start_time} · Company: ${m.company_name ?? "Internal"}`
+          `[${m.id}] ${m.host_name} -${m.topic} (${m.scoring_stage_type}) · Score: ${m.overall_score} · Health: ${m.client_health_score ?? "N/A"} · ${m.start_time} · Company: ${m.company_name ?? "Internal"}`
       )
       .join("\n");
 

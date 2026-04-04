@@ -169,8 +169,8 @@ export default function PrintReportPage({
                 <tr key={i} className="border-b border-gray-100">
                   <td className="py-1.5 pr-3 text-sm">{item.action}</td>
                   <td className="py-1.5 pr-3 text-sm font-medium">{item.owner}</td>
-                  <td className="py-1.5 pr-3 text-xs">{item.priority ?? "—"}</td>
-                  <td className="py-1.5 text-xs">{item.deadline ?? "—"}</td>
+                  <td className="py-1.5 pr-3 text-xs">{item.priority ?? "-"}</td>
+                  <td className="py-1.5 text-xs">{item.deadline ?? "-"}</td>
                 </tr>
               ))}
             </tbody>
@@ -181,7 +181,7 @@ export default function PrintReportPage({
       {/* Footer */}
       <div className="mt-8 pt-4 border-t text-xs text-gray-400 flex justify-between">
         <span>FullFunnel Meeting Intelligence</span>
-        <span>Confidential — Internal Use Only</span>
+        <span>Confidential - Internal Use Only</span>
       </div>
 
       {/* Back button (hidden in print) */}

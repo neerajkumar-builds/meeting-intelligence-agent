@@ -9,13 +9,13 @@ const FORMATS: Record<string, { label: string; systemPrompt: string }> = {
 
 ## Action Items
 ### Client Actions
-- [Action] — Owner: [Name], Deadline: [Date]
+- [Action] -Owner: [Name], Deadline: [Date]
 
 ### FullFunnel Actions
-- [Action] — Owner: [Name], Deadline: [Date]
+- [Action] -Owner: [Name], Deadline: [Date]
 
 ### Kantata Tasks
-- [Task title] — Assignee: [Name]
+- [Task title] -Assignee: [Name]
 
 ## Key Discussion Points
 [Bullet points]
@@ -27,7 +27,7 @@ Be specific with names, dates, and deliverables. Use first names only.`,
   },
   executive_summary: {
     label: "Executive Summary",
-    systemPrompt: `Write a 3-5 sentence executive summary of this meeting. Focus on: what was discussed, what was decided, what happens next, and any risks. No bullets — flowing prose. Keep it under 100 words.`,
+    systemPrompt: `Write a 3-5 sentence executive summary of this meeting. Focus on: what was discussed, what was decided, what happens next, and any risks. No bullets -flowing prose. Keep it under 100 words.`,
   },
   bullet_points: {
     label: "Bullet Points",

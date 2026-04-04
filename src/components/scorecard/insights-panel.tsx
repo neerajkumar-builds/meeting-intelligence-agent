@@ -159,12 +159,12 @@ function generateBriefingAndAlerts(meetings: MeetingsListRow[]): { briefing: str
 
   // Risk
   if (atRisk.length > 0) {
-    parts.push(`Watch ${atRisk.join(" and ")} — health below 5.0.`);
+    parts.push(`Watch ${atRisk.join(" and ")} - health below 5.0.`);
   }
 
   // Biggest mover
   if (biggestDrop.delta <= -1) {
-    parts.push(`${biggestDrop.name.split(" ")[0]} dropped ${Math.abs(biggestDrop.delta).toFixed(1)} pts this week — review latest calls.`);
+    parts.push(`${biggestDrop.name.split(" ")[0]} dropped ${Math.abs(biggestDrop.delta).toFixed(1)} pts this week - review latest calls.`);
   }
 
   const briefing = parts.length > 0 ? parts.join(" ") : null;

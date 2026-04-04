@@ -125,7 +125,7 @@ export function CompetitorMentions() {
                     <span className="line-clamp-2">
                       <span className="font-medium text-foreground">{item.topic}</span>
                       {item.companyName && ` (${item.companyName})`}
-                      {" — "}{item.snippet}
+                      {" - "}{item.snippet}
                     </span>
                   </Link>
                 ))}
