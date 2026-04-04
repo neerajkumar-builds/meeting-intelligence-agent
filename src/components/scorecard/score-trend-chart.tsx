@@ -4,6 +4,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip,
 } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
+import { ChartDownload } from "@/components/shared/chart-download";
 import { BrandTooltip } from "@/components/shared/chart-tooltip";
 import type { MeetingsListRow } from "@/types/meetings";
 import { parseISO, startOfWeek, format } from "date-fns";
@@ -35,6 +36,7 @@ export function ScoreTrendChart({ meetings }: ScoreTrendChartProps) {
 
   return (
     <Card className="flex-1">
+      <ChartDownload title="Score Trend">
       <CardContent className="p-6">
         <h3 className="text-sm font-semibold mb-4">Score Trend (Weekly Avg)</h3>
         <ResponsiveContainer width="100%" height={200}>
@@ -61,6 +63,7 @@ export function ScoreTrendChart({ meetings }: ScoreTrendChartProps) {
           </AreaChart>
         </ResponsiveContainer>
       </CardContent>
+      </ChartDownload>
     </Card>
   );
 }

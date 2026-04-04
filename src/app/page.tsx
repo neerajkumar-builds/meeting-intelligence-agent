@@ -10,6 +10,7 @@ import { ScoreTrendChart } from "@/components/scorecard/score-trend-chart";
 import { StageDistribution } from "@/components/scorecard/stage-distribution";
 import { RecentActivity } from "@/components/scorecard/recent-activity";
 import { CompetitorMentions } from "@/components/scorecard/competitor-mentions";
+// import { PipelineFunnel } from "@/components/scorecard/pipeline-funnel"; // Backlog: re-enable when companies span multiple stages
 import { useMeetingsList } from "@/lib/hooks/use-meetings-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";

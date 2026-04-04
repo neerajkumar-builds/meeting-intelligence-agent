@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { STAGE_CONFIG, type ScoringStageType } from "@/lib/constants";
-import { X, Search } from "lucide-react";
+import { X, Search, SlidersHorizontal } from "lucide-react";
 
 interface MeetingFiltersProps {
   repFilter: string;
@@ -51,14 +51,48 @@ export function MeetingFilters({
   hasActiveFilters,
   onClearFilters,
 }: MeetingFiltersProps) {
+  // When Period preset is selected, clear custom dates
+  function handlePeriodChange(v: string) {
+    onDateRangeChange(v ?? "all");
+    if (v !== "all" && v !== "custom") {
+      onDateFromChange?.("");
+      onDateToChange?.("");
+    }
+  }
+
+  // When custom date is set, switch period to "all" (disable preset)
+  function handleDateFromChange(v: string) {
+    onDateFromChange?.(v);
+    if (v) onDateRangeChange("all");
+  }
+
+  function handleDateToChange(v: string) {
+    onDateToChange?.(v);
+    if (v) onDateRangeChange("all");
+  }
+
   return (
-    <div className="space-y-3 mb-4">
-      {/* Row 1: Core filters */}
+    <div className="rounded-lg border bg-card/50 p-3 mb-4">
+      <div className="flex items-center gap-1.5 mb-2.5">
+        <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
+        <span className="text-xs font-medium text-muted-foreground">Filters</span>
+        {hasActiveFilters && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClearFilters}
+            className="gap-1 text-xs text-muted-foreground h-6 px-2 ml-auto"
+          >
+            <X className="h-3 w-3" />
+            Clear all
+          </Button>
+        )}
+      </div>
       <div className="flex flex-wrap items-end gap-2">
         <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Rep</label>
+          <label className="text-[10px] font-medium text-muted-foreground mb-1 block">Rep</label>
           <Select value={repFilter} onValueChange={(v) => onRepFilterChange(v ?? "all")}>
-            <SelectTrigger className="w-[140px] h-9">
+            <SelectTrigger className="w-[130px] h-8 text-xs">
               <SelectValue placeholder="All Reps" />
             </SelectTrigger>
             <SelectContent>
@@ -71,9 +105,9 @@ export function MeetingFilters({
         </div>
 
         <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Stage</label>
+          <label className="text-[10px] font-medium text-muted-foreground mb-1 block">Stage</label>
           <Select value={stageFilter} onValueChange={(v) => onStageFilterChange(v ?? "all")}>
-            <SelectTrigger className="w-[140px] h-9">
+            <SelectTrigger className="w-[130px] h-8 text-xs">
               <SelectValue placeholder="All Stages" />
             </SelectTrigger>
             <SelectContent>
@@ -88,9 +122,9 @@ export function MeetingFilters({
         </div>
 
         <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Period</label>
-          <Select value={dateRange} onValueChange={(v) => onDateRangeChange(v ?? "all")}>
-            <SelectTrigger className="w-[120px] h-9">
+          <label className="text-[10px] font-medium text-muted-foreground mb-1 block">Period</label>
+          <Select value={dateRange} onValueChange={(v) => handlePeriodChange(v ?? "all")}>
+            <SelectTrigger className="w-[100px] h-8 text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -105,30 +139,30 @@ export function MeetingFilters({
         {onDateFromChange && onDateToChange && (
           <>
             <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">From</label>
+              <label className="text-[10px] font-medium text-muted-foreground mb-1 block">From</label>
               <Input
                 type="date"
                 value={dateFrom ?? ""}
-                onChange={(e) => onDateFromChange(e.target.value)}
-                className="w-[155px] h-9"
+                onChange={(e) => handleDateFromChange(e.target.value)}
+                className="w-[135px] h-8 text-xs"
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">To</label>
+              <label className="text-[10px] font-medium text-muted-foreground mb-1 block">To</label>
               <Input
                 type="date"
                 value={dateTo ?? ""}
-                onChange={(e) => onDateToChange(e.target.value)}
-                className="w-[155px] h-9"
+                onChange={(e) => handleDateToChange(e.target.value)}
+                className="w-[135px] h-8 text-xs"
               />
             </div>
           </>
         )}
 
         <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Sort</label>
+          <label className="text-[10px] font-medium text-muted-foreground mb-1 block">Sort</label>
           <Select value={sortBy} onValueChange={(v) => onSortChange(v ?? "date")}>
-            <SelectTrigger className="w-[110px] h-9">
+            <SelectTrigger className="w-[100px] h-8 text-xs">
               <SelectValue placeholder="Date" />
             </SelectTrigger>
             <SelectContent>
@@ -140,31 +174,18 @@ export function MeetingFilters({
           </Select>
         </div>
 
-        {/* Company search — pushed right */}
-        <div className="flex-1 min-w-[160px]">
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Company</label>
+        <div className="max-w-[180px]">
+          <label className="text-[10px] font-medium text-muted-foreground mb-1 block">Company</label>
           <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search company..."
+              placeholder="Search..."
               value={companyFilter}
               onChange={(e) => onCompanyFilterChange(e.target.value)}
-              className="pl-8 h-9"
+              className="pl-7 h-8 text-xs"
             />
           </div>
         </div>
-
-        {hasActiveFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClearFilters}
-            className="gap-1 text-xs text-muted-foreground h-9"
-          >
-            <X className="h-3 w-3" />
-            Clear
-          </Button>
-        )}
       </div>
     </div>
   );

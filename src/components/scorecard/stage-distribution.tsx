@@ -2,6 +2,7 @@
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
+import { ChartDownload } from "@/components/shared/chart-download";
 import { BrandTooltip } from "@/components/shared/chart-tooltip";
 import type { MeetingsListRow } from "@/types/meetings";
 import { getStageLabel } from "@/lib/utils/stage";
@@ -36,6 +37,7 @@ export function StageDistribution({ meetings }: StageDistributionProps) {
 
   return (
     <Card className="flex-1">
+      <ChartDownload title="Stage Distribution">
       <CardContent className="p-6">
         <h3 className="text-sm font-semibold mb-4">Meetings by Stage</h3>
         <div className="flex items-center gap-6">
@@ -72,6 +74,7 @@ export function StageDistribution({ meetings }: StageDistributionProps) {
           </div>
         </div>
       </CardContent>
+      </ChartDownload>
     </Card>
   );
 }

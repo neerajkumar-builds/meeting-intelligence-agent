@@ -8,14 +8,15 @@ import {
 } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
 import { MeetingCard } from "@/components/shared/meeting-card";
-import { CircularGauge } from "@/components/shared/circular-gauge";
+import { ScoreBadge } from "@/components/shared/score-badge";
 import { BrandTooltip } from "@/components/shared/chart-tooltip";
+import { ChartDownload } from "@/components/shared/chart-download";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useMeetingsList } from "@/lib/hooks/use-meetings-list";
 import { formatScore } from "@/lib/utils/format";
 import { getStageLabel } from "@/lib/utils/stage";
-import { ArrowLeft, User, TrendingUp } from "lucide-react";
+import { ArrowLeft, User, TrendingUp, TrendingDown } from "lucide-react";
 import { parseISO, startOfWeek, format } from "date-fns";
 
 const STAGE_COLORS: Record<string, string> = {
@@ -59,7 +60,6 @@ export default function RepProfilePage({
       ? healthScores.reduce((s, m) => s + m.client_health_score!, 0) / healthScores.length
       : null;
 
-    // Stage breakdown
     const stageCounts = new Map<string, number>();
     for (const m of meetings) {
       if (m.scoring_stage_type) {
@@ -67,7 +67,6 @@ export default function RepProfilePage({
       }
     }
 
-    // Weekly trend
     const weeklyData = new Map<string, { total: number; count: number }>();
     for (const m of scored) {
       if (!m.start_time) continue;
@@ -83,7 +82,6 @@ export default function RepProfilePage({
       score: parseFloat((total / count).toFixed(1)),
     }));
 
-    // Best and worst
     let best = scored[0] ?? null;
     let worst = scored[0] ?? null;
     for (const m of scored) {
@@ -98,8 +96,8 @@ export default function RepProfilePage({
     return (
       <div className="space-y-4">
         <Skeleton className="h-8 w-48" />
-        <div className="grid gap-4 md:grid-cols-4"><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /></div>
-        <Skeleton className="h-64" />
+        <div className="grid gap-3 md:grid-cols-4"><Skeleton className="h-20" /><Skeleton className="h-20" /><Skeleton className="h-20" /><Skeleton className="h-20" /></div>
+        <Skeleton className="h-48" />
       </div>
     );
   }
@@ -115,6 +113,9 @@ export default function RepProfilePage({
     );
   }
 
+  const delta = stats.avgScore && stats.teamAvg ? stats.avgScore - stats.teamAvg : 0;
+  const aboveTeam = delta >= 0;
+
   const stageData = Array.from(stats.stageCounts.entries()).map(([stage, count]) => ({
     name: getStageLabel(stage),
     value: count,
@@ -122,70 +123,82 @@ export default function RepProfilePage({
   }));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <Link href="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Back to scorecard
       </Link>
 
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-          <User className="h-6 w-6 text-primary" />
+      {/* Header — compact */}
+      <div className="flex items-center gap-3">
+        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+          <User className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold">{repName}</h1>
-          <p className="text-sm text-muted-foreground">{stats.total} scored meetings</p>
+          <h1 className="text-xl font-semibold">{repName}</h1>
+          <p className="text-xs text-muted-foreground">{stats.total} meetings · {((stats.total / (teamMeetings.length || 1)) * 100).toFixed(0)}% of team volume</p>
         </div>
       </div>
 
-      {/* KPI Row */}
-      <div className="grid gap-4 md:grid-cols-4">
+      {/* KPI Row — all text-based, consistent */}
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         <Card>
-          <CardContent className="p-4 text-center">
-            <p className="text-xs text-muted-foreground mb-1">Avg Score</p>
-            <CircularGauge score={stats.avgScore} label="" size={80} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">vs Team Avg</p>
-            <div className="flex items-center gap-2 mt-2">
-              <span className="text-2xl font-bold">
-                {stats.avgScore && stats.teamAvg
-                  ? (stats.avgScore - stats.teamAvg > 0 ? "+" : "") + (stats.avgScore - stats.teamAvg).toFixed(1)
-                  : "—"}
-              </span>
-              <TrendingUp className={`h-4 w-4 ${stats.avgScore && stats.teamAvg && stats.avgScore >= stats.teamAvg ? "text-emerald-500" : "text-red-500"}`} />
+          <CardContent className="px-4 py-3">
+            <p className="text-xs text-muted-foreground">Avg Score</p>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-2xl font-bold">{formatScore(stats.avgScore)}</span>
+              <ScoreBadge score={stats.avgScore} size="sm" />
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Team avg: {formatScore(stats.teamAvg)}</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="px-4 py-3">
+            <p className="text-xs text-muted-foreground">vs Team</p>
+            <div className="flex items-center gap-1.5 mt-1">
+              <span className={`text-2xl font-bold ${aboveTeam ? "text-emerald-600" : "text-red-500"}`}>
+                {aboveTeam ? "+" : ""}{delta.toFixed(1)}
+              </span>
+              {aboveTeam ? <TrendingUp className="h-4 w-4 text-emerald-500" /> : <TrendingDown className="h-4 w-4 text-red-500" />}
+            </div>
+            <p className="text-[10px] text-muted-foreground">Team avg: {formatScore(stats.teamAvg)}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="px-4 py-3">
             <p className="text-xs text-muted-foreground">Avg Health</p>
-            <p className="text-2xl font-bold mt-2">{formatScore(stats.avgHealth)}</p>
-            <p className="text-xs text-muted-foreground mt-1">client accounts</p>
+            <span className="text-2xl font-bold mt-1 block">{formatScore(stats.avgHealth)}</span>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Meetings</p>
-            <p className="text-2xl font-bold mt-2">{stats.total}</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {((stats.total / (teamMeetings.length || 1)) * 100).toFixed(0)}% of team volume
-            </p>
+          <CardContent className="px-4 py-3">
+            <p className="text-xs text-muted-foreground">Best / Worst</p>
+            <div className="mt-1 space-y-0.5">
+              {stats.best && (
+                <Link href={`/meetings/${stats.best.id}`} className="flex items-center gap-1.5 text-xs hover:underline">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  <span className="truncate">{stats.best.topic}</span>
+                  <ScoreBadge score={stats.best.overall_score} size="sm" />
+                </Link>
+              )}
+              {stats.worst && (
+                <Link href={`/meetings/${stats.worst.id}`} className="flex items-center gap-1.5 text-xs hover:underline">
+                  <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
+                  <span className="truncate">{stats.worst.topic}</span>
+                  <ScoreBadge score={stats.worst.overall_score} size="sm" />
+                </Link>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Charts Row */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Score Trend */}
+      {/* Charts — trend + donut side by side */}
+      <div className="grid gap-4 lg:grid-cols-5">
         {stats.trend.length >= 2 && (
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-sm font-semibold mb-4">Score Trend</h3>
-              <ResponsiveContainer width="100%" height={200}>
+          <Card className="lg:col-span-3">
+            <ChartDownload title={`${repName} Score Trend`}>
+            <CardContent className="p-4">
+              <h3 className="text-xs font-semibold mb-3">Score Trend</h3>
+              <ResponsiveContainer width="100%" height={160}>
                 <AreaChart data={stats.trend} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
                   <defs>
                     <linearGradient id="repTrend" x1="0" y1="0" x2="0" y2="1">
@@ -194,32 +207,32 @@ export default function RepProfilePage({
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
-                  <XAxis dataKey="week" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <YAxis domain={[0, 10]} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <XAxis dataKey="week" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <YAxis domain={[0, 10]} tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
                   <Tooltip content={<BrandTooltip />} />
                   <Area type="monotone" dataKey="score" stroke="#146DFA" strokeWidth={2} fill="url(#repTrend)" dot={{ r: 3, fill: "#146DFA" }} />
                 </AreaChart>
               </ResponsiveContainer>
             </CardContent>
+            </ChartDownload>
           </Card>
         )}
-
-        {/* Stage Breakdown */}
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="text-sm font-semibold mb-4">Meeting Types</h3>
-            <div className="flex items-center gap-6">
-              <ResponsiveContainer width={140} height={140}>
+        <Card className={stats.trend.length >= 2 ? "lg:col-span-2" : "lg:col-span-5"}>
+          <ChartDownload title={`${repName} Meeting Types`}>
+          <CardContent className="p-4">
+            <h3 className="text-xs font-semibold mb-3">Meeting Types</h3>
+            <div className="flex items-center gap-4">
+              <ResponsiveContainer width={100} height={100}>
                 <PieChart>
-                  <Pie data={stageData} cx="50%" cy="50%" innerRadius={40} outerRadius={60} dataKey="value" strokeWidth={2} stroke="hsl(var(--background))">
+                  <Pie data={stageData} cx="50%" cy="50%" innerRadius={30} outerRadius={45} dataKey="value" strokeWidth={2} stroke="hsl(var(--background))">
                     {stageData.map((entry, i) => (<Cell key={i} fill={entry.color} />))}
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {stageData.map((s) => (
-                  <div key={s.name} className="flex items-center gap-2 text-sm">
-                    <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+                  <div key={s.name} className="flex items-center gap-2 text-xs">
+                    <div className="h-2 w-2 rounded-full" style={{ backgroundColor: s.color }} />
                     <span className="text-muted-foreground">{s.name}</span>
                     <span className="font-medium">{s.value}</span>
                   </div>
@@ -227,37 +240,14 @@ export default function RepProfilePage({
               </div>
             </div>
           </CardContent>
+          </ChartDownload>
         </Card>
-      </div>
-
-      {/* Best & Worst */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {stats.best && (
-          <Card className="border-l-4 border-l-emerald-500">
-            <CardContent className="p-4">
-              <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-1">Best Meeting</p>
-              <Link href={`/meetings/${stats.best.id}`} className="text-sm font-medium hover:underline">
-                {stats.best.topic} ({formatScore(stats.best.overall_score)})
-              </Link>
-            </CardContent>
-          </Card>
-        )}
-        {stats.worst && (
-          <Card className="border-l-4 border-l-red-400">
-            <CardContent className="p-4">
-              <p className="text-xs font-medium text-red-500 mb-1">Needs Work</p>
-              <Link href={`/meetings/${stats.worst.id}`} className="text-sm font-medium hover:underline">
-                {stats.worst.topic} ({formatScore(stats.worst.overall_score)})
-              </Link>
-            </CardContent>
-          </Card>
-        )}
       </div>
 
       {/* Recent Meetings */}
       <div>
-        <h3 className="text-sm font-semibold mb-3">Recent Meetings</h3>
-        <div className="space-y-3">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Recent Meetings</h3>
+        <div className="space-y-2">
           {meetings.slice(0, 10).map((m, i) => (
             <MeetingCard key={m.id} meeting={m} index={i} />
           ))}

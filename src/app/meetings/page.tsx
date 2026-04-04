@@ -46,8 +46,8 @@ export default function MeetingFeedPage() {
       if (stageFilter !== "all" && m.scoring_stage_type !== stageFilter) return false;
       if (companyFilter && !m.company_name?.toLowerCase().includes(companyFilter.toLowerCase())) return false;
       if (dateCutoff && m.start_time && parseISO(m.start_time) < dateCutoff) return false;
-      if (dateFrom && m.start_time && m.start_time < dateFrom) return false;
-      if (dateTo && m.start_time && m.start_time > dateTo + "T23:59:59") return false;
+      if (dateFrom && m.start_time && parseISO(m.start_time) < parseISO(dateFrom + "T00:00:00")) return false;
+      if (dateTo && m.start_time && parseISO(m.start_time) > parseISO(dateTo + "T23:59:59")) return false;
       return true;
     });
 

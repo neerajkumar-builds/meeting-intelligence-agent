@@ -6,7 +6,9 @@ import { ChatInput } from "./chat-input";
 import { SuggestedPrompts } from "./suggested-prompts";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Trash2 } from "lucide-react";
+
+const STORAGE_KEY = "meeting-intel-chat";
 
 interface Message {
   id: string;
@@ -14,12 +16,43 @@ interface Message {
   content: string;
 }
 
+function loadMessages(): Message[] {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return [];
+    return JSON.parse(stored) as Message[];
+  } catch {
+    return [];
+  }
+}
+
+function saveMessages(messages: Message[]) {
+  try {
+    if (messages.length === 0) {
+      localStorage.removeItem(STORAGE_KEY);
+    } else {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    }
+  } catch {
+    // Storage full or unavailable — ignore
+  }
+}
+
 export function ChatInterface({ initialQuery }: { initialQuery?: string }) {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(() =>
+    initialQuery ? [] : loadMessages()
+  );
   const [isStreaming, setIsStreaming] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const initialSent = useRef(false);
+
+  // Persist messages whenever they change (and not mid-stream)
+  useEffect(() => {
+    if (!isStreaming) {
+      saveMessages(messages);
+    }
+  }, [messages, isStreaming]);
 
   useEffect(() => {
     if (initialQuery && !initialSent.current && messages.length === 0) {
@@ -28,6 +61,12 @@ export function ChatInterface({ initialQuery }: { initialQuery?: string }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: run once when initialQuery arrives, guarded by initialSent ref
   }, [initialQuery]);
+
+  // Scroll to bottom on mount if restoring conversation
+  useEffect(() => {
+    if (messages.length > 0) scrollToBottom();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only on mount
+  }, []);
 
   const scrollToBottom = useCallback(() => {
     if (scrollRef.current) {
@@ -156,6 +195,7 @@ export function ChatInterface({ initialQuery }: { initialQuery?: string }) {
 
   function resetConversation() {
     setMessages([]);
+    saveMessages([]);
   }
 
   return (
@@ -177,6 +217,7 @@ export function ChatInterface({ initialQuery }: { initialQuery?: string }) {
                     message.role === "assistant" &&
                     message.id === messages[messages.length - 1]?.id
                   }
+                  onFollowUp={!isStreaming ? sendMessage : undefined}
                 />
               ))}
             </div>
@@ -187,25 +228,30 @@ export function ChatInterface({ initialQuery }: { initialQuery?: string }) {
       {/* Input area */}
       <div className="border-t bg-background p-4">
         <div className="max-w-3xl mx-auto">
-          <div className="flex items-center justify-between mb-2">
-            {messages.length > 0 && (
+          {messages.length > 0 && (
+            <div className="flex items-center justify-between mb-2">
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
                 onClick={resetConversation}
-                className="gap-1 text-xs text-muted-foreground"
+                className="gap-1.5 text-xs"
               >
-                <RotateCcw className="h-3 w-3" />
-                New conversation
+                <Trash2 className="h-3 w-3" />
+                Clear chat
               </Button>
-            )}
-            {messages.length > 0 && (
-              <span className="text-xs text-muted-foreground">
-                {Math.floor(messages.length / 2)} / 10 turns
-              </span>
-            )}
-          </div>
-          <ChatInput onSend={sendMessage} disabled={isStreaming} />
+              {(() => {
+                const turns = Math.floor(messages.length / 2);
+                const isNearLimit = turns >= 8;
+                return (
+                  <span className={`text-xs ${isNearLimit ? "text-amber-600 dark:text-amber-400 font-medium" : "text-muted-foreground"}`}>
+                    {turns} / 10 turns{isNearLimit && turns < 10 ? " — running low" : ""}
+                    {turns >= 10 ? " — limit reached, clear to continue" : ""}
+                  </span>
+                );
+              })()}
+            </div>
+          )}
+          <ChatInput onSend={sendMessage} disabled={isStreaming || Math.floor(messages.length / 2) >= 10} />
         </div>
       </div>
     </div>

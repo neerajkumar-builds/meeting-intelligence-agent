@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Building2, Heart, Search } from "lucide-react";
+import { Building2, Heart, Search, SlidersHorizontal } from "lucide-react";
 
 interface CompanyStats {
   name: string;
@@ -106,32 +106,50 @@ export default function CompaniesIndexPage() {
         />
       ) : (
         <>
-        {/* Filters row */}
-        <div className="flex items-end gap-3 mb-4">
-          <div className="flex-1 max-w-sm relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search companies..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
-            />
+        {/* Filters */}
+        <div className="rounded-lg border bg-card/50 p-3 mb-4">
+          <div className="flex items-center gap-1.5 mb-2.5">
+            <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-xs font-medium text-muted-foreground">Filters</span>
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="ml-auto text-[10px] text-muted-foreground hover:text-foreground flex items-center gap-0.5"
+              >
+                <span className="h-3 w-3 flex items-center justify-center">&times;</span>
+                Clear
+              </button>
+            )}
           </div>
-          <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Sort by</label>
-            <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="recent">Most Recent</SelectItem>
-                <SelectItem value="az">A → Z</SelectItem>
-                <SelectItem value="za">Z → A</SelectItem>
-                <SelectItem value="meetings">Most Meetings</SelectItem>
-                <SelectItem value="score">Avg Score</SelectItem>
-                <SelectItem value="health">Health Score</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="flex items-end gap-2">
+            <div className="max-w-[220px] flex-1">
+              <label className="text-[10px] font-medium text-muted-foreground mb-1 block">Search</label>
+              <div className="relative">
+                <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Company name..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-7 h-8 text-xs"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-[10px] font-medium text-muted-foreground mb-1 block">Sort by</label>
+              <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
+                <SelectTrigger className="w-[130px] h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recent">Most Recent</SelectItem>
+                  <SelectItem value="az">A → Z</SelectItem>
+                  <SelectItem value="za">Z → A</SelectItem>
+                  <SelectItem value="meetings">Most Meetings</SelectItem>
+                  <SelectItem value="score">Avg Score</SelectItem>
+                  <SelectItem value="health">Health Score</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
         <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -166,7 +184,7 @@ export default function CompaniesIndexPage() {
                         <ScoreBadge score={company.avgScore} size="sm" />
                       </div>
                       <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                        <span>{company.meetingCount} meetings</span>
+                        <span>{company.meetingCount} {company.meetingCount === 1 ? "meeting" : "meetings"}</span>
                         <span>{formatDate(company.lastMeeting)}</span>
                         {company.avgHealth !== null && (
                           <span className="flex items-center gap-1">

@@ -2,7 +2,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, GraduationCap, ListChecks, Gavel, Users } from "lucide-react";
+import { FileText, GraduationCap, ListChecks, Gavel, Users, Lightbulb, CircleHelp, Scale } from "lucide-react";
 import type { ScoringStageType } from "@/lib/constants";
 import type {
   DiscoveryMeetingScore,
@@ -19,31 +19,109 @@ interface IntelligenceTabsProps {
   internalSummary: unknown;
 }
 
-function TextBlock({ label, text, icon }: { label: string; text: string | null | undefined; icon?: React.ReactNode }) {
+// Sentiment keywords to color mapping
+const SENTIMENT_COLORS: Record<string, string> = {
+  accelerating: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300",
+  positive: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300",
+  strong: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300",
+  healthy: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300",
+  neutral: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
+  passive: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
+  moderate: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
+  "needs attention": "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+  declining: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+  "at risk": "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+  stalled: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+};
+
+function getSentimentClass(text: string): string | null {
+  const lower = text.toLowerCase().trim();
+  for (const [key, cls] of Object.entries(SENTIMENT_COLORS)) {
+    if (lower.includes(key)) return cls;
+  }
+  return null;
+}
+
+// Colored left accent borders for coaching + internal cards
+const ACCENT_BORDERS: Record<string, string> = {
+  emerald: "border-l-4 border-l-emerald-400 dark:border-l-emerald-600",
+  amber: "border-l-4 border-l-amber-400 dark:border-l-amber-600",
+  red: "border-l-4 border-l-red-400 dark:border-l-red-600",
+  blue: "border-l-4 border-l-blue-400 dark:border-l-blue-600",
+  purple: "border-l-4 border-l-purple-400 dark:border-l-purple-600",
+  indigo: "border-l-4 border-l-indigo-400 dark:border-l-indigo-600",
+};
+
+// Detect numbered lists like "1. First item\n2. Second item"
+function isNumberedList(text: string): boolean {
+  return /^\s*1[\.\)]\s/.test(text) && /\d+[\.\)]\s/.test(text.slice(text.indexOf("\n") || 0));
+}
+
+function parseNumberedList(text: string): string[] {
+  return text
+    .split(/\n?\s*\d+[\.\)]\s+/)
+    .filter((s) => s.trim().length > 0)
+    .map((s) => s.trim());
+}
+
+function TextBlock({ label, text, icon, sentiment, accent }: { label: string; text: string | null | undefined; icon?: React.ReactNode; sentiment?: boolean; accent?: "emerald" | "amber" | "red" | "blue" | "purple" | "indigo" }) {
   if (!text) return null;
+  const sentimentClass = sentiment ? getSentimentClass(text) : null;
+  const accentClass = accent ? ACCENT_BORDERS[accent] ?? "" : "";
+
   return (
-    <div className="rounded-lg border bg-card p-4">
+    <div className={`rounded-lg border bg-card p-4 ${accentClass}`}>
       <div className="flex items-center gap-2 mb-2">
         {icon}
         <h4 className="text-sm font-semibold">{label}</h4>
+        {sentimentClass && (
+          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${sentimentClass}`}>
+            {text}
+          </span>
+        )}
       </div>
-      <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{text}</p>
+      {!sentimentClass && (
+        isNumberedList(text)
+          ? <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground leading-relaxed">
+              {parseNumberedList(text).map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
+            </ol>
+          : <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{text}</p>
+      )}
     </div>
   );
 }
 
-function ListBlock({ label, items, icon }: { label: string; items: string[] | undefined; icon?: React.ReactNode }) {
+function ListBlock({ label, items, icon, variant }: { label: string; items: string[] | undefined; icon?: React.ReactNode; variant?: "risk" | "positive" | "questions" }) {
   if (!items || items.length === 0) return null;
+  const borderClass =
+    variant === "risk" ? "border-red-200 dark:border-red-900" :
+    variant === "positive" ? "border-emerald-200 dark:border-emerald-900" :
+    variant === "questions" ? "border-l-4 border-l-amber-400 dark:border-l-amber-600 border-amber-200 dark:border-amber-900" :
+    "";
+  const dotClass =
+    variant === "risk" ? "bg-red-400" :
+    variant === "positive" ? "bg-emerald-400" :
+    variant === "questions" ? "bg-amber-400" :
+    "bg-primary/60";
+  const labelClass =
+    variant === "risk" ? "text-red-600 dark:text-red-400" :
+    variant === "positive" ? "text-emerald-600 dark:text-emerald-400" :
+    variant === "questions" ? "text-amber-600 dark:text-amber-400" :
+    "";
+
   return (
-    <div className="rounded-lg border bg-card p-4">
+    <div className={`rounded-lg border bg-card p-4 ${borderClass}`}>
       <div className="flex items-center gap-2 mb-2">
         {icon}
-        <h4 className="text-sm font-semibold">{label}</h4>
+        <h4 className={`text-sm font-semibold ${labelClass}`}>{label}</h4>
+        <span className="text-[10px] text-muted-foreground">{items.length}</span>
       </div>
       <ul className="space-y-1.5">
         {items.map((item, i) => (
           <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary/60 mt-1.5 shrink-0" />
+            <span className={`h-1.5 w-1.5 rounded-full ${dotClass} mt-1.5 shrink-0`} />
             <span className="leading-relaxed">{item}</span>
           </li>
         ))}
@@ -168,7 +246,7 @@ function DiscoverySummaryDetails({ ms }: { ms: DiscoveryMeetingScore | null }) {
   if (!ms) return null;
   return (
     <div className="mt-4 space-y-2">
-      <TextBlock label="Deal Sentiment" text={ms.deal_sentiment} />
+      <TextBlock label="Deal Sentiment" text={ms.deal_sentiment} sentiment />
       <TextBlock label="Next Steps" text={ms.next_actionables} />
       <TextBlock label="Reasoning" text={ms.reasoning_summary} />
     </div>
@@ -179,9 +257,9 @@ function FollowUpSummaryDetails({ ms }: { ms: FollowUpMeetingScore | null }) {
   if (!ms) return null;
   return (
     <div className="mt-4 space-y-2">
-      <TextBlock label="Relationship Health" text={ms.relationship_health} />
-      <ListBlock label="Expansion Signals" items={ms.expansion_signals} />
-      <ListBlock label="Churn Risk Signals" items={ms.churn_risk_signals} />
+      <TextBlock label="Relationship Health" text={ms.relationship_health} sentiment />
+      <ListBlock label="Expansion Signals" items={ms.expansion_signals} variant="positive" />
+      <ListBlock label="Churn Risk Signals" items={ms.churn_risk_signals} variant="risk" />
       <TextBlock label="Reasoning" text={ms.reasoning_summary} />
     </div>
   );
@@ -191,11 +269,11 @@ function OnboardingSummaryDetails({ ms }: { ms: OnboardingMeetingScore | null })
   if (!ms) return null;
   return (
     <div className="mt-4 space-y-2">
-      <TextBlock label="Delivery Status" text={ms.delivery_status} />
+      <TextBlock label="Delivery Status" text={ms.delivery_status} sentiment />
       <TextBlock label="Current Phase" text={ms.current_phase} />
       <TextBlock label="Progress" text={ms.project_progress} />
-      <ListBlock label="Blockers" items={ms.blockers} />
-      <ListBlock label="Milestones" items={ms.milestones_discussed} />
+      <ListBlock label="Blockers" items={ms.blockers} variant="risk" />
+      <ListBlock label="Milestones" items={ms.milestones_discussed} variant="positive" />
     </div>
   );
 }
@@ -204,10 +282,24 @@ function InternalSummaryDetails({ is: intSummary }: { is: InternalSummary | null
   if (!intSummary) return null;
   return (
     <div className="mt-4 space-y-2">
-      <TextBlock label="Headline" text={intSummary.summary?.headline} />
-      <TextBlock label="Key Insight" text={intSummary.quality?.key_insight} />
+      {intSummary.summary?.headline && (
+        <div className="rounded-lg border bg-card p-4">
+          <h4 className="text-base font-semibold leading-snug">{intSummary.summary.headline}</h4>
+        </div>
+      )}
+      <TextBlock
+        label="Key Insight"
+        text={intSummary.quality?.key_insight}
+        accent="indigo"
+        icon={<Lightbulb className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />}
+      />
       <ListBlock label="Key Topics" items={intSummary.summary?.key_topics} />
-      <ListBlock label="Open Questions" items={intSummary.open_questions} />
+      <ListBlock
+        label="Open Questions"
+        items={intSummary.open_questions}
+        variant="questions"
+        icon={<CircleHelp className="h-4 w-4 text-amber-500 dark:text-amber-400" />}
+      />
     </div>
   );
 }
@@ -237,29 +329,34 @@ function CoachingContent({
       <TextBlock
         label="Strengths"
         text={rs.strengths}
+        accent="emerald"
         icon={<span className="h-5 w-5 rounded bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-xs font-bold">+</span>}
       />
       <TextBlock
         label="Areas for Improvement"
         text={rs.areas_for_improvement}
+        accent="amber"
         icon={<span className="h-5 w-5 rounded bg-amber-100 dark:bg-amber-900 flex items-center justify-center text-amber-600 dark:text-amber-400 text-xs font-bold">!</span>}
       />
       {rs.blind_spots && (
         <TextBlock
           label="Blind Spots"
           text={rs.blind_spots}
+          accent="red"
           icon={<span className="h-5 w-5 rounded bg-red-100 dark:bg-red-900 flex items-center justify-center text-red-600 dark:text-red-400 text-xs font-bold">?</span>}
         />
       )}
       <TextBlock
         label="Coaching Recommendations"
         text={rs.coaching_recommendations}
+        accent="blue"
         icon={<span className="h-5 w-5 rounded bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-400 text-xs font-bold">C</span>}
       />
       {rs.handling_analysis && (
         <TextBlock
           label="Objection Handling"
           text={rs.handling_analysis}
+          accent="purple"
           icon={<span className="h-5 w-5 rounded bg-purple-100 dark:bg-purple-900 flex items-center justify-center text-purple-600 dark:text-purple-400 text-xs font-bold">O</span>}
         />
       )}
@@ -267,12 +364,19 @@ function CoachingContent({
         <TextBlock
           label="Deal Progression"
           text={rs.deal_progression_assessment}
+          accent="emerald"
           icon={<span className="h-5 w-5 rounded bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-xs font-bold">D</span>}
         />
       )}
     </div>
   );
 }
+
+const PRIORITY_BORDERS: Record<string, string> = {
+  high: "border-l-4 border-l-red-400 dark:border-l-red-600",
+  medium: "border-l-4 border-l-amber-400 dark:border-l-amber-600",
+  low: "border-l-4 border-l-gray-300 dark:border-l-gray-600",
+};
 
 function ActionItemsList({
   items,
@@ -285,7 +389,7 @@ function ActionItemsList({
   return (
     <div className="space-y-3">
       {items.map((item, i) => (
-        <div key={i} className="rounded-lg border p-3">
+        <div key={i} className={`rounded-lg border p-3 ${item.priority ? PRIORITY_BORDERS[item.priority] ?? "" : ""}`}>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs font-medium bg-primary/10 text-primary px-1.5 py-0.5 rounded">
               {item.owner}
@@ -330,17 +434,20 @@ function DecisionsList({
   return (
     <div className="space-y-3">
       {decisions.map((d, i) => (
-        <div key={i} className="rounded-lg border p-3">
-          <p className="text-sm font-medium">{d.decision}</p>
+        <div key={i} className="rounded-lg border p-3 border-l-4 border-l-indigo-400 dark:border-l-indigo-600">
+          <div className="flex items-start gap-2">
+            <Scale className="h-4 w-4 text-indigo-500 dark:text-indigo-400 mt-0.5 shrink-0" />
+            <p className="text-sm font-medium">{d.decision}</p>
+          </div>
           {d.rationale && (
-            <p className="text-xs text-muted-foreground mt-1">
-              Rationale: {d.rationale}
+            <p className="text-xs text-muted-foreground mt-1 ml-6">
+              {d.rationale}
             </p>
           )}
           {d.impact && (
-            <p className="text-xs text-muted-foreground mt-1">
+            <span className="inline-block text-xs mt-2 ml-6 px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300">
               Impact: {d.impact}
-            </p>
+            </span>
           )}
         </div>
       ))}
@@ -365,10 +472,18 @@ function ClientRefsList({
     at_risk: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
   };
 
+  const sentimentBorders: Record<string, string> = {
+    positive: "border-l-4 border-l-emerald-400 dark:border-l-emerald-600",
+    neutral: "border-l-4 border-l-gray-300 dark:border-l-gray-600",
+    negative: "border-l-4 border-l-red-400 dark:border-l-red-600",
+    concern: "border-l-4 border-l-yellow-400 dark:border-l-yellow-600",
+    at_risk: "border-l-4 border-l-red-400 dark:border-l-red-600",
+  };
+
   return (
     <div className="space-y-3">
       {refs.map((ref, i) => (
-        <div key={i} className="rounded-lg border p-3">
+        <div key={i} className={`rounded-lg border p-3 ${ref.sentiment ? sentimentBorders[ref.sentiment] ?? "" : ""} ${ref.action_needed ? "bg-red-50/50 dark:bg-red-950/30" : ""}`}>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-sm font-medium">{ref.client_name}</span>
             {ref.sentiment && (

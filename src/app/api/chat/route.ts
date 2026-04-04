@@ -47,6 +47,14 @@ SOURCE CITATIONS — At the end of your response, include a sources block listin
 
 Include 1-5 sources. Only include meetings you actually referenced in your answer. The frontend renders these as clickable cards linking to the meeting detail page.
 
+FOLLOW-UP SUGGESTIONS — After your sources block, suggest 2-3 brief follow-up questions the user might want to ask next, based on your response. Format exactly as:
+
+\`\`\`followups
+["Follow-up question 1?", "Follow-up question 2?", "Follow-up question 3?"]
+\`\`\`
+
+Make them specific and actionable — not generic. If you mentioned a specific rep, suggest digging into their coaching. If you mentioned a risk, suggest exploring it further.
+
 CRITICAL: Never query or reference legacy tables: documents, n8n_vectors, n8n_chat_histories, zoom_meetings_new.`;
 
 interface ChatRequest {

@@ -5,27 +5,55 @@ import ReactMarkdown from "react-markdown";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, Tooltip, AreaChart, Area } from "recharts";
 import { cn } from "@/lib/utils";
 import { BrandTooltip } from "@/components/shared/chart-tooltip";
+import { ChartDownload } from "@/components/shared/chart-download";
 import { SendToSlack } from "@/components/shared/send-to-slack";
 import { SourceCitation } from "./source-citation";
-import { Copy, Mail, Check } from "lucide-react";
+import { Copy, Mail, Check, Sparkles } from "lucide-react";
 
 interface ChatMessageProps {
   role: "user" | "assistant";
   content: string;
   isStreaming?: boolean;
+  onFollowUp?: (question: string) => void;
 }
 
-export function ChatMessage({ role, content, isStreaming }: ChatMessageProps) {
+/** Convert ```chart JSON blocks to readable text for copy/email/slack */
+function chartBlocksToText(text: string): string {
+  return text.replace(/```chart\n([\s\S]*?)```/g, (_match, json: string) => {
+    try {
+      const chart = JSON.parse(json.trim());
+      const title = chart.title ? `${chart.title}:\n` : "";
+      if (Array.isArray(chart.data)) {
+        const rows = chart.data.map((d: { label: string; value: number }) => `  - ${d.label}: ${d.value}`).join("\n");
+        return `${title}${rows}`;
+      }
+      return title.trim();
+    } catch {
+      return "[Chart data]";
+    }
+  });
+}
+
+/** Strip sources, followups, and convert charts to text — for export */
+function getExportText(rawContent: string): string {
+  let text = rawContent;
+  text = text.replace(/```sources\n[\s\S]*?```/g, "");
+  text = text.replace(/```followups\n[\s\S]*?```/g, "");
+  text = chartBlocksToText(text);
+  return text.trim();
+}
+
+export function ChatMessage({ role, content, isStreaming, onFollowUp }: ChatMessageProps) {
   const [copied, setCopied] = useState(false);
 
   function handleCopy() {
-    navigator.clipboard.writeText(content);
+    navigator.clipboard.writeText(getExportText(content));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
 
   function handleEmail() {
-    window.open(`mailto:?body=${encodeURIComponent(content)}`, "_blank");
+    window.open(`mailto:?body=${encodeURIComponent(getExportText(content))}`, "_blank");
   }
 
   return (
@@ -55,6 +83,18 @@ export function ChatMessage({ role, content, isStreaming }: ChatMessageProps) {
                 cleanContent = content.replace(/```sources\n[\s\S]*?```/, "").trim();
               } catch {
                 // Invalid sources JSON — ignore
+              }
+            }
+
+            // Extract follow-up suggestions
+            const followupsMatch = cleanContent.match(/```followups\n([\s\S]*?)```/);
+            let followups: string[] = [];
+            if (followupsMatch) {
+              try {
+                followups = JSON.parse(followupsMatch[1].trim());
+                cleanContent = cleanContent.replace(/```followups\n[\s\S]*?```/, "").trim();
+              } catch {
+                // Invalid followups JSON — ignore
               }
             }
             return <>
@@ -100,7 +140,7 @@ export function ChatMessage({ role, content, isStreaming }: ChatMessageProps) {
                         if (chartData.type === "bar" && Array.isArray(chartData.data)) {
                           const maxVal = Math.max(...chartData.data.map((d: { value: number }) => d.value));
                           return (
-                            <div className="my-3 rounded-lg border bg-card p-4">
+                            <ChartDownload title={chartData.title} className="my-3 rounded-lg border bg-card p-4">
                               {chartData.title && <p className="text-xs font-semibold mb-3">{chartData.title}</p>}
                               <ResponsiveContainer width="100%" height={180}>
                                 <BarChart data={chartData.data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
@@ -111,13 +151,13 @@ export function ChatMessage({ role, content, isStreaming }: ChatMessageProps) {
                                   <Bar dataKey="value" fill="#146DFA" radius={[4, 4, 0, 0]} barSize={32} />
                                 </BarChart>
                               </ResponsiveContainer>
-                            </div>
+                            </ChartDownload>
                           );
                         }
 
                         if (chartData.type === "donut" && Array.isArray(chartData.data)) {
                           return (
-                            <div className="my-3 rounded-lg border bg-card p-4">
+                            <ChartDownload title={chartData.title} className="my-3 rounded-lg border bg-card p-4">
                               {chartData.title && <p className="text-xs font-semibold mb-3">{chartData.title}</p>}
                               <div className="flex items-center gap-6">
                                 <ResponsiveContainer width={160} height={160}>
@@ -148,12 +188,12 @@ export function ChatMessage({ role, content, isStreaming }: ChatMessageProps) {
                                   ))}
                                 </div>
                               </div>
-                            </div>
+                            </ChartDownload>
                           );
                         }
                         if (chartData.type === "line" && Array.isArray(chartData.data)) {
                           return (
-                            <div className="my-3 rounded-lg border bg-card p-4">
+                            <ChartDownload title={chartData.title} className="my-3 rounded-lg border bg-card p-4">
                               {chartData.title && <p className="text-xs font-semibold mb-3">{chartData.title}</p>}
                               <ResponsiveContainer width="100%" height={180}>
                                 <AreaChart data={chartData.data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
@@ -170,7 +210,7 @@ export function ChatMessage({ role, content, isStreaming }: ChatMessageProps) {
                                   <Area type="monotone" dataKey="value" stroke="#146DFA" strokeWidth={2} fill="url(#chatLineGrad)" dot={{ r: 3, fill: "#146DFA" }} />
                                 </AreaChart>
                               </ResponsiveContainer>
-                            </div>
+                            </ChartDownload>
                           );
                         }
                       } catch {
@@ -242,12 +282,32 @@ export function ChatMessage({ role, content, isStreaming }: ChatMessageProps) {
                   <Mail className="h-3 w-3" />
                   Email
                 </button>
-                <SendToSlack title="AI Search Response" body={cleanContent} />
+                <SendToSlack title="AI Search Response" body={getExportText(content)} />
               </div>
             )}
 
             {/* Source citations */}
             {sources.length > 0 && <SourceCitation sources={sources} />}
+
+            {/* Follow-up suggestions */}
+            {!isStreaming && followups.length > 0 && onFollowUp && (
+              <div className="mt-3 pt-2 border-t border-border/30">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5 flex items-center gap-1">
+                  <Sparkles className="h-3 w-3" /> Follow-up
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {followups.map((q, i) => (
+                    <button
+                      key={i}
+                      onClick={() => onFollowUp(q)}
+                      className="text-xs text-left px-2.5 py-1.5 rounded-lg border border-primary/20 bg-primary/5 text-foreground hover:bg-primary/10 hover:border-primary/40 transition-colors"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </>;
           })()
         ) : (

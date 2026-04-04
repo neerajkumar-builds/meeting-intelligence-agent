@@ -142,3 +142,20 @@
     @apply font-sans;
   }
 }
+
+/* Login page animated gradient */
+@keyframes login-gradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.login-gradient-bg {
+  background: linear-gradient(135deg, #0A0A0A 0%, #0d1b2a 25%, #0A0A0A 50%, #0a1628 75%, #0A0A0A 100%);
+  background-size: 400% 400%;
+  animation: login-gradient 12s ease infinite;
+}
+
+/* Tagline fade transition */
+.tagline-fade {
+  transition: opacity 0.5s ease-in-out;
+}

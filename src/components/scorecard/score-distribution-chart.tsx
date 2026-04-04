@@ -5,6 +5,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer, Tooltip,
 } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
+import { ChartDownload } from "@/components/shared/chart-download";
 import { BrandTooltip } from "@/components/shared/chart-tooltip";
 import type { MeetingsListRow } from "@/types/meetings";
 
@@ -48,6 +49,7 @@ export function ScoreDistributionChart({ meetings }: ScoreDistributionChartProps
 
   return (
     <Card>
+      <ChartDownload title="Score Distribution">
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold">Score Distribution by Rep</h3>
@@ -63,7 +65,7 @@ export function ScoreDistributionChart({ meetings }: ScoreDistributionChartProps
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
             <XAxis dataKey="name" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
             <YAxis allowDecimals={false} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-            <Tooltip content={<BrandTooltip />} />
+            <Tooltip content={<BrandTooltip />} cursor={{ fill: "transparent" }} />
             <Legend wrapperStyle={{ fontSize: 12, paddingTop: 12 }} iconType="circle" iconSize={8} />
             <Bar
               dataKey="8+ Strong"
@@ -92,6 +94,7 @@ export function ScoreDistributionChart({ meetings }: ScoreDistributionChartProps
           </BarChart>
         </ResponsiveContainer>
       </CardContent>
+      </ChartDownload>
     </Card>
   );
 }

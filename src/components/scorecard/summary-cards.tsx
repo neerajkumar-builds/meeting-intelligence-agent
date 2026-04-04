@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatScore } from "@/lib/utils/format";
+import { TrendingUp, TrendingDown } from "lucide-react";
+import { parseISO, subDays } from "date-fns";
 import type { MeetingsListRow } from "@/types/meetings";
 
 interface SummaryCardsProps {
@@ -15,6 +17,16 @@ export function SummaryCards({ meetings }: SummaryCardsProps) {
   const avgScore =
     meetings.reduce((sum, m) => sum + (m.overall_score ?? 0), 0) /
     (totalMeetings || 1);
+
+  // Week-over-week delta for avg score
+  const now = new Date();
+  const oneWeekAgo = subDays(now, 7);
+  const twoWeeksAgo = subDays(now, 14);
+  const thisWeek = meetings.filter((m) => m.start_time && m.overall_score !== null && parseISO(m.start_time) >= oneWeekAgo);
+  const lastWeek = meetings.filter((m) => m.start_time && m.overall_score !== null && parseISO(m.start_time) >= twoWeeksAgo && parseISO(m.start_time) < oneWeekAgo);
+  const thisWeekAvg = thisWeek.length > 0 ? thisWeek.reduce((s, m) => s + m.overall_score!, 0) / thisWeek.length : null;
+  const lastWeekAvg = lastWeek.length > 0 ? lastWeek.reduce((s, m) => s + m.overall_score!, 0) / lastWeek.length : null;
+  const weekDelta = thisWeekAvg !== null && lastWeekAvg !== null ? thisWeekAvg - lastWeekAvg : null;
 
   // Average health across meetings with health data
   const healthMeetings = meetings.filter((m) => m.client_health_score !== null);
@@ -40,15 +52,15 @@ export function SummaryCards({ meetings }: SummaryCardsProps) {
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card
-        className="transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
-      >
-        <CardContent className="p-6">
-          <p className="text-sm text-muted-foreground">Total Meetings</p>
-          <p className="text-3xl font-bold mt-1 tracking-tight">{totalMeetings}</p>
-          <p className="text-xs text-muted-foreground mt-1">scored meetings</p>
-        </CardContent>
-      </Card>
+      <Link href="/meetings">
+        <Card className="transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 cursor-pointer">
+          <CardContent className="p-6">
+            <p className="text-sm text-muted-foreground">Total Meetings</p>
+            <p className="text-3xl font-bold mt-1 tracking-tight">{totalMeetings}</p>
+            <p className="text-xs text-muted-foreground mt-1">scored meetings</p>
+          </CardContent>
+        </Card>
+      </Link>
 
       <Card
         className="transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
@@ -56,10 +68,20 @@ export function SummaryCards({ meetings }: SummaryCardsProps) {
       >
         <CardContent className="p-6">
           <p className="text-sm text-muted-foreground">Avg Score</p>
-          <p className="text-3xl font-bold mt-1 tracking-tight">
-            {formatScore(totalMeetings > 0 ? avgScore : null)}
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-3xl font-bold tracking-tight">
+              {formatScore(totalMeetings > 0 ? avgScore : null)}
+            </p>
+            {weekDelta !== null && (
+              <span className={`inline-flex items-center gap-0.5 text-xs font-medium px-1.5 py-0.5 rounded-full ${weekDelta >= 0 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300" : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"}`}>
+                {weekDelta >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                {weekDelta >= 0 ? "+" : ""}{weekDelta.toFixed(1)}
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            {weekDelta !== null ? "vs last week" : "across all reps"}
           </p>
-          <p className="text-xs text-muted-foreground mt-1">across all reps</p>
         </CardContent>
       </Card>
 

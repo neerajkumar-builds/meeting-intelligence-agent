@@ -115,6 +115,11 @@ export default function MeetingDetailPage({
             companyName={meeting.company_name}
             transcript={meeting.transcript_text}
             topic={meeting.topic}
+            meetingSummary={meeting.meeting_summary}
+            meetingScore={meeting.meeting_score}
+            repScore={meeting.rep_score}
+            stageType={meeting.scoring_stage_type}
+            overallScore={meeting.overall_score}
           />
           <button
             onClick={() => {
