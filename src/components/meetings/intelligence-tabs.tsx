@@ -10,9 +10,11 @@ import type {
   OnboardingMeetingScore,
   InternalSummary,
 } from "@/types/scores";
+import { MeetingNotes, useMeetingNotes } from "./meeting-notes";
 
 interface IntelligenceTabsProps {
   stageType: ScoringStageType | null;
+  meetingId: string;
   meetingSummary: string | null;
   meetingScore: unknown;
   repScore: unknown;
@@ -132,12 +134,14 @@ function ListBlock({ label, items, icon, variant }: { label: string; items: stri
 
 export function IntelligenceTabs({
   stageType,
+  meetingId,
   meetingSummary,
   meetingScore,
   repScore,
   internalSummary,
 }: IntelligenceTabsProps) {
   const tabs = getTabs(stageType);
+  const { notes, refetch } = useMeetingNotes(meetingId);
 
   return (
     <Tabs defaultValue="summary">
@@ -179,6 +183,7 @@ export function IntelligenceTabs({
                 is={internalSummary as InternalSummary | null}
               />
             )}
+            <MeetingNotes meetingId={meetingId} section="summary" allNotes={notes} onNoteAdded={refetch} />
           </CardContent>
         </Card>
       </TabsContent>
@@ -187,6 +192,7 @@ export function IntelligenceTabs({
         <Card>
           <CardContent className="p-4">
             <CoachingContent stageType={stageType} repScore={repScore} />
+            <MeetingNotes meetingId={meetingId} section="coaching" allNotes={notes} onNoteAdded={refetch} />
           </CardContent>
         </Card>
       </TabsContent>
@@ -199,6 +205,7 @@ export function IntelligenceTabs({
                 <ActionItemsList
                   items={(internalSummary as InternalSummary | null)?.action_items}
                 />
+                <MeetingNotes meetingId={meetingId} section="actions" allNotes={notes} onNoteAdded={refetch} />
               </CardContent>
             </Card>
           </TabsContent>
@@ -208,6 +215,7 @@ export function IntelligenceTabs({
                 <DecisionsList
                   decisions={(internalSummary as InternalSummary | null)?.decisions_made}
                 />
+                <MeetingNotes meetingId={meetingId} section="decisions" allNotes={notes} onNoteAdded={refetch} />
               </CardContent>
             </Card>
           </TabsContent>
@@ -217,6 +225,7 @@ export function IntelligenceTabs({
                 <ClientRefsList
                   refs={(internalSummary as InternalSummary | null)?.client_references}
                 />
+                <MeetingNotes meetingId={meetingId} section="clients" allNotes={notes} onNoteAdded={refetch} />
               </CardContent>
             </Card>
           </TabsContent>

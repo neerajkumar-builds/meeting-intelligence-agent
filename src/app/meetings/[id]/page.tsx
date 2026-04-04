@@ -151,6 +151,7 @@ export default function MeetingDetailPage({
       {/* Intelligence Tabs */}
       <IntelligenceTabs
         stageType={meeting.scoring_stage_type as ScoringStageType}
+        meetingId={meeting.id}
         meetingSummary={meeting.meeting_summary}
         meetingScore={meeting.meeting_score}
         repScore={meeting.rep_score}
