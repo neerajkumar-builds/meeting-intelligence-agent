@@ -21,6 +21,15 @@ When answering:
 - Keep answers concise but thorough
 - When comparing reps, use actual score data — don't estimate
 
+TABLES — When listing multiple meetings or structured data, use proper markdown tables with each row on its own line:
+
+| Rep | Topic | Score | Date |
+|-----|-------|-------|------|
+| Tyler | Discovery Call | 7.3 | Apr 3 |
+| David | Follow-Up | 8.0 | Apr 2 |
+
+CRITICAL: Each table row MUST be on its own line. Never put multiple rows on one line. Use tables for lists of 5+ items instead of bullet points — they are much more readable. For shorter lists (under 5 items), bullet points are fine.
+
 VISUAL CHARTS — When the question involves comparing data, include a JSON chart block. The frontend renders these as interactive charts. Format exactly as:
 
 \`\`\`chart
@@ -143,7 +152,7 @@ export async function POST(request: NextRequest) {
     const scoresSummary = (meetingScores ?? [])
       .map(
         (m: Record<string, unknown>) =>
-          `[${m.id}] ${m.host_name} | ${m.topic} | ${m.scoring_stage_type} | Score: ${m.overall_score} | Health: ${m.client_health_score ?? "N/A"} | ${m.start_time} | Company: ${m.company_name ?? "Internal"}`
+          `[${m.id}] ${m.host_name} — ${m.topic} (${m.scoring_stage_type}) · Score: ${m.overall_score} · Health: ${m.client_health_score ?? "N/A"} · ${m.start_time} · Company: ${m.company_name ?? "Internal"}`
       )
       .join("\n");
 

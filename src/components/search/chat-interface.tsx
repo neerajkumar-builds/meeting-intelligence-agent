@@ -5,7 +5,6 @@ import { ChatMessage } from "./chat-message";
 import { ChatInput } from "./chat-input";
 import { SuggestedPrompts } from "./suggested-prompts";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { logChatEvent } from "@/lib/analytics";
@@ -51,9 +50,17 @@ function getSessionId(): string {
 }
 
 export function ChatInterface({ initialQuery }: { initialQuery?: string }) {
-  const [messages, setMessages] = useState<Message[]>(() =>
-    initialQuery ? [] : loadMessages()
-  );
+  const [messages, setMessages] = useState<Message[]>(() => {
+    // If initialQuery matches the first user message in localStorage, restore it
+    // Otherwise start fresh (new query from "Ask Blarney" button)
+    if (initialQuery) {
+      const stored = loadMessages();
+      const firstUserMsg = stored.find(m => m.role === "user");
+      if (firstUserMsg && firstUserMsg.content === initialQuery) return stored;
+      return [];
+    }
+    return loadMessages();
+  });
   const [isStreaming, setIsStreaming] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -229,7 +236,7 @@ export function ChatInterface({ initialQuery }: { initialQuery?: string }) {
         {messages.length === 0 ? (
           <SuggestedPrompts onSelect={sendMessage} />
         ) : (
-          <ScrollArea className="h-full" ref={scrollRef}>
+          <div className="h-full overflow-y-auto" ref={scrollRef}>
             <div className="max-w-3xl mx-auto px-4 pb-4">
               {messages.map((message) => (
                 <ChatMessage
@@ -247,7 +254,7 @@ export function ChatInterface({ initialQuery }: { initialQuery?: string }) {
                 />
               ))}
             </div>
-          </ScrollArea>
+          </div>
         )}
       </div>
 

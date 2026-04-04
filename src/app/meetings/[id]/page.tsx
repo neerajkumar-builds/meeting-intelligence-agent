@@ -13,7 +13,7 @@ import { useMeetingDetail } from "@/lib/hooks/use-meeting-detail";
 import { formatDateTime, formatDuration } from "@/lib/utils/format";
 import { useRouter } from "next/navigation";
 import { IntelligenceSidebar } from "@/components/companies/intelligence-sidebar";
-import { ExternalLink, ArrowLeft, Sparkles } from "lucide-react";
+import { ExternalLink, ArrowLeft, Sparkles, Play, Video } from "lucide-react";
 import type { ScoringStageType } from "@/lib/constants";
 
 export default function MeetingDetailPage({
@@ -147,6 +147,34 @@ export default function MeetingDetailPage({
         clientHealthScore={meeting.client_health_score}
         overallScore={meeting.overall_score}
       />
+
+      {/* Recording Banner */}
+      {meeting.recording_url && (
+        <a
+          href={meeting.recording_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group block rounded-xl bg-gradient-to-r from-[#0B0E14] to-[#131820] border border-white/10 overflow-hidden hover:border-[#2D8CFF]/40 transition-all duration-300"
+        >
+          <div className="flex items-center gap-4 px-5 py-4">
+            <div className="relative shrink-0">
+              <div className="h-11 w-11 rounded-full bg-[#2D8CFF]/15 flex items-center justify-center group-hover:bg-[#2D8CFF]/25 transition-colors">
+                <Play className="h-5 w-5 text-[#2D8CFF] ml-0.5" />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white/90">Watch Recording</p>
+              <p className="text-xs text-white/40 mt-0.5">
+                {meeting.topic} · {meeting.duration_minutes ? `${meeting.duration_minutes} min` : ""}
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <Video className="h-3.5 w-3.5 text-[#2D8CFF]/60" />
+              <span className="text-[10px] text-white/30 font-medium uppercase tracking-wider">Zoom</span>
+            </div>
+          </div>
+        </a>
+      )}
 
       {/* Intelligence Tabs */}
       <IntelligenceTabs

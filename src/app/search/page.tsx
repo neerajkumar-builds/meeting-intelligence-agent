@@ -8,7 +8,7 @@ export default function AISearchPage() {
   const initialQuery = searchParams.get("q") ?? undefined;
 
   return (
-    <div className="h-[calc(100vh-3.5rem-2rem)]">
+    <div className="h-[calc(100vh-3.5rem-2rem)] md:h-[calc(100vh-3.5rem-3rem)]">
       <ChatInterface initialQuery={initialQuery} />
     </div>
   );

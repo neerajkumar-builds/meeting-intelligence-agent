@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, Tooltip, AreaChart, Area } from "recharts";
 import { cn } from "@/lib/utils";
 import { BrandTooltip } from "@/components/shared/chart-tooltip";
@@ -46,6 +47,61 @@ function getExportText(rawContent: string): string {
   return text.trim();
 }
 
+/** Fix pipe tables where all rows are on a single line */
+function fixSingleLineTables(text: string): string {
+  return text.split("\n").map(line => {
+    // Detect table separator: |---|---| pattern with 2+ columns
+    const sepMatch = line.match(/\|(\s*:?-+:?\s*\|){2,}/);
+    if (!sepMatch) return line;
+
+    const sepStr = sepMatch[0];
+    const sepIdx = line.indexOf(sepStr);
+    const beforeSep = line.substring(0, sepIdx).trim();
+    const rowsStr = line.substring(sepIdx + sepStr.length).trim();
+
+    if (!beforeSep || !rowsStr || !beforeSep.includes("|")) return line;
+
+    // Count columns from separator
+    const colCount = sepStr.split("|").filter((s: string) => s.trim()).length;
+    if (colCount < 2) return line;
+    const pipesPerRow = colCount + 1;
+
+    // Extract just the table header — count pipes backward from the separator
+    // Title text like "Meeting Topics (April 2-3)" comes before the actual header pipes
+    const headerPipes: number[] = [];
+    for (let i = 0; i < beforeSep.length; i++) {
+      if (beforeSep[i] === "|") headerPipes.push(i);
+    }
+
+    let titleText = "";
+    let actualHeader = beforeSep;
+    if (headerPipes.length >= pipesPerRow) {
+      const headerStart = headerPipes[headerPipes.length - pipesPerRow];
+      titleText = beforeSep.substring(0, headerStart).trim();
+      actualHeader = beforeSep.substring(headerStart).trim();
+    }
+
+    // Split data rows by pipe counting — each row has pipesPerRow pipes
+    const rowPipes: number[] = [];
+    for (let i = 0; i < rowsStr.length; i++) {
+      if (rowsStr[i] === "|") rowPipes.push(i);
+    }
+
+    const rows: string[] = [];
+    for (let i = 0; i + pipesPerRow <= rowPipes.length; i += pipesPerRow) {
+      rows.push(rowsStr.substring(rowPipes[i], rowPipes[i + pipesPerRow - 1] + 1).trim());
+    }
+
+    if (rows.length === 0) return line;
+
+    // Build output — blank line between title and table so ReactMarkdown separates them
+    const parts: string[] = [];
+    if (titleText) parts.push(titleText, "");
+    parts.push(actualHeader, sepStr.trim(), ...rows);
+    return parts.join("\n");
+  }).join("\n");
+}
+
 export function ChatMessage({ role, content, isStreaming, onFollowUp, sessionId, userEmail }: ChatMessageProps) {
   const [copied, setCopied] = useState(false);
   const [feedback, setFeedback] = useState<"up" | "down" | null>(null);
@@ -77,14 +133,17 @@ export function ChatMessage({ role, content, isStreaming, onFollowUp, sessionId,
       >
         {role === "assistant" ? (
           (() => {
-            // Extract sources block from content
-            const sourcesMatch = content.match(/```sources\n([\s\S]*?)```/);
+            // Pre-process: ensure fenced code block markers are on their own line
+            // Claude sometimes outputs ```chart or ```sources inline without a preceding newline
+            let cleanContent = content.replace(/([^\n])(```)/g, "$1\n$2");
+
+            // Extract sources block
+            const sourcesMatch = cleanContent.match(/```sources\n([\s\S]*?)```/);
             let sources: { topic: string; rep: string; date: string; company?: string; id: string; score?: number }[] = [];
-            let cleanContent = content;
             if (sourcesMatch) {
               try {
                 sources = JSON.parse(sourcesMatch[1].trim());
-                cleanContent = content.replace(/```sources\n[\s\S]*?```/, "").trim();
+                cleanContent = cleanContent.replace(/```sources\n[\s\S]*?```/, "").trim();
               } catch {
                 // Invalid sources JSON — ignore
               }
@@ -101,9 +160,14 @@ export function ChatMessage({ role, content, isStreaming, onFollowUp, sessionId,
                 // Invalid followups JSON — ignore
               }
             }
+
+            // Fix pipe tables where all rows are on a single line
+            cleanContent = fixSingleLineTables(cleanContent);
+
             return <>
             <div className="text-sm leading-relaxed">
               <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
                 components={{
                   p: ({ children }) => (
                     <p className="mb-3 last:mb-0">{children}</p>
@@ -137,6 +201,15 @@ export function ChatMessage({ role, content, isStreaming, onFollowUp, sessionId,
                   code: ({ children, className }) => {
                     // Detect chart blocks from the AI
                     if (className?.includes("language-chart")) {
+                      // During streaming, chart JSON may be incomplete — show placeholder
+                      if (isStreaming) {
+                        return (
+                          <div className="my-3 rounded-lg border bg-muted/50 p-4 text-xs text-muted-foreground flex items-center gap-2">
+                            <span className="inline-block w-3 h-3 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                            Generating chart...
+                          </div>
+                        );
+                      }
                       try {
                         const chartData = JSON.parse(String(children).trim());
                         const CHART_COLORS = ["#146DFA", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444", "#94a3b8", "#ec4899", "#06b6d4"];
@@ -151,7 +224,7 @@ export function ChatMessage({ role, content, isStreaming, onFollowUp, sessionId,
                                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
                                   <XAxis dataKey="label" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
                                   <YAxis domain={[0, Math.ceil(maxVal * 1.2)]} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                                  <Tooltip content={<BrandTooltip />} />
+                                  <Tooltip content={<BrandTooltip />} cursor={{ fill: "transparent" }} />
                                   <Bar dataKey="value" fill="#146DFA" radius={[4, 4, 0, 0]} barSize={32} />
                                 </BarChart>
                               </ResponsiveContainer>
