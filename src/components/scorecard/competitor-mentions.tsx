@@ -4,21 +4,21 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/lib/supabase/client";
-import { COMPETITORS } from "@/lib/constants";
-import { Swords, ExternalLink } from "lucide-react";
+import { TRACKED_VENDORS } from "@/lib/constants";
+import { Radar, ExternalLink } from "lucide-react";
 
-interface CompetitorMention {
-  competitor: string;
+interface VendorMention {
+  vendor: string;
   meetingId: string;
   topic: string;
   hostName: string;
   companyName: string | null;
-  startTime: string;
+  stagetype: string | null;
   snippet: string;
 }
 
 export function CompetitorMentions() {
-  const [mentions, setMentions] = useState<CompetitorMention[]>([]);
+  const [mentions, setMentions] = useState<VendorMention[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,86 +26,86 @@ export function CompetitorMentions() {
   }, []);
 
   async function findMentions() {
-    // Search transcript chunks for competitor names
-    const results: CompetitorMention[] = [];
+    const results: VendorMention[] = [];
 
-    // Batch search — query chunks that contain any competitor name
-    // Use a broad ILIKE search for efficiency
-    const searchTerms = COMPETITORS.slice(0, 15); // Top 15 to avoid huge queries
-
-    for (const term of searchTerms) {
+    for (const term of TRACKED_VENDORS) {
       const { data } = await supabase
         .from("meeting_chunks")
         .select("id, meeting_id, chunk_text, metadata")
         .ilike("chunk_text", `%${term}%`)
-        .limit(3);
+        .limit(5);
 
       if (data) {
         for (const chunk of data) {
           const meta = chunk.metadata as Record<string, unknown> | null;
-          // Extract a short snippet around the mention
+          const stageType = meta?.scoring_stage_type as string ?? meta?.stage_type as string ?? null;
+
+          // Skip internal meetings — only track vendor mentions in client calls
+          if (stageType === "internal") continue;
+
           const text = chunk.chunk_text as string;
           const idx = text.toLowerCase().indexOf(term.toLowerCase());
-          const start = Math.max(0, idx - 60);
-          const end = Math.min(text.length, idx + term.length + 60);
+          if (idx === -1) continue;
+          const start = Math.max(0, idx - 50);
+          const end = Math.min(text.length, idx + term.length + 50);
           const snippet = (start > 0 ? "..." : "") + text.slice(start, end).trim() + (end < text.length ? "..." : "");
 
           results.push({
-            competitor: term,
+            vendor: term,
             meetingId: meta?.meeting_id as string ?? chunk.meeting_id,
             topic: meta?.topic as string ?? "Unknown",
             hostName: meta?.host_name as string ?? "Unknown",
             companyName: meta?.company_name as string ?? null,
-            startTime: meta?.start_time as string ?? "",
+            stagetype: stageType,
             snippet,
           });
         }
       }
     }
 
-    // Deduplicate by competitor + meetingId
+    // Deduplicate by vendor + meetingId
     const seen = new Set<string>();
     const unique = results.filter((r) => {
-      const key = `${r.competitor}-${r.meetingId}`;
+      const key = `${r.vendor}-${r.meetingId}`;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     });
 
-    // Sort by most recent
-    unique.sort((a, b) => (b.startTime ?? "").localeCompare(a.startTime ?? ""));
+    // Only keep mentions from meetings with a company (external)
+    const external = unique.filter((r) => r.companyName && r.companyName !== "");
 
-    setMentions(unique.slice(0, 10));
+    external.sort((a, b) => b.topic.localeCompare(a.topic));
+    setMentions(external.slice(0, 12));
     setLoading(false);
   }
 
   if (loading) return null;
   if (mentions.length === 0) return null;
 
-  // Group by competitor
-  const grouped = new Map<string, CompetitorMention[]>();
+  const grouped = new Map<string, VendorMention[]>();
   for (const m of mentions) {
-    const list = grouped.get(m.competitor) ?? [];
+    const list = grouped.get(m.vendor) ?? [];
     list.push(m);
-    grouped.set(m.competitor, list);
+    grouped.set(m.vendor, list);
   }
 
   return (
     <Card>
       <CardContent className="p-6">
         <div className="flex items-center gap-2 mb-4">
-          <Swords className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-semibold">Competitor Mentions</h3>
+          <Radar className="h-4 w-4 text-primary" />
+          <h3 className="text-sm font-semibold">Tools & Vendor Mentions</h3>
           <span className="text-xs text-muted-foreground ml-auto">
-            {mentions.length} mention{mentions.length !== 1 ? "s" : ""} found
+            from client meetings
           </span>
         </div>
 
         <div className="space-y-3">
-          {Array.from(grouped.entries()).map(([competitor, items]) => (
-            <div key={competitor} className="rounded-lg border p-3">
+          {Array.from(grouped.entries()).map(([vendor, items]) => (
+            <div key={vendor} className="rounded-lg border p-3">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">{competitor}</span>
+                <span className="text-sm font-medium">{vendor}</span>
                 <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
                   {items.length} mention{items.length !== 1 ? "s" : ""}
                 </span>

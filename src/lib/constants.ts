@@ -64,10 +64,14 @@ export const SUGGESTED_PROMPTS = [
   "What's the breakdown of meeting stages across all reps?",
 ];
 
-export const COMPETITORS = [
-  "Gong", "Chorus", "Salesloft", "Outreach", "Apollo", "6Sense", "6sense",
-  "ZoomInfo", "Clari", "Fireflies", "Fathom", "Granola", "Sybill",
-  "HubSpot", "Salesforce", "Pardot", "Marketo", "Drift", "Intercom",
-  "Clay", "Instantly", "Lemlist", "Lavender", "Regie", "Orum",
-  "Definitive Healthcare", "Conversica", "HeyReach",
+// Vendors/tools to track in CLIENT meeting transcripts (excludes internal meetings)
+// Excludes FullFunnel's own stack (Clay, HubSpot, HeyReach, Instantly) to focus
+// on what prospects/clients are using or evaluating
+export const TRACKED_VENDORS = [
+  "Gong", "Chorus", "Salesloft", "Outreach", "Apollo",
+  "6Sense", "6sense", "ZoomInfo", "Clari",
+  "Salesforce", "Pardot", "Marketo", "Drift", "Intercom",
+  "Definitive Healthcare", "Conversica",
+  "Lemlist", "Lavender", "Regie", "Orum",
+  "HubSpot", "Clay", "HeyReach", "Instantly",
 ];
