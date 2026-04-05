@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   CalendarDays,
   Building2,
+  Users,
   Search,
   Activity,
 } from "lucide-react";
@@ -16,6 +17,7 @@ const ICON_MAP = {
   LayoutDashboard,
   CalendarDays,
   Building2,
+  Users,
   Search,
   Activity,
 } as const;

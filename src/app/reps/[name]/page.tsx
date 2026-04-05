@@ -26,6 +26,7 @@ import { formatScore } from "@/lib/utils/format";
 import { getStageLabel } from "@/lib/utils/stage";
 import { STAGE_CONFIG, type ScoringStageType } from "@/lib/constants";
 import { CoachingSummary } from "@/components/reps/coaching-summary";
+import { InternalInsightsSummary } from "@/components/reps/internal-insights-summary";
 import { ArrowLeft, User, TrendingUp, TrendingDown, Sparkles, ExternalLink, SlidersHorizontal } from "lucide-react";
 import { parseISO, startOfWeek, format } from "date-fns";
 
@@ -151,8 +152,8 @@ export default function RepProfilePage({
   if (!stats) {
     return (
       <div>
-        <Link href="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
-          <ArrowLeft className="h-4 w-4" /> Back to scorecard
+        <Link href="/reps" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
+          <ArrowLeft className="h-4 w-4" /> Back to reps
         </Link>
         <EmptyState icon={User} title={`No meetings for ${repName}`} description="No scored meetings found for this rep." />
       </div>
@@ -170,8 +171,8 @@ export default function RepProfilePage({
 
   return (
     <div className="space-y-5">
-      <Link href="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> Back to scorecard
+      <Link href="/reps" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+        <ArrowLeft className="h-4 w-4" /> Back to reps
       </Link>
 
       {/* Header */}
@@ -304,8 +305,11 @@ export default function RepProfilePage({
         </Card>
       </div>
 
-      {/* Coaching Insights — from scored_meetings rep_score JSONB (read-only) */}
+      {/* Coaching Insights - from scored_meetings rep_score JSONB (read-only) */}
       <CoachingSummary repName={repName} />
+
+      {/* Internal Meeting Insights - from scored_meetings internal_summary JSONB (read-only) */}
+      <InternalInsightsSummary repName={repName} />
 
       {/* Meetings — with filters */}
       <div>

@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useRepCoaching, type CoachingInsight } from "@/lib/hooks/use-rep-coaching";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
-import { Target, AlertTriangle, Eye, Lightbulb, TrendingUp, ChevronDown, ExternalLink } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Target, AlertTriangle, Eye, Lightbulb, TrendingUp, ChevronDown, ExternalLink, Sparkles } from "lucide-react";
 
 interface CoachingSummaryProps {
   repName: string;
@@ -18,6 +20,8 @@ const SECTIONS = [
   { key: "recommendations" as const, label: "Coaching Tips", icon: Lightbulb, accent: "border-l-blue-500", iconColor: "text-blue-500", bg: "bg-blue-500/5" },
   { key: "dealProgressions" as const, label: "Deal Progression", icon: TrendingUp, accent: "border-l-purple-500", iconColor: "text-purple-500", bg: "bg-purple-500/5" },
 ] as const;
+
+type SectionKey = typeof SECTIONS[number]["key"];
 
 const PRIMARY_KEYS = new Set(["strengths", "improvements"]);
 
@@ -53,6 +57,8 @@ function InsightRow({ insight }: { insight: CoachingInsight }) {
 export function CoachingSummary({ repName }: CoachingSummaryProps) {
   const { data: coaching, isLoading, error } = useRepCoaching(repName);
   const [expanded, setExpanded] = useState(false);
+  const [modalKey, setModalKey] = useState<SectionKey | null>(null);
+  const router = useRouter();
 
   if (isLoading) {
     return (
@@ -75,6 +81,10 @@ export function CoachingSummary({ repName }: CoachingSummaryProps) {
   const secondarySections = activeSections.filter((s) => !PRIMARY_KEYS.has(s.key));
   const visibleSections = expanded ? activeSections : primarySections;
 
+  // Data for the modal
+  const modalSection = modalKey ? SECTIONS.find((s) => s.key === modalKey) : null;
+  const modalItems = modalKey ? coaching[modalKey] : [];
+
   return (
     <div>
       <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
@@ -92,7 +102,13 @@ export function CoachingSummary({ repName }: CoachingSummaryProps) {
                 <div className="flex items-center gap-2 mb-1.5">
                   <Icon className={`h-3.5 w-3.5 ${section.iconColor}`} />
                   <p className="text-xs font-semibold">{section.label}</p>
-                  <span className="text-[10px] text-muted-foreground ml-auto">{items.length}</span>
+                  <button
+                    onClick={() => setModalKey(section.key)}
+                    className="text-[10px] text-primary hover:underline ml-auto"
+                    title={`View all ${items.length} ${section.label.toLowerCase()}`}
+                  >
+                    {items.length} insights
+                  </button>
                 </div>
                 <ul className="space-y-1.5">
                   {display.map((insight, i) => (
@@ -116,6 +132,48 @@ export function CoachingSummary({ repName }: CoachingSummaryProps) {
           }
         </button>
       )}
+
+      {/* View All Modal */}
+      <Dialog open={modalKey !== null} onOpenChange={(open) => { if (!open) setModalKey(null); }}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            {modalSection && (
+              <DialogTitle className="flex items-center gap-2">
+                <modalSection.icon className={`h-4 w-4 ${modalSection.iconColor}`} />
+                {modalSection.label}
+                <span className="text-sm font-normal text-muted-foreground">({modalItems.length} insights)</span>
+              </DialogTitle>
+            )}
+          </DialogHeader>
+          <ul className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+            {modalItems.map((insight, i) => (
+              <li key={i} className="text-sm leading-relaxed border-b border-border/50 pb-3 last:border-0">
+                <p className="text-muted-foreground">{cleanText(insight.text)}</p>
+                <Link
+                  href={`/meetings/${insight.meetingId}`}
+                  className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-1"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  {insight.topic}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          {modalSection && modalItems.length >= 3 && (
+            <button
+              onClick={() => {
+                setModalKey(null);
+                const query = encodeURIComponent(`Summarize the top patterns from ${repName}'s ${modalSection.label.toLowerCase()} across all ${modalItems.length} meetings. Be specific with examples.`);
+                router.push(`/search?q=${query}`);
+              }}
+              className="flex items-center justify-center gap-1.5 w-full rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              Summarize patterns with Ask Blarney
+            </button>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
