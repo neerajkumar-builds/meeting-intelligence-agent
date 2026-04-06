@@ -25,17 +25,22 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: "title and body are required" }, { status: 400 });
     }
 
-    // Build Slack Block Kit blocks
+    // Build Slack Block Kit blocks — split long content into multiple sections (max 3000 chars each)
     const blocks: Record<string, unknown>[] = [
       {
         type: "header",
         text: { type: "plain_text", text: payload.title.slice(0, 150), emoji: true },
       },
-      {
-        type: "section",
-        text: { type: "mrkdwn", text: payload.body.slice(0, 2800) },
-      },
     ];
+
+    const BLOCK_LIMIT = 2800;
+    const body = payload.body;
+    for (let i = 0; i < body.length && blocks.length < 48; i += BLOCK_LIMIT) {
+      blocks.push({
+        type: "section",
+        text: { type: "mrkdwn", text: body.slice(i, i + BLOCK_LIMIT) },
+      });
+    }
 
     if (payload.meetingUrl) {
       blocks.push({

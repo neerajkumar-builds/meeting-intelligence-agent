@@ -154,7 +154,7 @@ export default function MeetingDetailPage({
           href={meeting.recording_url}
           target="_blank"
           rel="noopener noreferrer"
-          className="group block rounded-xl bg-gradient-to-r from-[#0B0E14] to-[#131820] border border-white/10 overflow-hidden hover:border-[#2D8CFF]/40 transition-all duration-300"
+          className="group block rounded-xl bg-gradient-to-r from-[#0B0E14] to-[#131820] border border-black/20 dark:border-white/10 shadow-sm overflow-hidden hover:border-[#2D8CFF]/40 transition-all duration-300"
         >
           <div className="flex items-center gap-0">
             {/* Video thumbnail placeholder */}
@@ -196,7 +196,7 @@ export default function MeetingDetailPage({
       />
 
       {/* Transcript */}
-      <TranscriptViewer transcript={meeting.transcript_text} />
+      <TranscriptViewer transcript={meeting.transcript_text} meetingTopic={meeting.topic ?? undefined} />
       </div>
 
       {/* Intelligence Sidebar — only for external meetings with a company */}
