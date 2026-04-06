@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "@/lib/providers";
 import { ConditionalShell } from "@/components/layout/conditional-shell";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/react";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -40,6 +41,7 @@ export default function RootLayout({
         <Providers>
           <ConditionalShell>{children}</ConditionalShell>
           <Toaster position="bottom-right" richColors closeButton />
+          <Analytics />
         </Providers>
       </body>
     </html>

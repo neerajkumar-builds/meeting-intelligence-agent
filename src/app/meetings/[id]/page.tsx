@@ -156,21 +156,30 @@ export default function MeetingDetailPage({
           rel="noopener noreferrer"
           className="group block rounded-xl bg-gradient-to-r from-[#0B0E14] to-[#131820] border border-white/10 overflow-hidden hover:border-[#2D8CFF]/40 transition-all duration-300"
         >
-          <div className="flex items-center gap-4 px-5 py-4">
-            <div className="relative shrink-0">
-              <div className="h-11 w-11 rounded-full bg-[#2D8CFF]/15 flex items-center justify-center group-hover:bg-[#2D8CFF]/25 transition-colors">
-                <Play className="h-5 w-5 text-[#2D8CFF] ml-0.5" />
+          <div className="flex items-center gap-0">
+            {/* Video thumbnail placeholder */}
+            <div className="relative shrink-0 w-[140px] h-[80px] bg-gradient-to-br from-[#1a1f2e] to-[#0d1117] flex items-center justify-center border-r border-white/5">
+              <div className="h-10 w-10 rounded-full bg-[#2D8CFF]/20 flex items-center justify-center group-hover:bg-[#2D8CFF]/30 group-hover:scale-110 transition-all">
+                <Play className="h-4 w-4 text-[#2D8CFF] ml-0.5" />
               </div>
+              {meeting.duration_minutes && (
+                <span className="absolute bottom-1.5 right-1.5 text-[9px] font-medium text-white/70 bg-black/60 px-1.5 py-0.5 rounded">
+                  {meeting.duration_minutes}m
+                </span>
+              )}
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white/90">Watch Recording</p>
-              <p className="text-xs text-white/40 mt-0.5">
-                {meeting.topic} · {meeting.duration_minutes ? `${meeting.duration_minutes} min` : ""}
-              </p>
-            </div>
-            <div className="flex items-center gap-1.5 shrink-0">
-              <Video className="h-3.5 w-3.5 text-[#2D8CFF]/60" />
-              <span className="text-[10px] text-white/30 font-medium uppercase tracking-wider">Zoom</span>
+            {/* Details */}
+            <div className="flex items-center gap-4 flex-1 min-w-0 px-4 py-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white/90">Watch Recording</p>
+                <p className="text-xs text-white/40 mt-0.5 truncate">
+                  {meeting.topic}
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <Video className="h-3.5 w-3.5 text-[#2D8CFF]/60" />
+                <span className="text-[10px] text-white/30 font-medium uppercase tracking-wider">Zoom</span>
+              </div>
             </div>
           </div>
         </a>
