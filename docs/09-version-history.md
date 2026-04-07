@@ -265,6 +265,205 @@ Analytics, rate limiting, RAG performance optimization, and collaborative meetin
 
 ---
 
+## V1.4 -- Scorecard Redesign + Reps Hub + Polish Pass
+
+**Commits:** `9851bc3` through `1dc637f`
+
+Major UX upgrades to the scorecard, a new dedicated reps section with coaching insights, and a comprehensive polish pass driven by user testing. This release happened across April 4-7, 2026 - all after the V1.3 documentation was committed.
+
+### Scorecard Redesign
+
+**Commit:** `9851bc3`
+
+Complete visual overhaul of the home/scorecard page.
+
+**KPI Cards:**
+- Colored top accents based on metric status (blue/green/amber/red)
+- Week-over-week deltas on ALL 4 cards (was previously only Avg Score)
+- Score progress bars under Avg Score and Avg Health
+- Pulsing red dot on At-Risk indicator when count > 0
+- "All healthy" green text when no at-risk accounts
+- Tighter padding, uppercase tracking labels
+
+**Weekly Briefing (replaces "Cross-Call Insights"):**
+- Narrative paragraph generated client-side from meeting data
+- Covers: score trend, top performer, at-risk accounts, rep movements
+- "Ask Blarney for more" link for deeper exploration
+
+**Smart Alerts Strip:**
+- Horizontal scrollable pill badges replacing 3 large colored insight blocks
+- Only shows changes (rep score drops/rises, at-risk, new meetings)
+- Each alert is clickable - links to rep profile or company detail
+- Saves ~80px vertical space vs old insights section
+
+### Ask Blarney Fixes
+
+**Commit:** `2a5e449`
+
+Fixes to chat rendering, scroll behavior, and persistence.
+
+- Added `remark-gfm` plugin so ReactMarkdown renders pipe tables as HTML tables
+- Added `fixSingleLineTables()` fallback for single-line table output from Claude
+- Fenced code blocks (```chart/sources/followups) now start on own line
+- "Generating chart..." placeholder during streaming instead of error flash
+- Replaced ScrollArea with plain div for working auto-scroll-to-bottom
+- Fixed double scrollbar with responsive height calc (md breakpoint)
+- Smart `initialQuery` dedup - restores from localStorage on browser back
+- Changed RAG score context from pipe-separated to dash-separated format
+- Added Zoom recording banner on meeting detail page (FIRST appearance)
+- Fixed cursor on bar chart tooltip hover
+
+### UI/UX Audit Fixes (Large Polish Pass)
+
+**Commit:** `9b61d23`
+
+17 distinct fixes from a user-driven UI/UX audit:
+
+- Replaced dev error messages (API key names) with user-friendly text
+- Fixed "Back to companies" link on company detail page
+- Chat errors show as red banner with icon, not AI chat bubbles
+- Added sign-out confirmation dialog
+- Renamed nav "System" -> "System Health"
+- Added score scale labels ("/ 10") with tooltip on scorecard KPIs
+- "Showing X of Y" indicator when filters active on meetings + companies
+- Improved Ask Blarney placeholder text with specific examples
+- Meeting detail sidebar stacks on mobile (`flex-col lg:flex-row`)
+- Companies filter bar wraps on mobile (`flex-col sm:flex-row`)
+- Intelligence tab labels icon-only on mobile (`hidden sm:inline`)
+- Responsive donut chart sizing (120px mobile, 160px desktop)
+- Post-login redirect preserves intended URL (`?redirect=/path`)
+- Login placeholder contrast improved (white/50), password toggle accessible
+- Code blocks use theme-aware `bg-zinc-900` instead of hardcoded `#0A0A0A`
+- Intelligence sidebar shows empty state instead of blank
+- Fixed duplicate key error on source citations
+
+### Rep Profile Upgrade
+
+**Commit:** `0745610`
+
+Major rewrite of the individual rep profile page.
+
+- Tinted KPI cards with colored top accents + score bars + "/ 10" labels
+- Stage filter + sort (date/score) added to meetings section
+- Show all meetings (removed `slice(0,10)` limit) with count
+- "Ask Blarney" button in header for quick coaching AI query
+- "View all in Meeting Feed" link → `/meetings?rep=RepName`
+- Larger charts (trend 200px, donut 120px)
+- Better "vs Team Avg" label, larger best/worst dots
+- Empty filter state messaging
+
+### Coaching Insights API
+
+**Commit:** `d964aea`
+
+New API endpoint and UI for rep coaching patterns.
+
+- New API route: `/api/reps/[name]/coaching` (READ-ONLY SELECT from `scored_meetings`)
+- Extracts `rep_score` JSONB: strengths, improvements, blind spots, recommendations, deal progression
+- Collapsed by default: shows Strengths + Improvements (1 truncated insight each)
+- "Show more" expands to all 5 categories with up to 3 insights each
+- Color-coded cards with left accent borders matching category severity
+- New `useRepCoaching` hook with 5-min React Query cache
+- New `CoachingSummary` component
+
+### Em Dash Removal + Numbered List Fix
+
+**Commit:** `48d9b66`
+
+User-driven fix to remove em dashes from all display strings.
+
+- Replaced em dashes with hyphens in 20+ user-visible strings
+- Added "NEVER use em dashes" instruction to AI system prompt
+- New `cleanText()` display transform for JSONB coaching data (NEVER modifies database)
+- Fixed `isNumberedList()` to detect inline numbering without newlines
+- Coaching insights now link to source meeting (API returns `meetingId` + `topic`)
+- Updated `format.ts` null fallbacks from "—" to "-"
+- Updated all tests to match new format
+
+**New pattern established:** `cleanText()` is the standard display-layer transform for any JSONB data we don't control. Don't modify Supabase data - clean it at render time.
+
+### Reps Index Page + Coaching Modal + Internal Insights
+
+**Commit:** `604f958`
+
+Major new feature: a dedicated `/reps` index page with table and card views.
+
+- New `/reps` page with table (default) and card view toggle
+- Table columns: name, meetings, avg score, vs team, health, last meeting
+- "Reps" added to sidebar nav under Analysis
+- Coaching "View all" modal - click insight count to see all with meeting links
+- "Summarize patterns with Ask Blarney" button in modal
+- Internal Meeting Insights for internal-focused reps (action items, decisions, client refs)
+- New API: `/api/reps/[name]/internal-insights` (READ-ONLY from `scored_meetings`)
+- New `useRepInternalInsights` hook
+- New `InternalInsightsSummary` component
+- Rep profile back link: "Back to scorecard" -> "Back to reps"
+
+### Vercel Analytics + Recording Thumbnail
+
+**Commit:** `943900d`
+
+- Installed `@vercel/analytics`, added `<Analytics />` to root layout
+- Recording banner now has video-player thumbnail (dark frame, play button, duration badge)
+- `BLOB_READ_WRITE_TOKEN` added to `.env.local` for future media storage
+  - Note: Token is configured but `@vercel/blob` package is NOT yet installed
+
+### Transcript Actions + Slack Full Content + Theme Fix
+
+**Commit:** `1dc637f`
+
+- Added Copy/Download/Slack buttons to transcript section header
+- Toast feedback via sonner for copy and download actions
+- Removed transcript truncation - sends full content to Slack
+- Slack API now splits long messages into multiple Block Kit sections (2800 chars each)
+- Recording banner border adapts to light/dark theme (`shadow-sm` in light mode)
+
+### Phase 0 - In Progress (Uncommitted)
+
+The following work is COMPLETE locally but not yet committed as of `1dc637f`:
+
+**Vendor Mentions Horizontal Bar Chart**
+- File: `src/components/scorecard/competitor-mentions.tsx`
+- Replaces text card grid with Recharts horizontal `BarChart`
+- Click-to-expand interaction shows meeting details for selected vendor
+- HSL color gradient (`hsl(217, 91%, 40-72%)`) for visual hierarchy
+- Wrapped in `ChartDownload` for PNG export
+- Theme fix: removed `stroke` from axes (SVG text uses `fill`)
+
+**MEDDIC Coverage Radar Chart**
+- File: `src/components/companies/intelligence-sidebar/meddic-section.tsx`
+- New `RadarChart` above existing MEDDIC dimension list
+- Custom `MeddicTooltip` shows dimension name + status (Known/Partial/Missing)
+- Status conversion: known=100, partial=50, missing=0
+- Short labels for narrow sidebar fit
+- Empty state: "No MEDDIC data discovered yet" if all 6 dimensions missing
+
+These will be committed as part of executing the first quality checkpoint plan (see `audit-baseline/03-execution-plan.md`).
+
+### New Routes / APIs Added in V1.4
+
+| Route | Type | Commit |
+|-------|------|--------|
+| `/reps` | Page | `604f958` |
+| `/api/reps/[name]/coaching` | API (READ) | `d964aea` |
+| `/api/reps/[name]/internal-insights` | API (READ) | `604f958` |
+
+The total API route count is now **11** (was 9 in V1.3).
+
+### New Packages Added in V1.4
+
+| Package | Version | Commit | Purpose |
+|---------|---------|--------|---------|
+| `@vercel/analytics` | `^2.0.1` | `943900d` | Page view tracking |
+
+`BLOB_READ_WRITE_TOKEN` env var was added but `@vercel/blob` package is NOT yet installed.
+
+### Test Count
+
+77 tests at V1.3, **still 77 at V1.4**. No new tests were added. This is a known gap that the first quality checkpoint identifies as finding F05.
+
+---
+
 ## Summary Table
 
 | Version | Commit(s) | Focus |
@@ -274,3 +473,4 @@ Analytics, rate limiting, RAG performance optimization, and collaborative meetin
 | V1.1 | `b03affe` | Slack, notifications, Company Intel sidebar, Cmd+K nav |
 | V1.2 | `b00a11f` | UI polish -- coaching colors, sparklines, chart export, login redesign |
 | V1.3 | `b176563` - `3a37572` | Ask Blarney rebrand, analytics, rate limits, RAG perf, meeting notes |
+| V1.4 | `9851bc3` - `1dc637f` | Scorecard redesign, Reps hub, coaching API, em dash removal, Vercel Analytics, transcript actions |
