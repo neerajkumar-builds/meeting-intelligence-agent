@@ -265,10 +265,10 @@ export async function POST(request: NextRequest) {
     }
     const contextBlock = contextParts.join("\n---\n");
 
-    // Step 5: Stream response
-    const anthropic = new Anthropic();
+    // Step 5: Call Claude with built-in retry (SDK retries 529/overloaded automatically)
+    const anthropic = new Anthropic({ maxRetries: 3 });
 
-    const messages: Anthropic.MessageParam[] = [
+    const messageParams: Anthropic.MessageParam[] = [
       ...history.slice(-16).map((msg) => ({
         role: msg.role as "user" | "assistant",
         content: msg.content,
@@ -284,17 +284,14 @@ export async function POST(request: NextRequest) {
       },
     ];
 
-    const stream = anthropic.messages.stream({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 4096,
-      system: RAG_SYSTEM_PROMPT,
-      messages,
-    });
-
-    // Await the HTTP connection — catches auth/rate-limit/payload errors
-    // inside the try/catch instead of letting them crash as unhandled stream errors
+    let response: Anthropic.Message;
     try {
-      await stream.withResponse();
+      response = await anthropic.messages.create({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 4096,
+        system: RAG_SYSTEM_PROMPT,
+        messages: messageParams,
+      });
     } catch (apiError) {
       console.error("Anthropic API error:", apiError);
       return Response.json(
@@ -302,6 +299,12 @@ export async function POST(request: NextRequest) {
         { status: 502 }
       );
     }
+
+    // Extract text from response
+    const responseText = response.content
+      .filter((block): block is Anthropic.TextBlock => block.type === "text")
+      .map((block) => block.text)
+      .join("");
 
     // Log query to analytics (fire-and-forget, never blocks response)
     supabase.from("chat_analytics").insert({
@@ -314,27 +317,28 @@ export async function POST(request: NextRequest) {
       latency_ms: Date.now() - startTime,
     }).then(() => {}, () => {});
 
-    // Wrap ReadableStream to handle mid-stream errors gracefully
-    // (e.g., Anthropic drops connection mid-response)
-    const sourceStream = stream.toReadableStream();
-    const safeStream = new ReadableStream({
-      async start(controller) {
-        const reader = sourceStream.getReader();
-        try {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            controller.enqueue(value);
-          }
-          controller.close();
-        } catch (err) {
-          console.error("Anthropic stream interrupted:", err);
-          controller.close();
-        }
+    // Stream the complete response to the client in the same format
+    // the frontend expects (Anthropic SSE events)
+    const encoder = new TextEncoder();
+    const sseStream = new ReadableStream({
+      start(controller) {
+        // Send content_block_start
+        controller.enqueue(encoder.encode(
+          JSON.stringify({ type: "content_block_start", index: 0, content_block: { type: "text", text: "" } }) + "\n"
+        ));
+        // Send the text as a single delta
+        controller.enqueue(encoder.encode(
+          JSON.stringify({ type: "content_block_delta", index: 0, delta: { type: "text_delta", text: responseText } }) + "\n"
+        ));
+        // Send message_stop
+        controller.enqueue(encoder.encode(
+          JSON.stringify({ type: "message_stop" }) + "\n"
+        ));
+        controller.close();
       },
     });
 
-    return new Response(safeStream, {
+    return new Response(sseStream, {
       headers: {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
