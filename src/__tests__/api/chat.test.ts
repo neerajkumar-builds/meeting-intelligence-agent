@@ -5,8 +5,9 @@ vi.mock("@anthropic-ai/sdk", () => {
   return {
     default: class MockAnthropic {
       messages = {
-        create: vi.fn().mockResolvedValue({
-          content: [{ type: "text", text: "Mock response" }],
+        stream: vi.fn().mockReturnValue({
+          withResponse: vi.fn().mockResolvedValue({ response: new Response(), request_id: null }),
+          toReadableStream: () => new ReadableStream(),
         }),
       };
     },
