@@ -77,20 +77,26 @@ interface ChatRequest {
   userEmail?: string;
 }
 
+// Rough token estimate: ~4 chars per token for English text
+function estimateTokens(text: string): number {
+  return Math.ceil(text.length / 4);
+}
+
+// Token budget — keeps total prompt under API rate limits
+// System prompt ~800 tokens, reserve ~4K for output, ~500 for user message + overhead
+const MAX_CONTEXT_TOKENS = 4500;
+
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
-  console.log("[chat] POST handler invoked");
   try {
     const body: ChatRequest = await request.json();
     const { message, history, sessionId, userEmail } = body;
-    console.log("[chat] parsed body, message length:", message?.length);
 
     if (!message) {
       return Response.json({ error: "Message is required" }, { status: 400 });
     }
 
     const supabase = createServerSupabase();
-    console.log("[chat] supabase client created");
 
     // Rate limiting -check daily + burst limits (silent skip if table doesn't exist)
     if (userEmail) {
@@ -130,9 +136,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Step 1: Embed query + fetch scores IN PARALLEL (scores don't depend on embedding)
-    console.log("[chat] starting embedding");
     const embedding = await embedQuery(message);
-    console.log("[chat] embedding done, got:", embedding ? "vector" : "null");
 
     // Dynamic chunk count based on query breadth
     const chunkCount = /compare|all reps|across|every|breakdown|overview/i.test(message) ? 15
@@ -155,16 +159,17 @@ export async function POST(request: NextRequest) {
       supabase.from("meetings_list").select("*").order("start_time", { ascending: false }),
     ]);
 
-    console.log("[chat] parallel fetch done, chunks:", chunks.length, "scores:", meetingScores?.length ?? 0);
-
-    // Cap to most recent 75 meetings to prevent prompt token overflow
-    const scoresSummary = (meetingScores ?? [])
-      .slice(0, 75)
-      .map(
-        (m: Record<string, unknown>) =>
-          `[${m.id}] ${m.host_name} -${m.topic} (${m.scoring_stage_type}) · Score: ${m.overall_score} · Health: ${m.client_health_score ?? "N/A"} · ${m.start_time} · Company: ${m.company_name ?? "Internal"}`
-      )
-      .join("\n");
+    // Build meeting scores summary with token budget
+    let tokensUsed = 0;
+    const scoreLines: string[] = [];
+    for (const m of (meetingScores ?? []) as Record<string, unknown>[]) {
+      const line = `[${m.id}] ${m.host_name} -${m.topic} (${m.scoring_stage_type}) · Score: ${m.overall_score} · Health: ${m.client_health_score ?? "N/A"} · ${m.start_time} · Company: ${m.company_name ?? "Internal"}`;
+      const lineTokens = estimateTokens(line);
+      if (tokensUsed + lineTokens > MAX_CONTEXT_TOKENS * 0.45) break; // 45% budget for scores
+      scoreLines.push(line);
+      tokensUsed += lineTokens;
+    }
+    const scoresSummary = scoreLines.join("\n");
 
     // Step 3: Fetch JSONB coaching/intelligence for matched meetings
     const matchedMeetingIds = new Set<string>();
@@ -173,6 +178,9 @@ export async function POST(request: NextRequest) {
       if (typeof mid === "string") matchedMeetingIds.add(mid);
     }
 
+    // Build intelligence block with token budget (35% of budget)
+    const intelBudget = MAX_CONTEXT_TOKENS * 0.35;
+    let intelTokens = 0;
     let intelligenceBlock = "";
     if (matchedMeetingIds.size > 0) {
       const { data: fullMeetings } = await supabase
@@ -183,66 +191,79 @@ export async function POST(request: NextRequest) {
         .in("id", Array.from(matchedMeetingIds));
 
       if (fullMeetings) {
-        intelligenceBlock = fullMeetings
-          .map((m: Record<string, unknown>) => {
-            const parts = [`\n### ${m.topic} (${m.host_name}, ${m.start_time})`];
+        const intelParts: string[] = [];
+        for (const m of fullMeetings as Record<string, unknown>[]) {
+          const parts = [`\n### ${m.topic} (${m.host_name}, ${m.start_time})`];
 
-            if (m.rep_score && typeof m.rep_score === "object") {
-              const rs = m.rep_score as Record<string, unknown>;
-              if (rs.strengths) parts.push(`**Strengths:** ${rs.strengths}`);
-              if (rs.areas_for_improvement) parts.push(`**Areas for Improvement:** ${rs.areas_for_improvement}`);
-              if (rs.blind_spots) parts.push(`**Blind Spots:** ${rs.blind_spots}`);
-              if (rs.coaching_recommendations) parts.push(`**Coaching:** ${rs.coaching_recommendations}`);
-              if (rs.deal_progression_assessment) parts.push(`**Deal Progression:** ${rs.deal_progression_assessment}`);
-            }
+          if (m.rep_score && typeof m.rep_score === "object") {
+            const rs = m.rep_score as Record<string, unknown>;
+            if (rs.strengths) parts.push(`**Strengths:** ${rs.strengths}`);
+            if (rs.areas_for_improvement) parts.push(`**Areas for Improvement:** ${rs.areas_for_improvement}`);
+            if (rs.blind_spots) parts.push(`**Blind Spots:** ${rs.blind_spots}`);
+            if (rs.coaching_recommendations) parts.push(`**Coaching:** ${rs.coaching_recommendations}`);
+            if (rs.deal_progression_assessment) parts.push(`**Deal Progression:** ${rs.deal_progression_assessment}`);
+          }
 
-            if (m.meeting_score && typeof m.meeting_score === "object") {
-              const ms = m.meeting_score as Record<string, unknown>;
-              if (ms.deal_sentiment) parts.push(`**Deal Sentiment:** ${ms.deal_sentiment}`);
-              if (ms.next_actionables) parts.push(`**Next Steps:** ${ms.next_actionables}`);
-              if (ms.reasoning_summary) parts.push(`**Score Reasoning:** ${ms.reasoning_summary}`);
-              if (ms.relationship_health) parts.push(`**Relationship Health:** ${ms.relationship_health}`);
-              if (ms.delivery_status) parts.push(`**Delivery Status:** ${ms.delivery_status}`);
-            }
+          if (m.meeting_score && typeof m.meeting_score === "object") {
+            const ms = m.meeting_score as Record<string, unknown>;
+            if (ms.deal_sentiment) parts.push(`**Deal Sentiment:** ${ms.deal_sentiment}`);
+            if (ms.next_actionables) parts.push(`**Next Steps:** ${ms.next_actionables}`);
+            if (ms.reasoning_summary) parts.push(`**Score Reasoning:** ${ms.reasoning_summary}`);
+            if (ms.relationship_health) parts.push(`**Relationship Health:** ${ms.relationship_health}`);
+            if (ms.delivery_status) parts.push(`**Delivery Status:** ${ms.delivery_status}`);
+          }
 
-            if (m.icp_score && typeof m.icp_score === "object") {
-              const is = m.icp_score as Record<string, unknown>;
-              if (is.reason_for_score) parts.push(`**ICP Analysis:** ${is.reason_for_score}`);
-            }
+          if (m.icp_score && typeof m.icp_score === "object") {
+            const is = m.icp_score as Record<string, unknown>;
+            if (is.reason_for_score) parts.push(`**ICP Analysis:** ${is.reason_for_score}`);
+          }
 
-            if (m.internal_summary && typeof m.internal_summary === "object") {
-              const internalSummary = m.internal_summary as Record<string, unknown>;
-              const actions = internalSummary.action_items;
-              if (Array.isArray(actions) && actions.length > 0) {
-                parts.push(`**Action Items:**`);
-                for (const a of actions as { action: string; owner: string; priority?: string }[]) {
-                  parts.push(`- [${a.owner}] ${a.action} (${a.priority ?? ""})`);
-                }
-              }
-              const decisions = internalSummary.decisions_made;
-              if (Array.isArray(decisions) && decisions.length > 0) {
-                parts.push(`**Decisions:**`);
-                for (const d of decisions as { decision: string }[]) {
-                  parts.push(`- ${d.decision}`);
-                }
-              }
-              const refs = internalSummary.client_references;
-              if (Array.isArray(refs) && refs.length > 0) {
-                parts.push(`**Client References:**`);
-                for (const r of refs as { client_name: string; sentiment?: string; context?: string }[]) {
-                  parts.push(`- ${r.client_name} (${r.sentiment}): ${r.context ?? ""}`);
-                }
+          if (m.internal_summary && typeof m.internal_summary === "object") {
+            const internalSummary = m.internal_summary as Record<string, unknown>;
+            const actions = internalSummary.action_items;
+            if (Array.isArray(actions) && actions.length > 0) {
+              parts.push(`**Action Items:**`);
+              for (const a of actions as { action: string; owner: string; priority?: string }[]) {
+                parts.push(`- [${a.owner}] ${a.action} (${a.priority ?? ""})`);
               }
             }
+            const decisions = internalSummary.decisions_made;
+            if (Array.isArray(decisions) && decisions.length > 0) {
+              parts.push(`**Decisions:**`);
+              for (const d of decisions as { decision: string }[]) {
+                parts.push(`- ${d.decision}`);
+              }
+            }
+            const refs = internalSummary.client_references;
+            if (Array.isArray(refs) && refs.length > 0) {
+              parts.push(`**Client References:**`);
+              for (const r of refs as { client_name: string; sentiment?: string; context?: string }[]) {
+                parts.push(`- ${r.client_name} (${r.sentiment}): ${r.context ?? ""}`);
+              }
+            }
+          }
 
-            return parts.join("\n");
-          })
-          .join("\n\n");
+          const meetingBlock = parts.join("\n");
+          const blockTokens = estimateTokens(meetingBlock);
+          if (intelTokens + blockTokens > intelBudget) break;
+          intelParts.push(meetingBlock);
+          intelTokens += blockTokens;
+        }
+        intelligenceBlock = intelParts.join("\n\n");
       }
     }
 
-    // Step 4: Build transcript context
-    const contextBlock = chunks.map((c) => c.content).join("\n---\n");
+    // Build transcript context with remaining token budget (20% of budget)
+    const chunkBudget = MAX_CONTEXT_TOKENS * 0.20;
+    let chunkTokens = 0;
+    const contextParts: string[] = [];
+    for (const c of chunks) {
+      const t = estimateTokens(c.content);
+      if (chunkTokens + t > chunkBudget) break;
+      contextParts.push(c.content);
+      chunkTokens += t;
+    }
+    const contextBlock = contextParts.join("\n---\n");
 
     // Step 5: Stream response
     const anthropic = new Anthropic();
@@ -255,7 +276,7 @@ export async function POST(request: NextRequest) {
       {
         role: "user",
         content: [
-          `## Meeting Score Data (all ${meetingScores?.length ?? 0} scored meetings)\n${scoresSummary}`,
+          `## Meeting Score Data (${scoreLines.length} of ${meetingScores?.length ?? 0} scored meetings, most recent first)\n${scoresSummary}`,
           intelligenceBlock ? `\n## Coaching & Intelligence (matched meetings)\n${intelligenceBlock}` : "",
           `\n## Transcript Excerpts\n${contextBlock || "No transcript matches found."}`,
           `\n---\nUser question: ${message}`,
@@ -321,7 +342,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("[chat] CAUGHT error:", error instanceof Error ? error.stack : error);
+    console.error("Chat API error:", error instanceof Error ? error.stack : error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 }
