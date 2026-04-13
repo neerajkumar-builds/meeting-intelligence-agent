@@ -69,6 +69,7 @@ CRITICAL: Never query or reference legacy tables: documents, n8n_vectors, n8n_ch
 
 const DAILY_LIMIT = parseInt(process.env.DAILY_QUERY_LIMIT ?? "50", 10);
 const BURST_LIMIT = parseInt(process.env.BURST_QUERY_LIMIT ?? "10", 10);
+const CHAT_MODEL = process.env.CHAT_MODEL ?? "claude-sonnet-4-20250514";
 
 interface ChatRequest {
   message: string;
@@ -287,7 +288,7 @@ export async function POST(request: NextRequest) {
     let response: Anthropic.Message;
     try {
       response = await anthropic.messages.create({
-        model: "claude-sonnet-4-20250514",
+        model: CHAT_MODEL,
         max_tokens: 4096,
         system: RAG_SYSTEM_PROMPT,
         messages: messageParams,
