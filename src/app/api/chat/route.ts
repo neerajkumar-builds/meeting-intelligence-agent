@@ -150,7 +150,9 @@ export async function POST(request: NextRequest) {
       supabase.from("meetings_list").select("*").order("start_time", { ascending: false }),
     ]);
 
+    // Cap to most recent 75 meetings to prevent prompt token overflow
     const scoresSummary = (meetingScores ?? [])
+      .slice(0, 75)
       .map(
         (m: Record<string, unknown>) =>
           `[${m.id}] ${m.host_name} -${m.topic} (${m.scoring_stage_type}) · Score: ${m.overall_score} · Health: ${m.client_health_score ?? "N/A"} · ${m.start_time} · Company: ${m.company_name ?? "Internal"}`
@@ -261,6 +263,18 @@ export async function POST(request: NextRequest) {
       messages,
     });
 
+    // Await the HTTP connection — catches auth/rate-limit/payload errors
+    // inside the try/catch instead of letting them crash as unhandled stream errors
+    try {
+      await stream.withResponse();
+    } catch (apiError) {
+      console.error("Anthropic API error:", apiError);
+      return Response.json(
+        { error: "AI service temporarily unavailable. Please try again in a moment." },
+        { status: 502 }
+      );
+    }
+
     // Log query to analytics (fire-and-forget, never blocks response)
     supabase.from("chat_analytics").insert({
       session_id: sessionId ?? "unknown",
@@ -272,7 +286,27 @@ export async function POST(request: NextRequest) {
       latency_ms: Date.now() - startTime,
     }).then(() => {}, () => {});
 
-    return new Response(stream.toReadableStream(), {
+    // Wrap ReadableStream to handle mid-stream errors gracefully
+    // (e.g., Anthropic drops connection mid-response)
+    const sourceStream = stream.toReadableStream();
+    const safeStream = new ReadableStream({
+      async start(controller) {
+        const reader = sourceStream.getReader();
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            controller.enqueue(value);
+          }
+          controller.close();
+        } catch (err) {
+          console.error("Anthropic stream interrupted:", err);
+          controller.close();
+        }
+      },
+    });
+
+    return new Response(safeStream, {
       headers: {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
@@ -280,7 +314,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Chat API error:", error);
+    console.error("Chat API error:", error instanceof Error ? error.stack : error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 }
