@@ -79,15 +79,18 @@ interface ChatRequest {
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
+  console.log("[chat] POST handler invoked");
   try {
     const body: ChatRequest = await request.json();
     const { message, history, sessionId, userEmail } = body;
+    console.log("[chat] parsed body, message length:", message?.length);
 
     if (!message) {
       return Response.json({ error: "Message is required" }, { status: 400 });
     }
 
     const supabase = createServerSupabase();
+    console.log("[chat] supabase client created");
 
     // Rate limiting -check daily + burst limits (silent skip if table doesn't exist)
     if (userEmail) {
@@ -127,7 +130,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Step 1: Embed query + fetch scores IN PARALLEL (scores don't depend on embedding)
+    console.log("[chat] starting embedding");
     const embedding = await embedQuery(message);
+    console.log("[chat] embedding done, got:", embedding ? "vector" : "null");
 
     // Dynamic chunk count based on query breadth
     const chunkCount = /compare|all reps|across|every|breakdown|overview/i.test(message) ? 15
@@ -149,6 +154,8 @@ export async function POST(request: NextRequest) {
       })(),
       supabase.from("meetings_list").select("*").order("start_time", { ascending: false }),
     ]);
+
+    console.log("[chat] parallel fetch done, chunks:", chunks.length, "scores:", meetingScores?.length ?? 0);
 
     // Cap to most recent 75 meetings to prevent prompt token overflow
     const scoresSummary = (meetingScores ?? [])
@@ -314,7 +321,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Chat API error:", error instanceof Error ? error.stack : error);
+    console.error("[chat] CAUGHT error:", error instanceof Error ? error.stack : error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 }
