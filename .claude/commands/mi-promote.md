@@ -13,7 +13,12 @@ The Meeting Intelligence Dashboard has two environments:
 - **Dev**: personal GitHub (`origin`) -> personal Vercel
 - **Prod**: company GitHub (`production`) -> company Vercel (auto-deploys)
 
-Promotion = `git push production main`. Company Vercel auto-deploys from there.
+Promotion = `git push production main` + Vercel CLI deploy with company config.
+
+**Vercel configs** (both stored in `.migration/`):
+- `.migration/vercel-company-project.json` — company Vercel (production)
+- `.migration/vercel-personal-project.json` — personal Vercel (dev)
+- `.vercel/project.json` — active config (normally points to dev)
 
 ## Steps
 
@@ -61,23 +66,36 @@ Count the commits. If zero: "Nothing to promote. Dev and prod are in sync."
 
 Display the commit list and ask: "These N commits will be deployed to production. Proceed?"
 
-### 5. Push to production
+### 5. Push to production GitHub
 
 ```bash
 git push production main
 ```
 
-### 6. Post-promotion verification
+### 6. Deploy to company Vercel
+
+Swap the Vercel config to company, deploy, then restore dev config:
+
+```bash
+cp .vercel/project.json .vercel/project.json.dev-backup
+cp .migration/vercel-company-project.json .vercel/project.json
+npx vercel --prod
+cp .vercel/project.json.dev-backup .vercel/project.json
+rm .vercel/project.json.dev-backup
+```
+
+Wait for deployment to complete (shown in CLI output).
+
+### 7. Post-promotion verification
 
 Print this checklist for the user:
-- Company Vercel should auto-deploy within 1-2 minutes
-- Verify on production URL:
+- Verify on production URL (https://dashboard-jet-seven-93.vercel.app):
   - [ ] Login works
   - [ ] Scorecard shows real data
   - [ ] Ask Blarney returns answers
   - [ ] Slack send works (if applicable)
 
-### 7. Log the promotion
+### 8. Log the promotion
 
 Append to `.migration/promotions.log`:
 

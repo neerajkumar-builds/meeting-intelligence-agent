@@ -5,8 +5,8 @@
 | Component | Value |
 |-----------|-------|
 | **GitHub** | `neerajkumar-builds/meeting-intelligence-agent` |
-| **Vercel** | _Pending setup_ |
-| **Vercel URL** | _Pending_ |
+| **Vercel** | Project `prj_Mu9agcZ5TZA8ng4d5li5yCaJTWyN`, team `neerajkumar-builds` |
+| **Vercel URL** | https://dashboard-jet-seven-93.vercel.app |
 | **Supabase** | `cxrjlmquzhfueqrudiuy.supabase.co` |
 | **n8n Workflows** | MI\|0 through MI\|4 (active, 8-hour cycle) |
 | **Slack Channels** | Production channels |
@@ -18,7 +18,7 @@
 | **GitHub** | `say2neeraj/fullfunnel-meeting-intel` |
 | **Vercel** | Project `prj_3sbGLoNzzEAXAOGorABwnFf61Oqm` |
 | **Vercel URL** | _Current personal URL_ |
-| **Supabase** | _Pending — new dev project_ |
+| **Supabase** | `burcfsxsxgabknmodsrd` — `https://burcfsxsxgabknmodsrd.supabase.co` (FF_Internal_Initiatives) |
 | **n8n Workflows** | MI\|0-DEV through MI\|4-DEV (dormant) |
 | **Slack Channels** | `#meeting-intel-dev` |
 
@@ -26,7 +26,7 @@
 
 | Variable | Production | Development |
 |----------|-----------|-------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | `cxrjlmquzhfueqrudiuy.supabase.co` | _Pending dev project_ |
+| `NEXT_PUBLIC_SUPABASE_URL` | `cxrjlmquzhfueqrudiuy.supabase.co` | `burcfsxsxgabknmodsrd.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Production key | Dev key |
 | `ANTHROPIC_API_KEY` | Shared | Shared |
 | `GEMINI_API_KEY` | Shared | Shared |
