@@ -40,13 +40,13 @@ Also check for uncommitted changes and report modified files.
 
 ### 3. Report completed CRs
 
-Read `docs/15-change-log-revision-1.md` if it exists. List completed CRs with their completion dates.
+Read `migration/changelog-revision-1.md` if it exists. List completed CRs with their completion dates.
 
 If the file doesn't exist, report: "No CRs completed yet."
 
 ### 4. Determine next CR
 
-Read `src/data/change-requests.json` and the change log to determine which CRs are done vs. pending.
+Read `migration/change-requests.json` and the change log to determine which CRs are done vs. pending.
 
 The implementation order from the plan is:
 1. CR-004 (Critical, Compliance)

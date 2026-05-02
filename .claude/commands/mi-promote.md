@@ -79,7 +79,7 @@ Print this checklist for the user:
 
 ### 7. Log the promotion
 
-Append to `.promotions.log`:
+Append to `.migration/promotions.log`:
 
 ```
 [YYYY-MM-DD HH:MM] Promoted <commit-sha> (<N> commits) to production

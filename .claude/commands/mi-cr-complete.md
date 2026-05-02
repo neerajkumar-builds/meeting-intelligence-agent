@@ -95,7 +95,7 @@ git merge cr-<id>-<slug>
 
 ### 10. Log to change log
 
-Append to `docs/15-change-log-revision-1.md` (create if it doesn't exist):
+Append to `migration/changelog-revision-1.md` (create if it doesn't exist):
 
 ```markdown
 ## <CR-ID>: <title>

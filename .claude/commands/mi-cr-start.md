@@ -11,7 +11,7 @@ Arguments: `<CR-ID>` (e.g., `CR-004`). Sets up everything needed to begin implem
 
 ### 1. Load CR details
 
-Read the CR data from `src/data/change-requests.json`. Parse the file and find the entry matching the provided CR-ID.
+Read the CR data from `migration/change-requests.json`. Parse the file and find the entry matching the provided CR-ID.
 
 Display to user:
 - **Title**

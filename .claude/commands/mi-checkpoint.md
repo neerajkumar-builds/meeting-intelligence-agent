@@ -46,7 +46,7 @@ Also query dev Supabase for row counts (use Supabase MCP if available):
 
 ### 5. Log to .checkpoints.log
 
-Append a line to `dashboard/.checkpoints.log`:
+Append a line to `.migration/checkpoints.log`:
 
 ```
 [YYYY-MM-DD HH:MM] checkpoint/<label>-<date> | branch: <branch> | sha: <sha-short> | tests: <pass>/<total> | meetings: <N> | chunks: <N> | users: <N>

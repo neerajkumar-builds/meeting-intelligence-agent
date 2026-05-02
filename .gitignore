@@ -41,7 +41,5 @@ yarn-error.log*
 next-env.d.ts
 test-results/
 
-# migration operational logs
-.checkpoints.log
-.promotions.log
-.env.production
+# migration operational data (secrets + logs)
+.migration/

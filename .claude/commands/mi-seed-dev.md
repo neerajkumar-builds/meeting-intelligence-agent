@@ -11,7 +11,7 @@ Safely copies n8n-owned data from production Supabase to dev Supabase. Dashboard
 
 This skill writes to the dev database. Multiple safety checks prevent accidental writes to production:
 1. `.env.local` must NOT point to production
-2. `.env.production` provides read-only production credentials
+2. `.migration/env-production` provides read-only production credentials
 3. Only n8n-owned tables are truncated in dev
 4. User must confirm before any destructive operation
 
@@ -30,15 +30,15 @@ If it contains `cxrjlmquzhfueqrudiuy` (production project ref):
 
 ### 2. Load production credentials
 
-Check for `.env.production` in the dashboard directory:
+Check for `.migration/env-production` in the dashboard directory:
 
 ```bash
-test -f .env.production && echo "EXISTS" || echo "MISSING"
+test -f .migration/env-production && echo "EXISTS" || echo "MISSING"
 ```
 
 If missing, ask user to create it:
 ```
-Create dashboard/.env.production with:
+Create dashboard/.migration/env-production with:
 PROD_SUPABASE_URL=https://cxrjlmquzhfueqrudiuy.supabase.co
 PROD_SUPABASE_SERVICE_KEY=<production service_role key from Supabase dashboard>
 
