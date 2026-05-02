@@ -1,0 +1,258 @@
+{
+  "metadata": {
+    "source": "change_requests/revision_1/Meeting Score Agent - Change Log.xlsx",
+    "extracted_at": "2026-05-03",
+    "total_crs": 9,
+    "all_submitted_by_date": "2026-05-03",
+    "assigned_owner": "Neeraj",
+    "approver": "Product Team"
+  },
+  "change_requests": {
+    "CR-001": {
+      "title": "Add different analysis sections (Discovery, Onboarding, CSM)",
+      "submitted_by": "Luke & Stephen",
+      "product_area": "Architecture",
+      "change_type": "New Feature",
+      "end_user_impact": "Everyone",
+      "priority": "Critical",
+      "impact": "High",
+      "loe": "High",
+      "status": "Submitted",
+      "description": "Segment sections and analysis by meeting type. This will provide a clearer view of performance during certain meetings. This will also allow segmentation between sales reps, project management and CSM/Managing Directors.",
+      "business_justification": "Provides clear segmentation of analysis and allows for functionality and scoring to be sold separately or collectively.",
+      "implementation_order": 9,
+      "dashboard_only": false,
+      "n8n_changes_required": true,
+      "data_exists": "partial",
+      "dependencies": [],
+      "files_to_modify": [
+        "src/lib/constants.ts",
+        "src/lib/hooks/use-meetings-list.ts",
+        "src/types/scores.ts",
+        "src/components/layout/sidebar-nav.tsx",
+        "src/app/page.tsx",
+        "src/app/meetings/page.tsx",
+        "src/app/companies/page.tsx",
+        "src/app/reps/page.tsx",
+        "src/app/reps/[name]/page.tsx"
+      ],
+      "verification": "Sales section shows only discovery + follow_up. CSM shows onboarding + check_in. Internal excluded from both."
+    },
+    "CR-002": {
+      "title": "Summarized Strengths & Areas for Improvement on Rep homepage",
+      "submitted_by": "Luke",
+      "product_area": "User Profile",
+      "change_type": "Enhancement",
+      "end_user_impact": "Reps & Managers",
+      "priority": "High",
+      "impact": "Medium",
+      "loe": "Medium",
+      "status": "Submitted",
+      "description": "To avoid information overload and ensure that the rep has actionable insights, summarize the coaching insights section recommendation into 5 core strengths and 5 core areas for improvement. If the rep wants to drill down into all insights, that should still be allowed.",
+      "business_justification": "User adoption on the platform. There is a lot of information being generated at current. If this is not reduced it will likely result in information overload and a lack of user adoption.",
+      "implementation_order": 5,
+      "dashboard_only": true,
+      "n8n_changes_required": false,
+      "data_exists": true,
+      "dependencies": [],
+      "files_to_modify": [
+        "src/app/api/reps/[name]/summary/route.ts",
+        "src/components/reps/rep-strength-summary.tsx",
+        "src/lib/hooks/use-rep-summary.ts",
+        "src/app/reps/[name]/page.tsx"
+      ],
+      "verification": "Rep page shows concise top 5 strengths + 5 improvements above coaching detail. Drill-down shows full insights."
+    },
+    "CR-003": {
+      "title": "Ability to change the date range on the rep dashboard",
+      "submitted_by": "Luke",
+      "product_area": "User Profile",
+      "change_type": "New Feature",
+      "end_user_impact": "Reps & Managers",
+      "priority": "Low",
+      "impact": "Medium",
+      "loe": "Medium",
+      "status": "Submitted",
+      "description": "Allow users to adjust the date range on the rep dashboard. This will allow for a more granular level of comparison, as well as introduce the option of comparison periods.",
+      "business_justification": "The rep dashboard is currently set to a static date range. Allowing for date range adjustments provides more functionality for users to review improvements over time.",
+      "implementation_order": 6,
+      "dashboard_only": true,
+      "n8n_changes_required": false,
+      "data_exists": true,
+      "dependencies": [],
+      "files_to_modify": [
+        "src/app/reps/[name]/page.tsx"
+      ],
+      "verification": "Rep KPIs and meeting list filter by selected date range."
+    },
+    "CR-004": {
+      "title": "Remove internal meetings from the analysis and scorecard",
+      "submitted_by": "Luke",
+      "product_area": "Architecture",
+      "change_type": "Regulatory / Compliance",
+      "end_user_impact": "Everyone",
+      "priority": "Critical",
+      "impact": "High",
+      "loe": "Medium",
+      "status": "Submitted",
+      "description": "To ensure the privacy of internal conversations, the scoring and analysis should completely exclude internal conversations.",
+      "business_justification": "Privacy and compliance adherence to avoid any negative exposure that could result from capturing and analysis internal meetings.",
+      "implementation_order": 1,
+      "dashboard_only": true,
+      "n8n_changes_required": false,
+      "data_exists": true,
+      "dependencies": [],
+      "files_to_modify": [
+        "src/lib/hooks/use-meetings-list.ts",
+        "src/app/api/companies/[name]/intelligence/route.ts",
+        "src/app/api/reps/[name]/coaching/route.ts",
+        "src/app/meetings/page.tsx"
+      ],
+      "verification": "Scorecard KPIs exclude internal meetings. Feed hides internal by default. Company and rep pages exclude internal from aggregations. Internal filter still works when explicitly selected."
+    },
+    "CR-005": {
+      "title": "Score reason summaries",
+      "submitted_by": "Stephen",
+      "product_area": "Individual Meeting Analysis",
+      "change_type": "New Feature",
+      "end_user_impact": "Reps & Managers",
+      "priority": "High",
+      "impact": "Medium",
+      "loe": "Medium",
+      "status": "Submitted",
+      "description": "Alongside the scores, provide a score reason summary to give more context into the scoring.",
+      "business_justification": "Provides validation of the scores and will allow the team to identify any gaps within the scores moving forward.",
+      "implementation_order": 2,
+      "dashboard_only": true,
+      "n8n_changes_required": false,
+      "data_exists": true,
+      "dependencies": [],
+      "files_to_modify": [
+        "src/components/meetings/score-section.tsx"
+      ],
+      "verification": "Each stage type shows relevant reason text below its score gauges."
+    },
+    "CR-006": {
+      "title": "Watch Recording opens Zoom Link or plays in the platform",
+      "submitted_by": "Stephen",
+      "product_area": "Individual Meeting Analysis",
+      "change_type": "Enhancement",
+      "end_user_impact": "Reps & Managers",
+      "priority": "Medium",
+      "impact": "Medium",
+      "loe": "Medium",
+      "status": "Submitted",
+      "description": "To avoid having to download every video a users wants to watch, adding functionality into the platform to either watch the video in platform or through Zoom would be a better user experience.",
+      "business_justification": "Provides a better user experience for users and increases ease of use.",
+      "implementation_order": 4,
+      "dashboard_only": true,
+      "n8n_changes_required": false,
+      "data_exists": "partial",
+      "dependencies": [],
+      "files_to_modify": [
+        "src/app/meetings/[id]/page.tsx",
+        "src/components/meetings/recording-player.tsx"
+      ],
+      "verification": "User can watch recording without downloading. Recording opens in Zoom or plays in-platform."
+    },
+    "CR-007": {
+      "title": "Company Intelligence Panel enhancements & visibility",
+      "submitted_by": "Stephen",
+      "product_area": "Company Intelligence Panel",
+      "change_type": "Enhancement",
+      "end_user_impact": "Reps & Managers",
+      "priority": "Medium",
+      "impact": "Medium",
+      "loe": "Medium",
+      "status": "Submitted",
+      "description": "Increase the level of intelligence provided on the Intel panel. Also making it more discoverable and easily accessible than the side panel pop-up.",
+      "business_justification": "Provides validation of the scores and will allow the team to identify any gaps within the scores moving forward.",
+      "implementation_order": 7,
+      "dashboard_only": true,
+      "n8n_changes_required": false,
+      "data_exists": true,
+      "dependencies": [],
+      "files_to_modify": [
+        "src/components/companies/intelligence-sidebar",
+        "src/app/api/companies/[name]/intelligence/route.ts"
+      ],
+      "verification": "Intelligence is visible without user action. Summary provides quick read."
+    },
+    "CR-008": {
+      "title": "Company Intelligence Panel customization",
+      "submitted_by": "Stephen",
+      "product_area": "Company Intelligence Panel",
+      "change_type": "Enhancement",
+      "end_user_impact": "Reps & Managers",
+      "priority": "Medium",
+      "impact": "Medium",
+      "loe": "Medium",
+      "status": "Submitted",
+      "description": "Customization of MEDDIC Gaps to cover other frameworks e.g., BANT.",
+      "business_justification": "Provides an option for clients to customize based on their existing internal processes.",
+      "implementation_order": 8,
+      "dashboard_only": true,
+      "n8n_changes_required": false,
+      "data_exists": true,
+      "dependencies": [],
+      "files_to_modify": [
+        "src/lib/constants.ts",
+        "src/app/api/companies/[name]/intelligence/route.ts",
+        "src/types/intelligence.ts",
+        "src/components/companies/intelligence-sidebar"
+      ],
+      "verification": "Switching framework constant changes the analysis dimensions displayed."
+    },
+    "CR-009": {
+      "title": "Refinement of information on the meeting detail page",
+      "submitted_by": "Stephen",
+      "product_area": "Individual Meeting Analysis",
+      "change_type": "Enhancement",
+      "end_user_impact": "Reps & Managers",
+      "priority": "High",
+      "impact": "Medium",
+      "loe": "Medium",
+      "status": "Submitted",
+      "description": "Remove next steps, analysis etc. and provide only important information around scores, score reason, company intelligence, scoring framework and video viewing.",
+      "business_justification": "Removes noise from the meeting analysis and provides the most important information needed for users to make strategic decisions.",
+      "implementation_order": 3,
+      "dashboard_only": true,
+      "n8n_changes_required": false,
+      "data_exists": true,
+      "dependencies": [],
+      "files_to_modify": [
+        "src/app/meetings/[id]/page.tsx",
+        "src/components/meetings/intelligence-tabs.tsx"
+      ],
+      "verification": "Meeting detail page is cleaner, key info is immediately visible, noise removed."
+    }
+  },
+  "dependency_graph": {
+    "CR-004": { "blocks": [], "blocked_by": [] },
+    "CR-005": { "blocks": [], "blocked_by": [] },
+    "CR-009": { "blocks": [], "blocked_by": [] },
+    "CR-006": { "blocks": [], "blocked_by": [] },
+    "CR-002": { "blocks": [], "blocked_by": [] },
+    "CR-003": { "blocks": [], "blocked_by": [] },
+    "CR-007": { "blocks": [], "blocked_by": [] },
+    "CR-008": { "blocks": [], "blocked_by": [] },
+    "CR-001": { "blocks": [], "blocked_by": [], "note": "Largest CR, requires n8n changes. Implement last." }
+  },
+  "implementation_phases": {
+    "phase_1": {
+      "name": "Dashboard-Only, Data Exists",
+      "weeks": "2-3",
+      "crs": ["CR-004", "CR-005", "CR-009", "CR-006"]
+    },
+    "phase_2": {
+      "name": "Rep & Company Enhancements",
+      "weeks": "3-4",
+      "crs": ["CR-002", "CR-003", "CR-007", "CR-008"]
+    },
+    "phase_3": {
+      "name": "Section Segmentation (Architecture)",
+      "weeks": "4-6",
+      "crs": ["CR-001"]
+    }
+  }
+}
