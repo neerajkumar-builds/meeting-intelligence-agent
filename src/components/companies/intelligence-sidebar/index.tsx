@@ -13,7 +13,7 @@ interface IntelligenceSidebarProps {
 
 export function IntelligenceSidebar({ companyName }: IntelligenceSidebarProps) {
   const { data, isLoading, error } = useCompanyIntelligence(companyName);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
 
   return (
     <>
