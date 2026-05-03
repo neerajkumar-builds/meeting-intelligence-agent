@@ -1,19 +1,9 @@
-# Change Log: Revision 1
+# Change Log — Revision 1
 
-Change requests from Luke and Stephen, submitted 2026-05-03.
-
----
-
-_No CRs completed yet. Each entry will be added as CRs are implemented using `/mi-cr-complete`._
-
-<!-- Template for each completed CR:
-
-## CR-XXX: Title
-- **Date completed:** YYYY-MM-DD
-- **Priority:** Critical/High/Medium
-- **Submitted by:** Name
-- **Files modified:** (list)
-- **How to verify:** (verification steps)
-- **Rollback:** `git revert <sha>`
-
--->
+## CR-004: Remove internal meetings from analysis and scorecard
+- **Date completed:** 2026-05-04
+- **Priority:** Critical (Compliance)
+- **Submitted by:** Luke
+- **Files modified:** use-meetings-list.ts, use-company-meetings.ts, intelligence/route.ts, coaching/route.ts, meetings/page.tsx, coaching.test.ts, intelligence.test.ts
+- **How to verify:** Scorecard KPIs exclude internal meetings. Meeting feed hides internal by default. Select "Internal" from Stage dropdown to view them. Company and rep pages exclude internal from aggregations.
+- **Rollback:** `git revert 43708db`
