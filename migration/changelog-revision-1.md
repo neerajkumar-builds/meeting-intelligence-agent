@@ -15,3 +15,11 @@
 - **Files modified:** score-section.tsx
 - **How to verify:** Open any meeting detail page. Below the score gauges, reasoning text explains each score. Discovery shows Meeting Outcome + ICP Fit reasons. Follow-Up shows Engagement reasoning. Long text has "Show more" toggle.
 - **Rollback:** `git revert 5811302`
+
+## CR-009: Refinement of meeting detail page
+- **Date completed:** 2026-05-04
+- **Priority:** High
+- **Submitted by:** Stephen
+- **Files modified:** intelligence-tabs.tsx
+- **How to verify:** Open a discovery meeting detail. "Next Steps" and "Reasoning" blocks are removed from Summary tab. Deal sentiment and tentative close date remain. Score reasons are now shown below gauges (CR-005).
+- **Rollback:** `git revert 5a97624`
