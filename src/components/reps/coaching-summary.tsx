@@ -14,8 +14,8 @@ interface CoachingSummaryProps {
 }
 
 const SECTIONS = [
-  { key: "strengths" as const, label: "Strengths", icon: Target, accent: "border-l-emerald-500", iconColor: "text-emerald-500", bg: "bg-emerald-500/5" },
-  { key: "improvements" as const, label: "Areas for Improvement", icon: AlertTriangle, accent: "border-l-amber-500", iconColor: "text-amber-500", bg: "bg-amber-500/5" },
+  { key: "strengths" as const, label: "Top Strengths", icon: Target, accent: "border-l-emerald-500", iconColor: "text-emerald-500", bg: "bg-emerald-500/5" },
+  { key: "improvements" as const, label: "Top Areas for Improvement", icon: AlertTriangle, accent: "border-l-amber-500", iconColor: "text-amber-500", bg: "bg-amber-500/5" },
   { key: "blindSpots" as const, label: "Blind Spots", icon: Eye, accent: "border-l-red-500", iconColor: "text-red-500", bg: "bg-red-500/5" },
   { key: "recommendations" as const, label: "Coaching Tips", icon: Lightbulb, accent: "border-l-blue-500", iconColor: "text-blue-500", bg: "bg-blue-500/5" },
   { key: "dealProgressions" as const, label: "Deal Progression", icon: TrendingUp, accent: "border-l-purple-500", iconColor: "text-purple-500", bg: "bg-purple-500/5" },
@@ -94,7 +94,8 @@ export function CoachingSummary({ repName }: CoachingSummaryProps) {
         {visibleSections.map((section) => {
           const Icon = section.icon;
           const items = coaching[section.key];
-          const display = items.slice(0, expanded ? 3 : 2);
+          const isPrimary = PRIMARY_KEYS.has(section.key);
+          const display = items.slice(0, isPrimary ? 5 : expanded ? 3 : 2);
 
           return (
             <Card key={section.key} className={`border-l-4 ${section.accent} overflow-hidden`}>
