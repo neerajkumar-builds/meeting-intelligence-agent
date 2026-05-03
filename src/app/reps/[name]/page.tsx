@@ -195,16 +195,32 @@ export default function RepProfilePage({
             <p className="text-xs text-muted-foreground">{stats.total} meetings · {((stats.total / (teamMeetings.length || 1)) * 100).toFixed(0)}% of team volume</p>
           </div>
         </div>
-        <button
-          onClick={() => {
-            const query = encodeURIComponent(`Show coaching insights for ${repName} across all meetings`);
-            router.push(`/search?q=${query}`);
-          }}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-2.5 py-1.5 text-sm font-medium text-primary hover:bg-primary/10 transition-colors shrink-0"
-        >
-          <Sparkles className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Ask Blarney</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
+            <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
+            <Select value={dateRange} onValueChange={(v) => setDateRange(v ?? "all")}>
+              <SelectTrigger className="w-[110px] h-8 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="7d">Last 7 Days</SelectItem>
+                <SelectItem value="30d">Last 30 Days</SelectItem>
+                <SelectItem value="90d">Last 90 Days</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <button
+            onClick={() => {
+              const query = encodeURIComponent(`Show coaching insights for ${repName} across all meetings`);
+              router.push(`/search?q=${query}`);
+            }}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-2.5 py-1.5 text-sm font-medium text-primary hover:bg-primary/10 transition-colors shrink-0"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Ask Blarney</span>
+          </button>
+        </div>
       </div>
 
       {/* KPI Row — tinted cards with score bars */}
@@ -328,17 +344,6 @@ export default function RepProfilePage({
           </h3>
           <div className="flex items-center gap-2 flex-wrap">
             <SlidersHorizontal className="h-3 w-3 text-muted-foreground" />
-            <Select value={dateRange} onValueChange={(v) => setDateRange(v ?? "all")}>
-              <SelectTrigger className="w-[100px] h-7 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Time</SelectItem>
-                <SelectItem value="7d">7 Days</SelectItem>
-                <SelectItem value="30d">30 Days</SelectItem>
-                <SelectItem value="90d">90 Days</SelectItem>
-              </SelectContent>
-            </Select>
             <Select value={stageFilter} onValueChange={(v) => setStageFilter(v ?? "all")}>
               <SelectTrigger className="w-[130px] h-7 text-xs">
                 <SelectValue placeholder="All Stages" />
