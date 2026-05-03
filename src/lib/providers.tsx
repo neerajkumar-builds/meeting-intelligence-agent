@@ -12,7 +12,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 5 * 60 * 1000, // 5 min — data changes on 4hr scoring cycle
+            staleTime: 5 * 60 * 1000, // 5 min - data changes on 4hr scoring cycle
             gcTime: 30 * 60 * 1000,
             retry: 2,
             refetchOnWindowFocus: false,

@@ -13,11 +13,11 @@ const STATUS_CONFIG = {
 };
 
 const N8N_WORKFLOWS = [
-  { name: "MI|0 — Token Service", schedule: "On-demand" },
-  { name: "MI|1 — Capture Meetings + Sync Users", schedule: "8hr + Weekly" },
-  { name: "MI|2 — Transcript + Enrich", schedule: "8hr" },
-  { name: "MI|3 — Score Meetings (4-LLM)", schedule: "8hr" },
-  { name: "MI|4 — Chunk + Embed (RAG)", schedule: "8hr" },
+  { name: "MI|0 - Token Service", schedule: "On-demand" },
+  { name: "MI|1 - Capture Meetings + Sync Users", schedule: "8hr + Weekly" },
+  { name: "MI|2 - Transcript + Enrich", schedule: "8hr" },
+  { name: "MI|3 - Score Meetings (4-LLM)", schedule: "8hr" },
+  { name: "MI|4 - Chunk + Embed (RAG)", schedule: "8hr" },
 ];
 
 export function PipelineStatus() {

@@ -46,7 +46,7 @@ export function SendToSlack({ title, body, meetingUrl }: SendToSlackProps) {
           setSelectedChannel(validSaved ? saved! : data.channels[0].id);
         }
       } catch {
-        // Channels unavailable — will fall back to webhook
+        // Channels unavailable - will fall back to webhook
       } finally {
         setLoadingChannels(false);
       }
@@ -96,7 +96,7 @@ export function SendToSlack({ title, body, meetingUrl }: SendToSlackProps) {
 
   return (
     <div className="flex items-center gap-1.5">
-      {/* Channel picker — only shows if channels are available */}
+      {/* Channel picker - only shows if channels are available */}
       {!loadingChannels && channels.length > 0 && (
         <Select value={selectedChannel} onValueChange={(v) => setSelectedChannel(v ?? "")}>
           <SelectTrigger className="w-[150px] h-8 text-xs">

@@ -38,7 +38,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen">
-      {/* Desktop Sidebar — dark background per brand guidelines */}
+      {/* Desktop Sidebar - dark background per brand guidelines */}
       <aside
         className={`hidden lg:flex lg:flex-col bg-[#0A0A0A] text-white transition-all duration-200 ${
           collapsed ? "lg:w-14" : "lg:w-56"

@@ -18,7 +18,7 @@ interface Note {
 interface MeetingNotesProps {
   meetingId: string;
   section: string;
-  /** All notes for this meeting — filtered by section client-side */
+  /** All notes for this meeting - filtered by section client-side */
   allNotes: Note[];
   onNoteAdded: () => void;
 }

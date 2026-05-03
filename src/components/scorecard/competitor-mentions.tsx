@@ -49,7 +49,7 @@ export function CompetitorMentions() {
           const meta = chunk.metadata as Record<string, unknown> | null;
           const stageType = meta?.scoring_stage_type as string ?? meta?.stage_type as string ?? null;
 
-          // Skip internal meetings — only track vendor mentions in client calls
+          // Skip internal meetings - only track vendor mentions in client calls
           if (stageType === "internal") continue;
 
           const text = chunk.chunk_text as string;

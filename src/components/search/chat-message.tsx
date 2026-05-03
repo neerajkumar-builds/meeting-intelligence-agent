@@ -28,7 +28,7 @@ function chartBlocksToText(text: string): string {
       const chart = JSON.parse(json.trim());
       const title = chart.title ? `${chart.title}:\n` : "";
       if (Array.isArray(chart.data)) {
-        const rows = chart.data.map((d: { label: string; value: number }) => `  - ${d.label}: ${d.value}`).join("\n");
+        const rows = chart.data.map((d: { label: string; value: number }) => ` - ${d.label}: ${d.value}`).join("\n");
         return `${title}${rows}`;
       }
       return title.trim();
@@ -38,7 +38,7 @@ function chartBlocksToText(text: string): string {
   });
 }
 
-/** Strip sources, followups, and convert charts to text — for export */
+/** Strip sources, followups, and convert charts to text - for export */
 function getExportText(rawContent: string): string {
   let text = rawContent;
   text = text.replace(/```sources\n[\s\S]*?```/g, "");
@@ -66,7 +66,7 @@ function fixSingleLineTables(text: string): string {
     if (colCount < 2) return line;
     const pipesPerRow = colCount + 1;
 
-    // Extract just the table header — count pipes backward from the separator
+    // Extract just the table header - count pipes backward from the separator
     // Title text like "Meeting Topics (April 2-3)" comes before the actual header pipes
     const headerPipes: number[] = [];
     for (let i = 0; i < beforeSep.length; i++) {
@@ -81,7 +81,7 @@ function fixSingleLineTables(text: string): string {
       actualHeader = beforeSep.substring(headerStart).trim();
     }
 
-    // Split data rows by pipe counting — each row has pipesPerRow pipes
+    // Split data rows by pipe counting - each row has pipesPerRow pipes
     const rowPipes: number[] = [];
     for (let i = 0; i < rowsStr.length; i++) {
       if (rowsStr[i] === "|") rowPipes.push(i);
@@ -94,7 +94,7 @@ function fixSingleLineTables(text: string): string {
 
     if (rows.length === 0) return line;
 
-    // Build output — blank line between title and table so ReactMarkdown separates them
+    // Build output - blank line between title and table so ReactMarkdown separates them
     const parts: string[] = [];
     if (titleText) parts.push(titleText, "");
     parts.push(actualHeader, sepStr.trim(), ...rows);
@@ -152,7 +152,7 @@ export function ChatMessage({ role, content, isStreaming, onFollowUp, sessionId,
                 sources = JSON.parse(sourcesMatch[1].trim());
                 cleanContent = cleanContent.replace(/```sources\n[\s\S]*?```/, "").trim();
               } catch {
-                // Invalid sources JSON — ignore
+                // Invalid sources JSON - ignore
               }
             }
 
@@ -164,7 +164,7 @@ export function ChatMessage({ role, content, isStreaming, onFollowUp, sessionId,
                 followups = JSON.parse(followupsMatch[1].trim());
                 cleanContent = cleanContent.replace(/```followups\n[\s\S]*?```/, "").trim();
               } catch {
-                // Invalid followups JSON — ignore
+                // Invalid followups JSON - ignore
               }
             }
 
@@ -208,7 +208,7 @@ export function ChatMessage({ role, content, isStreaming, onFollowUp, sessionId,
                   code: ({ children, className }) => {
                     // Detect chart blocks from the AI
                     if (className?.includes("language-chart")) {
-                      // During streaming, chart JSON may be incomplete — show placeholder
+                      // During streaming, chart JSON may be incomplete - show placeholder
                       if (isStreaming) {
                         return (
                           <div className="my-3 rounded-lg border bg-muted/50 p-4 text-xs text-muted-foreground flex items-center gap-2">
@@ -349,7 +349,7 @@ export function ChatMessage({ role, content, isStreaming, onFollowUp, sessionId,
               )}
             </div>
 
-            {/* Action buttons — visible on hover */}
+            {/* Action buttons - visible on hover */}
             {!isStreaming && content && (
               <div className="flex items-center gap-1 mt-2 pt-2 border-t border-border/50 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button

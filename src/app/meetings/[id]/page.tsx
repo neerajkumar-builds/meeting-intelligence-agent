@@ -208,7 +208,7 @@ export default function MeetingDetailPage({
       <TranscriptViewer transcript={meeting.transcript_text} meetingTopic={meeting.topic ?? undefined} />
       </div>
 
-      {/* Intelligence Sidebar — only for external meetings with a company */}
+      {/* Intelligence Sidebar - only for external meetings with a company */}
       {meeting.company_name && (
         <IntelligenceSidebar companyName={meeting.company_name} />
       )}

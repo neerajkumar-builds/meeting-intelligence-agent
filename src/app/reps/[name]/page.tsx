@@ -335,7 +335,7 @@ export default function RepProfilePage({
         </div>
       ) : (
       <>
-      {/* KPI Row — tinted cards with score bars */}
+      {/* KPI Row - tinted cards with score bars */}
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         <Card className={`transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${getScoreTint(stats.avgScore)}`}>
           <CardContent className="px-4 py-3">
@@ -389,7 +389,7 @@ export default function RepProfilePage({
         </Card>
       </div>
 
-      {/* Charts — trend + donut side by side */}
+      {/* Charts - trend + donut side by side */}
       <div className="grid gap-4 lg:grid-cols-5">
         {stats.trend.length >= 2 && (
           <Card className="lg:col-span-3">

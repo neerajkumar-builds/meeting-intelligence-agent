@@ -116,17 +116,17 @@ export default function TeamScorecardPage() {
         />
       ) : (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
-          {/* KPI Summary — what matters at a glance */}
+          {/* KPI Summary - what matters at a glance */}
           <SummaryCards meetings={filtered} />
 
-          {/* Insights — what needs attention right now */}
+          {/* Insights - what needs attention right now */}
           <InsightsPanel meetings={filtered} />
 
-          {/* Team — how are reps doing */}
+          {/* Team - how are reps doing */}
           <SectionHeader title="Team" />
           <RepComparisonTable meetings={filtered} />
 
-          {/* Performance — trends and distribution */}
+          {/* Performance - trends and distribution */}
           <SectionHeader title="Performance" />
           <div className="grid gap-6 lg:grid-cols-2">
             <ScoreTrendChart meetings={filtered} />
@@ -134,11 +134,11 @@ export default function TeamScorecardPage() {
           </div>
           <ScoreDistributionChart meetings={filtered} />
 
-          {/* Intelligence — market signals */}
+          {/* Intelligence - market signals */}
           <SectionHeader title="Intelligence" />
           <CompetitorMentions />
 
-          {/* Activity — recent timeline */}
+          {/* Activity - recent timeline */}
           <RecentActivity meetings={filtered} />
         </div>
       )}

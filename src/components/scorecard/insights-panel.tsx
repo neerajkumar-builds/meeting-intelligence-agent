@@ -31,7 +31,7 @@ export function InsightsPanel({ meetings }: InsightsPanelProps) {
 
   return (
     <div className="space-y-3">
-      {/* Weekly Briefing — narrative summary */}
+      {/* Weekly Briefing - narrative summary */}
       {briefing && (
         <div className="rounded-lg border bg-card p-4">
           <div className="flex items-center gap-2 mb-2">
@@ -48,7 +48,7 @@ export function InsightsPanel({ meetings }: InsightsPanelProps) {
         </div>
       )}
 
-      {/* Smart Alerts — horizontal scrollable strip */}
+      {/* Smart Alerts - horizontal scrollable strip */}
       {alerts.length > 0 && (
         <div className="flex items-center gap-2 overflow-x-auto pb-1">
           <div className="flex items-center gap-1.5 shrink-0 pl-1">

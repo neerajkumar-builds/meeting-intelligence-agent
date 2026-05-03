@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
-  // Always return 200 — analytics should never fail visibly
+  // Always return 200 - analytics should never fail visibly
   try {
     const body = await request.json();
     const supabase = await createServerSupabase();
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       error_message: body.errorMessage ?? null,
     });
   } catch {
-    // Silent failure — analytics never blocks
+    // Silent failure - analytics never blocks
   }
 
   return Response.json({ ok: true });

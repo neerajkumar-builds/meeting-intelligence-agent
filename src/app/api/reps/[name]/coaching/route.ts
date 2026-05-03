@@ -3,7 +3,7 @@ import { createServerSupabase } from "@/lib/supabase/server";
 
 /**
  * GET /api/reps/[name]/coaching
- * READ-ONLY — fetches rep_score JSONB from scored_meetings, aggregates coaching patterns.
+ * READ-ONLY - fetches rep_score JSONB from scored_meetings, aggregates coaching patterns.
  * Never writes to any table.
  */
 
@@ -22,7 +22,7 @@ export async function GET(
     const repName = decodeURIComponent(name);
     const supabase = createServerSupabase();
 
-    // READ-ONLY query — only select, never insert/update/delete
+    // READ-ONLY query - only select, never insert/update/delete
     const { data: meetings, error } = await supabase
       .from("scored_meetings")
       .select("id, topic, start_time, scoring_stage_type, overall_score, rep_score")

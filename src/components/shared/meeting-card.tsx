@@ -73,7 +73,7 @@ export function MeetingCard({ meeting, index = 0 }: MeetingCardProps) {
             )}
           </div>
 
-          {/* Row 3: Summary — single line */}
+          {/* Row 3: Summary - single line */}
           {meeting.meeting_summary && (
             <p className="mt-1 text-xs text-muted-foreground truncate">
               {meeting.meeting_summary}

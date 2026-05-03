@@ -72,7 +72,7 @@ export function ChartDownload({ title, children, className }: ChartDownloadProps
     const svgW = svg.clientWidth;
     const svgH = svg.clientHeight;
 
-    // Collect legend items — find small colored dots (inline backgroundColor) + parent text
+    // Collect legend items - find small colored dots (inline backgroundColor) + parent text
     const legendItems: { color: string; text: string }[] = [];
     container.querySelectorAll<HTMLElement>("div[style]").forEach((el) => {
       const bg = el.style.backgroundColor;

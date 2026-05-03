@@ -36,7 +36,7 @@ function saveMessages(messages: Message[]) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
     }
   } catch {
-    // Storage full or unavailable — ignore
+    // Storage full or unavailable - ignore
   }
 }
 
@@ -205,7 +205,7 @@ export function ChatInterface({ initialQuery, suggestedPrompts, sectionLabel }: 
       }
     } catch (error) {
       const msg = (error as Error).message;
-      // Show user-friendly message — never expose API key names or internal config
+      // Show user-friendly message - never expose API key names or internal config
       const userMessage = msg.includes("429") || msg.includes("limit")
         ? msg  // Rate limit messages are already user-friendly
         : "Something went wrong. Please try again or contact your admin if this persists.";

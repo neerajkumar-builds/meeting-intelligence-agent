@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: "title and body are required" }, { status: 400 });
     }
 
-    // Build Slack Block Kit blocks — split long content into multiple sections (max 3000 chars each)
+    // Build Slack Block Kit blocks - split long content into multiple sections (max 3000 chars each)
     const blocks: Record<string, unknown>[] = [
       {
         type: "header",

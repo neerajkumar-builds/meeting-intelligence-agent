@@ -89,7 +89,7 @@ export default function RepsIndexPage() {
   if (error) {
     return (
       <div>
-        <PageHeader title={`${sectionLabel} — Reps`} />
+        <PageHeader title={`${sectionLabel} - Reps`} />
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
           <p className="text-sm text-destructive">Failed to load rep data: {(error as Error).message}</p>
         </div>
@@ -100,7 +100,7 @@ export default function RepsIndexPage() {
   return (
     <div>
       <PageHeader
-        title={`${sectionLabel} — Reps`}
+        title={`${sectionLabel} - Reps`}
         description={reps.length > 0 ? `${reps.length} reps with scored meetings` : undefined}
       />
 

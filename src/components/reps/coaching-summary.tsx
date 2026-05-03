@@ -27,7 +27,7 @@ const PRIMARY_KEYS = new Set(["strengths", "improvements"]);
 
 /** Replace em dashes with spaced hyphens - display only */
 function cleanText(text: string): string {
-  return text.replace(/\u2014/g, " - ").replace(/—/g, " - ");
+  return text.replace(/\u2014/g, " - ").replace(/ -/g, " - ");
 }
 
 /** Extract first sentence (up to first period/!/? after 40 chars, max 150 chars) */

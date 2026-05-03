@@ -2,7 +2,7 @@ let cachedChannels: { id: string; name: string }[] | null = null;
 let cachedAt = 0;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-// Only show channels matching these patterns — prevents accidental posts to client/unrelated channels
+// Only show channels matching these patterns - prevents accidental posts to client/unrelated channels
 // Set SLACK_ALLOWED_CHANNELS env var as comma-separated channel names to override
 const DEFAULT_ALLOWED = ["general", "meeting-intel", "fullfunnel"];
 

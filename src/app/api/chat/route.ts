@@ -83,7 +83,7 @@ function estimateTokens(text: string): number {
   return Math.ceil(text.length / 4);
 }
 
-// Token budget — keeps total prompt under API rate limits
+// Token budget - keeps total prompt under API rate limits
 // System prompt ~800 tokens, reserve ~4K for output, ~500 for user message + overhead
 const MAX_CONTEXT_TOKENS = 4500;
 
@@ -294,7 +294,7 @@ export async function POST(request: NextRequest) {
       messages: messageParams,
     });
 
-    // Await the HTTP connection — catches auth/rate-limit/payload errors
+    // Await the HTTP connection - catches auth/rate-limit/payload errors
     try {
       await stream.withResponse();
     } catch (apiError) {

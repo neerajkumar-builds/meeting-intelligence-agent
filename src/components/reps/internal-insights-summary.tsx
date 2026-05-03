@@ -24,7 +24,7 @@ const SENTIMENT_COLORS: Record<string, string> = {
 
 /** Replace em dashes - display only */
 function cleanText(text: string): string {
-  return text.replace(/\u2014/g, " - ").replace(/—/g, " - ");
+  return text.replace(/\u2014/g, " - ").replace(/ -/g, " - ");
 }
 
 export function InternalInsightsSummary({ repName }: InternalInsightsSummaryProps) {

@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-// Login helper — reused across tests
+// Login helper - reused across tests
 async function login(page: import("@playwright/test").Page) {
   await page.goto("/login");
   await page.fill('input[type="email"]', process.env.TEST_EMAIL ?? "neeraj@fullfunnel.co");

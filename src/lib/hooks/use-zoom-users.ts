@@ -21,6 +21,6 @@ export function useZoomUsers(enabledOnly = true) {
       if (error) throw error;
       return (data ?? []) as ZoomUserRow[];
     },
-    staleTime: 30 * 60 * 1000, // 30 min — rep list rarely changes
+    staleTime: 30 * 60 * 1000, // 30 min - rep list rarely changes
   });
 }

@@ -54,9 +54,9 @@ const ACCENT_BORDERS: Record<string, string> = {
   indigo: "border-l-4 border-l-indigo-400 dark:border-l-indigo-600",
 };
 
-/** Replace em dashes with spaced hyphens — display only, never modifies source data */
+/** Replace em dashes with spaced hyphens - display only, never modifies source data */
 function cleanText(text: string): string {
-  return text.replace(/\u2014/g, " - ").replace(/—/g, " - ");
+  return text.replace(/\u2014/g, " - ").replace(/ -/g, " - ");
 }
 
 // Detect numbered lists like "1. First 2. Second" (with or without newlines)

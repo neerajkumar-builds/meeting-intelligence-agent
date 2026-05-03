@@ -79,7 +79,7 @@ export default function CompaniesIndexPage() {
   if (error) {
     return (
       <div>
-        <PageHeader title={`${sectionLabel} — Companies`} />
+        <PageHeader title={`${sectionLabel} - Companies`} />
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
           <p className="text-sm text-destructive">Failed to load data: {(error as Error).message}</p>
         </div>
@@ -90,7 +90,7 @@ export default function CompaniesIndexPage() {
   return (
     <div>
       <PageHeader
-        title={`${sectionLabel} — Companies`}
+        title={`${sectionLabel} - Companies`}
         description={search ? `Showing ${companies.filter(c => c.name.toLowerCase().includes(search.toLowerCase())).length} of ${companies.length} companies` : `${companies.length} companies with scored meetings`}
       />
 

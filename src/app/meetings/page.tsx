@@ -84,7 +84,7 @@ export default function MeetingFeedPage() {
   if (error) {
     return (
       <div>
-        <PageHeader title={`${sectionLabel} — Meetings`} />
+        <PageHeader title={`${sectionLabel} - Meetings`} />
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
           <p className="text-sm text-destructive">
             Failed to load meetings: {(error as Error).message}
@@ -97,7 +97,7 @@ export default function MeetingFeedPage() {
   return (
     <div>
       <PageHeader
-        title={`${sectionLabel} — Meetings`}
+        title={`${sectionLabel} - Meetings`}
         description={hasActiveFilters ? `Showing ${filtered.length} of ${meetings?.length ?? 0} meetings` : `${filtered.length} meeting${filtered.length !== 1 ? "s" : ""}`}
       />
 

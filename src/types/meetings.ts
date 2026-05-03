@@ -1,7 +1,7 @@
 import type { ScoringStageType } from "@/lib/constants";
 
 /**
- * Row from the `meetings_list` view — lightweight, no transcript or JSONB scores.
+ * Row from the `meetings_list` view - lightweight, no transcript or JSONB scores.
  * Used by: Team Scorecard, Meeting Feed, Company View
  */
 export interface MeetingsListRow {
@@ -20,7 +20,7 @@ export interface MeetingsListRow {
 }
 
 /**
- * Full row from `scored_meetings` table — used for Meeting Detail only.
+ * Full row from `scored_meetings` table - used for Meeting Detail only.
  * Includes JSONB score fields and transcript.
  */
 export interface ScoredMeetingRow {
@@ -54,12 +54,12 @@ export interface ScoredMeetingRow {
   resolution_method: string | null;
 
   scoring_stage_type: ScoringStageType | null;
-  rep_score: unknown; // JSONB — varies by stage
-  meeting_score: unknown; // JSONB — discovery only
-  icp_score: unknown; // JSONB — discovery only
-  engagement_score: unknown; // JSONB — follow_up only
-  delivery_score: unknown; // JSONB — onboarding only
-  internal_summary: unknown; // JSONB — internal only
+  rep_score: unknown; // JSONB - varies by stage
+  meeting_score: unknown; // JSONB - discovery only
+  icp_score: unknown; // JSONB - discovery only
+  engagement_score: unknown; // JSONB - follow_up only
+  delivery_score: unknown; // JSONB - onboarding only
+  internal_summary: unknown; // JSONB - internal only
   client_health_score: number | null;
   overall_score: number | null;
 
@@ -76,7 +76,7 @@ export interface ScoredMeetingRow {
 }
 
 /**
- * Row from `zoom_users` table — rep configuration.
+ * Row from `zoom_users` table - rep configuration.
  */
 export interface ZoomUserRow {
   id: string;
@@ -91,7 +91,7 @@ export interface ZoomUserRow {
 }
 
 /**
- * Row from `scoring_run_log` table — pipeline observability.
+ * Row from `scoring_run_log` table - pipeline observability.
  */
 export interface ScoringRunLogRow {
   id: string;

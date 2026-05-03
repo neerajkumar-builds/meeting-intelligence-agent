@@ -31,7 +31,7 @@ export function IntelligenceSidebar({ companyName }: IntelligenceSidebarProps) {
             <SidebarContent data={data} isLoading={isLoading} error={error} />
           </aside>
         ) : (
-          /* Floating edge tab — pinned to right edge of content area */
+          /* Floating edge tab - pinned to right edge of content area */
           <button
             onClick={() => setExpanded(true)}
             className="fixed right-0 top-1/3 z-30 flex items-center gap-1.5 pl-3 pr-2 py-2.5 rounded-l-lg bg-[#146DFA] text-white text-xs font-medium shadow-lg hover:pr-4 transition-all duration-200"
