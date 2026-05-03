@@ -9,6 +9,22 @@ Loads context and reports the current state of the Meeting Intelligence project.
 
 ## Steps
 
+### 0. Load context sources
+
+Read these files to build full awareness:
+- `CLAUDE.md` — auto-loaded, but verify you've read it
+- `migration/knowledge-graph.yaml` — component dependency map
+- `migration/session-handover.md` — what happened last session
+
+Query `project_tracker` table in dev Supabase (`burcfsxsxgabknmodsrd`) via Supabase MCP:
+```sql
+SELECT type, reference_id, status, title, created_at 
+FROM project_tracker 
+ORDER BY created_at DESC LIMIT 20;
+```
+
+This gives you CR status, recent session logs, and key decisions — all in one query.
+
 ### 1. Quick environment check
 
 Run an abbreviated version of `/mi-env-check`:
@@ -38,15 +54,21 @@ If a CR branch exists, report: "In progress: <CR-ID> on branch <branch-name> (<N
 
 Also check for uncommitted changes and report modified files.
 
-### 3. Report completed CRs
+### 3. Report CR status
 
-Read `migration/changelog-revision-1.md` if it exists. List completed CRs with their completion dates.
+Query `project_tracker` for current CR status:
+```sql
+SELECT reference_id, status, title FROM project_tracker 
+WHERE type = 'cr_status' 
+ORDER BY (details->>'implementation_order')::int;
+```
 
-If the file doesn't exist, report: "No CRs completed yet."
+Show completed, in_progress, and pending CRs.
+Also read `migration/changelog-revision-1.md` for implementation details of completed CRs.
 
 ### 4. Determine next CR
 
-Read `migration/change-requests.json` and the change log to determine which CRs are done vs. pending.
+From the tracker query results, find the first CR with status = 'pending'.
 
 The implementation order from the plan is:
 1. CR-004 (Critical, Compliance)

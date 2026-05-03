@@ -1,0 +1,259 @@
+# Meeting Intelligence - Component Dependency Graph
+# Read this before ANY code change to understand blast radius.
+# Last updated: 2026-05-03
+
+features:
+  scorecard:
+    page: src/app/page.tsx
+    components:
+      - src/components/scorecard/summary-cards.tsx
+      - src/components/scorecard/rep-comparison-table.tsx
+      - src/components/scorecard/score-distribution-chart.tsx
+      - src/components/scorecard/insights-panel.tsx
+      - src/components/scorecard/score-trend-chart.tsx
+      - src/components/scorecard/stage-distribution.tsx
+      - src/components/scorecard/recent-activity.tsx
+      - src/components/scorecard/competitor-mentions.tsx
+    hooks: [use-meetings-list]
+    api_routes: []
+    supabase_tables: [meetings_list]
+    external_services: []
+    affected_by_crs: [CR-001, CR-004]
+
+  meeting-feed:
+    page: src/app/meetings/page.tsx
+    components:
+      - src/components/shared/meeting-card.tsx
+      - src/components/meetings/meeting-filters.tsx
+    hooks: [use-meetings-list]
+    api_routes: []
+    supabase_tables: [meetings_list]
+    external_services: []
+    affected_by_crs: [CR-001, CR-004]
+
+  meeting-detail:
+    page: src/app/meetings/[id]/page.tsx
+    components:
+      - src/components/meetings/score-section.tsx
+      - src/components/meetings/intelligence-tabs.tsx
+      - src/components/meetings/transcript-viewer.tsx
+      - src/components/meetings/meeting-notes.tsx
+      - src/components/meetings/meeting-actions/actions-menu.tsx
+      - src/components/meetings/meeting-actions/draft-email-dialog.tsx
+      - src/components/meetings/meeting-actions/resummarize-dialog.tsx
+      - src/components/meetings/meeting-actions/meeting-prep-dialog.tsx
+      - src/components/companies/intelligence-sidebar/
+    hooks: [use-meeting-detail]
+    api_routes:
+      - /api/meetings/[id]/notes
+      - /api/actions/draft-email
+      - /api/actions/resummarize
+      - /api/actions/meeting-prep
+      - /api/notifications/slack
+    supabase_tables: [scored_meetings, meeting_notes]
+    external_services: [anthropic, slack]
+    affected_by_crs: [CR-005, CR-006, CR-009]
+
+  companies-index:
+    page: src/app/companies/page.tsx
+    components:
+      - src/components/shared/score-badge.tsx
+    hooks: [use-meetings-list]
+    api_routes: []
+    supabase_tables: [meetings_list]
+    external_services: []
+    affected_by_crs: [CR-001, CR-004]
+
+  company-detail:
+    page: src/app/companies/[name]/page.tsx
+    components:
+      - src/components/companies/company-header.tsx
+      - src/components/companies/meeting-timeline.tsx
+      - src/components/companies/health-trend-chart.tsx
+      - src/components/companies/intelligence-sidebar/
+    hooks: [use-company-meetings, use-company-intelligence]
+    api_routes: [/api/companies/[name]/intelligence]
+    supabase_tables: [meetings_list, scored_meetings, meeting_chunks]
+    external_services: []
+    affected_by_crs: [CR-001, CR-004, CR-007, CR-008]
+
+  reps-index:
+    page: src/app/reps/page.tsx
+    components:
+      - src/components/shared/score-badge.tsx
+    hooks: [use-meetings-list]
+    api_routes: []
+    supabase_tables: [meetings_list]
+    external_services: []
+    affected_by_crs: [CR-001, CR-004]
+
+  rep-detail:
+    page: src/app/reps/[name]/page.tsx
+    components:
+      - src/components/reps/coaching-summary.tsx
+      - src/components/reps/internal-insights-summary.tsx
+      - src/components/shared/meeting-card.tsx
+      - src/components/shared/chart-download.tsx
+    hooks: [use-meetings-list, use-rep-coaching, use-rep-internal-insights]
+    api_routes:
+      - /api/reps/[name]/coaching
+      - /api/reps/[name]/internal-insights
+    supabase_tables: [meetings_list, scored_meetings]
+    external_services: []
+    affected_by_crs: [CR-001, CR-002, CR-003, CR-004]
+
+  ask-blarney:
+    page: src/app/search/page.tsx
+    components:
+      - src/components/search/chat-interface.tsx
+      - src/components/search/chat-input.tsx
+      - src/components/search/chat-message.tsx
+      - src/components/search/suggested-prompts.tsx
+      - src/components/search/source-citation.tsx
+    hooks: []
+    api_routes: [/api/chat, /api/analytics/chat]
+    supabase_tables: [scored_meetings, meeting_chunks, chat_analytics]
+    external_services: [anthropic, gemini]
+    affected_by_crs: []
+
+  system-health:
+    page: src/app/health/page.tsx
+    components:
+      - src/components/health/system-metrics.tsx
+      - src/components/health/status-breakdown.tsx
+      - src/components/health/processing-log.tsx
+      - src/components/health/connection-status.tsx
+      - src/components/health/pipeline-status.tsx
+    hooks: [use-pipeline-stats, use-scoring-run-log]
+    api_routes: []
+    supabase_tables: [scored_meetings, meeting_chunks, scoring_run_log]
+    external_services: []
+    affected_by_crs: []
+
+  login:
+    page: src/app/login/page.tsx
+    components: []
+    hooks: []
+    api_routes: []
+    supabase_tables: []
+    external_services: [supabase-auth]
+    affected_by_crs: []
+
+# Shared components used across multiple features
+shared_components:
+  - path: src/components/shared/score-badge.tsx
+    used_by: [meeting-feed, companies-index, reps-index, rep-detail]
+  - path: src/components/shared/stage-type-badge.tsx
+    used_by: [meeting-detail, meeting-feed]
+  - path: src/components/shared/meeting-card.tsx
+    used_by: [meeting-feed, rep-detail, scorecard]
+  - path: src/components/shared/empty-state.tsx
+    used_by: [scorecard, meeting-feed, companies-index, reps-index, rep-detail, system-health]
+  - path: src/components/shared/send-to-slack.tsx
+    used_by: [meeting-detail, ask-blarney]
+  - path: src/components/shared/sync-indicator.tsx
+    used_by: [layout/sidebar-nav]
+  - path: src/components/layout/sidebar-nav.tsx
+    used_by: [all pages via app-shell]
+    affected_by_crs: [CR-001]
+
+# Critical hooks - changes here cascade widely
+critical_hooks:
+  use-meetings-list:
+    file: src/lib/hooks/use-meetings-list.ts
+    queries: meetings_list (view)
+    used_by: [scorecard, meeting-feed, companies-index, reps-index, rep-detail]
+    note: "Most impactful hook - changes affect 5+ pages"
+    affected_by_crs: [CR-001, CR-004]
+
+  use-meeting-detail:
+    file: src/lib/hooks/use-meeting-detail.ts
+    queries: scored_meetings (full row by ID)
+    used_by: [meeting-detail]
+
+  use-company-intelligence:
+    file: src/lib/hooks/use-company-intelligence.ts
+    queries: /api/companies/[name]/intelligence
+    used_by: [company-detail, meeting-detail]
+    affected_by_crs: [CR-004, CR-007, CR-008]
+
+  use-rep-coaching:
+    file: src/lib/hooks/use-rep-coaching.ts
+    queries: /api/reps/[name]/coaching
+    used_by: [rep-detail]
+    affected_by_crs: [CR-002, CR-004]
+
+# CR impact map (reverse lookup: which features does each CR affect?)
+cr_impact:
+  CR-001:
+    features: [scorecard, meeting-feed, companies-index, company-detail, reps-index, rep-detail]
+    hooks: [use-meetings-list]
+    components: [sidebar-nav]
+    note: "Architecture change - touches navigation, filtering, every list page"
+    requires_n8n: true
+
+  CR-002:
+    features: [rep-detail]
+    hooks: [use-rep-coaching]
+    new_files: [/api/reps/[name]/summary, components/reps/rep-strength-summary.tsx, hooks/use-rep-summary.ts]
+    note: "New API route + component, localized to rep page"
+
+  CR-003:
+    features: [rep-detail]
+    hooks: []
+    note: "Date filter on rep page only, same pattern as meetings page"
+
+  CR-004:
+    features: [scorecard, meeting-feed, companies-index, company-detail, reps-index, rep-detail]
+    hooks: [use-meetings-list, use-company-intelligence, use-rep-coaching]
+    api_routes: [/api/companies/[name]/intelligence, /api/reps/[name]/coaching]
+    note: "Filter-only change but wide impact - affects every page showing meeting data"
+
+  CR-005:
+    features: [meeting-detail]
+    components: [score-section.tsx]
+    note: "Localized to score display on meeting detail page"
+
+  CR-006:
+    features: [meeting-detail]
+    note: "Recording URL behavior change on meeting detail only"
+
+  CR-007:
+    features: [company-detail, meeting-detail]
+    components: [intelligence-sidebar/]
+    api_routes: [/api/companies/[name]/intelligence]
+    note: "Intelligence panel visibility and content enhancements"
+
+  CR-008:
+    features: [company-detail]
+    components: [intelligence-sidebar/meddic-section.tsx]
+    api_routes: [/api/companies/[name]/intelligence]
+    types: [src/types/intelligence.ts]
+    note: "Framework customization - MEDDIC to BANT/SPICED"
+
+  CR-009:
+    features: [meeting-detail]
+    components: [score-section.tsx, intelligence-tabs.tsx]
+    note: "UI declutter on meeting detail page"
+
+# Decisions log
+decisions:
+  - date: 2026-05-03
+    topic: supabase-environments
+    decision: "project_n8n (cxrjlmquzhfueqrudiuy) stays as production, FF_Internal_Initiatives (burcfsxsxgabknmodsrd) as dev"
+    reason: "Changing n8n Supabase credentials mid-pipeline risks data loss"
+
+  - date: 2026-05-03
+    topic: dev-n8n-strategy
+    decision: "Dev n8n workflows stay dormant, seed data from production instead"
+    reason: "Avoids double LLM costs from both instances processing same Zoom meetings"
+
+  - date: 2026-05-03
+    topic: model-configuration
+    decision: "All 4 LLM routes use CHAT_MODEL env var with fallback to claude-sonnet-4-20250514"
+    reason: "Single point of control for model changes across all routes"
+
+  - date: 2026-05-03
+    topic: promotion-workflow
+    decision: "Manual git push + Vercel CLI deploy (no auto-deploy from GitHub)"
+    reason: "Vercel GitHub App not installed on neerajkumar-builds org yet"

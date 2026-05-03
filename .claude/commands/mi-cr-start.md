@@ -58,15 +58,35 @@ Run the equivalent of `/mi-checkpoint pre-<CR-ID>`:
 - Create git tag `checkpoint/pre-<cr-id>-<date>`
 - Record state to `.checkpoints.log`
 
-### 6. Display implementation guidance
+### 6. Read knowledge graph for blast radius
 
-From the CR JSON, display:
+Read `migration/knowledge-graph.yaml` and find this CR in the `cr_impact` section.
+
+Display the **Impact Brief**:
+- **Affected features** (which pages will change)
+- **Affected components** (which files to modify)
+- **Affected hooks** (which data flows change)
+- **Affected API routes** (which backends change)
+- **Affected tables** (any schema impact)
+- **Corner cases** to watch for
+
+### 7. Update project tracker
+
+Write to `project_tracker` in dev Supabase (`burcfsxsxgabknmodsrd`):
+```sql
+INSERT INTO project_tracker (type, reference_id, status, title, details)
+VALUES ('cr_status', '<CR-ID>', 'in_progress', '<title>', '{"started_at":"<date>"}');
+```
+
+### 8. Display implementation guidance
+
+From the CR JSON (`migration/change-requests.json`), display:
 - **Files to modify** (the `files_to_modify` array)
 - **Verification criteria** (the `verification` field)
 
-Also read the plan at `~/.claude/plans/there-are-a-couple-golden-moore.md` for additional implementation details specific to this CR (search for the CR-ID in the plan).
+Also read `migration/plan.md` for additional implementation details specific to this CR.
 
-### 7. Ready message
+### 9. Ready message
 
 ```
 Ready to implement <CR-ID>: <title>

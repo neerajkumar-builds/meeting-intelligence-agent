@@ -107,7 +107,20 @@ Append to `migration/changelog-revision-1.md` (create if it doesn't exist):
 - **Rollback:** `git revert <merge-commit-sha>`
 ```
 
-### 11. Next steps
+### 11. Update project tracker
+
+Write completion to `project_tracker` in dev Supabase (`burcfsxsxgabknmodsrd`):
+```sql
+INSERT INTO project_tracker (type, reference_id, status, title, details)
+VALUES ('cr_status', '<CR-ID>', 'completed', '<title>', 
+  '{"completed_at":"<date>","files_modified":[<list>],"merge_sha":"<sha>"}');
+```
+
+### 12. Update session handover
+
+Update `migration/session-handover.md` with this CR's completion details.
+
+### 13. Next steps
 
 ```
 <CR-ID> merged to main.
