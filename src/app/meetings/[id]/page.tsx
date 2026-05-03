@@ -151,7 +151,7 @@ export default function MeetingDetailPage({
       {/* Recording Banner */}
       {meeting.recording_url && (
         <a
-          href={meeting.recording_url}
+          href={meeting.recording_url.replace("/rec/download/", "/rec/play/")}
           target="_blank"
           rel="noopener noreferrer"
           className="group block rounded-xl bg-gradient-to-r from-[#0B0E14] to-[#131820] border border-black/20 dark:border-white/10 shadow-sm overflow-hidden hover:border-[#2D8CFF]/40 transition-all duration-300"
