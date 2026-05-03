@@ -8,6 +8,7 @@ import {
   PieChart, Pie, Cell, Tooltip,
 } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -68,6 +69,21 @@ export default function RepProfilePage({
   const [stageFilter, setStageFilter] = useState("all");
   const [sortBy, setSortBy] = useState<"date" | "score">("date");
   const [dateRange, setDateRange] = useState("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+
+  function handlePeriodChange(v: string) {
+    setDateRange(v);
+    if (v !== "all") { setDateFrom(""); setDateTo(""); }
+  }
+  function handleDateFromChange(v: string) {
+    setDateFrom(v);
+    if (v) setDateRange("all");
+  }
+  function handleDateToChange(v: string) {
+    setDateTo(v);
+    if (v) setDateRange("all");
+  }
 
   const meetings = useMemo(() => {
     const now = new Date();
@@ -79,6 +95,8 @@ export default function RepProfilePage({
     return (allMeetings ?? []).filter((m) => {
       if (m.host_name !== repName) return false;
       if (dateCutoff && m.start_time && parseISO(m.start_time) < dateCutoff) return false;
+      if (dateFrom && m.start_time && parseISO(m.start_time) < parseISO(dateFrom + "T00:00:00")) return false;
+      if (dateTo && m.start_time && parseISO(m.start_time) > parseISO(dateTo + "T23:59:59")) return false;
       return true;
     });
   }, [allMeetings, repName, dateRange]);
@@ -195,10 +213,10 @@ export default function RepProfilePage({
             <p className="text-xs text-muted-foreground">{stats.total} meetings · {((stats.total / (teamMeetings.length || 1)) * 100).toFixed(0)}% of team volume</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <div className="flex items-center gap-1.5">
             <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
-            <Select value={dateRange} onValueChange={(v) => setDateRange(v ?? "all")}>
+            <Select value={dateRange} onValueChange={(v) => handlePeriodChange(v ?? "all")}>
               <SelectTrigger className="w-[110px] h-8 text-xs">
                 <SelectValue />
               </SelectTrigger>
@@ -209,6 +227,22 @@ export default function RepProfilePage({
                 <SelectItem value="90d">Last 90 Days</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => handleDateFromChange(e.target.value)}
+              className="w-[135px] h-8 text-xs"
+              placeholder="From"
+            />
+            <Input
+              type="date"
+              value={dateTo}
+              onChange={(e) => handleDateToChange(e.target.value)}
+              className="w-[135px] h-8 text-xs"
+              placeholder="To"
+            />
           </div>
           <button
             onClick={() => {
