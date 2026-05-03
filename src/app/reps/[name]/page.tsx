@@ -30,7 +30,7 @@ import { getStageLabel } from "@/lib/utils/stage";
 import { STAGE_CONFIG, type ScoringStageType } from "@/lib/constants";
 import { CoachingSummary } from "@/components/reps/coaching-summary";
 import { InternalInsightsSummary } from "@/components/reps/internal-insights-summary";
-import { ArrowLeft, User, TrendingUp, TrendingDown, Sparkles, ExternalLink, SlidersHorizontal, CalendarDays } from "lucide-react";
+import { ArrowLeft, User, TrendingUp, TrendingDown, Sparkles, ExternalLink, CalendarDays } from "lucide-react";
 import { parseISO, startOfWeek, format, subDays, subMonths } from "date-fns";
 
 const STAGE_COLORS: Record<string, string> = {
@@ -233,6 +233,19 @@ export default function RepProfilePage({
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          <Select value={stageFilter} onValueChange={(v) => setStageFilter(v ?? "all")}>
+            <SelectTrigger className="w-[120px] h-8 text-xs">
+              <SelectValue placeholder="All Stages" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Stages</SelectItem>
+              {(Object.entries(STAGE_CONFIG) as [ScoringStageType, (typeof STAGE_CONFIG)[ScoringStageType]][]).map(
+                ([key, config]) => (
+                  <SelectItem key={key} value={key}>{config.label}</SelectItem>
+                )
+              )}
+            </SelectContent>
+          </Select>
           <Select value={periodPreset} onValueChange={(v) => handlePeriodChange(v ?? "all")}>
             <SelectTrigger className="w-[110px] h-8 text-xs">
               <SelectValue />
@@ -422,37 +435,21 @@ export default function RepProfilePage({
       {/* Internal Meeting Insights - from scored_meetings internal_summary JSONB (read-only) */}
       <InternalInsightsSummary repName={repName} />
 
-      {/* Meetings — with filters */}
+      {/* Meetings */}
       <div>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+        <div className="flex items-center justify-between gap-2 mb-3">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Meetings {stageFilter !== "all" ? `· Showing ${filteredMeetings.length} of ${meetings.length}` : `· ${meetings.length} total`}
+            Meetings · {filteredMeetings.length}{stageFilter !== "all" || hasFiltersActive ? ` of ${allRepMeetings.length}` : ""} total
           </h3>
-          <div className="flex items-center gap-2 flex-wrap">
-            <SlidersHorizontal className="h-3 w-3 text-muted-foreground" />
-            <Select value={stageFilter} onValueChange={(v) => setStageFilter(v ?? "all")}>
-              <SelectTrigger className="w-[130px] h-7 text-xs">
-                <SelectValue placeholder="All Stages" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Stages</SelectItem>
-                {(Object.entries(STAGE_CONFIG) as [ScoringStageType, (typeof STAGE_CONFIG)[ScoringStageType]][]).map(
-                  ([key, config]) => (
-                    <SelectItem key={key} value={key}>{config.label}</SelectItem>
-                  )
-                )}
-              </SelectContent>
-            </Select>
-            <Select value={sortBy} onValueChange={(v) => setSortBy(v as "date" | "score")}>
-              <SelectTrigger className="w-[100px] h-7 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="date">By Date</SelectItem>
-                <SelectItem value="score">By Score</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as "date" | "score")}>
+            <SelectTrigger className="w-[100px] h-7 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="date">By Date</SelectItem>
+              <SelectItem value="score">By Score</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-2">
           {filteredMeetings.length === 0 ? (
