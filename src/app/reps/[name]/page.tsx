@@ -80,6 +80,10 @@ export default function RepProfilePage({
     setCustomRange(undefined);
     setPendingRange(undefined);
   }
+  function handleCalendarOpenChange(open: boolean) {
+    setCalendarOpen(open);
+    if (open) setPendingRange(customRange);
+  }
   function applyDateRange() {
     if (pendingRange?.from && pendingRange?.to) {
       setCustomRange(pendingRange);
@@ -109,6 +113,11 @@ export default function RepProfilePage({
     });
   }, [allMeetings, repName, periodPreset, customRange]);
 
+  const allRepMeetings = useMemo(
+    () => (allMeetings ?? []).filter((m) => m.host_name === repName),
+    [allMeetings, repName]
+  );
+  const hasFiltersActive = periodPreset !== "all" || !!customRange;
   const teamMeetings = useMemo(() => allMeetings ?? [], [allMeetings]);
 
   const stats = useMemo(() => {
@@ -184,7 +193,7 @@ export default function RepProfilePage({
     );
   }
 
-  if (!stats) {
+  if (allRepMeetings.length === 0) {
     return (
       <div>
         <Link href="/reps" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
@@ -195,14 +204,16 @@ export default function RepProfilePage({
     );
   }
 
-  const delta = stats.avgScore && stats.teamAvg ? stats.avgScore - stats.teamAvg : 0;
+  const delta = stats ? (stats.avgScore && stats.teamAvg ? stats.avgScore - stats.teamAvg : 0) : 0;
   const aboveTeam = delta >= 0;
 
-  const stageData = Array.from(stats.stageCounts.entries()).map(([stage, count]) => ({
-    name: getStageLabel(stage),
-    value: count,
-    color: STAGE_COLORS[stage] ?? "#94a3b8",
-  }));
+  const stageData = stats
+    ? Array.from(stats.stageCounts.entries()).map(([stage, count]) => ({
+        name: getStageLabel(stage),
+        value: count,
+        color: STAGE_COLORS[stage] ?? "#94a3b8",
+      }))
+    : [];
 
   return (
     <div className="space-y-5">
@@ -218,7 +229,7 @@ export default function RepProfilePage({
           </div>
           <div>
             <h1 className="text-xl font-semibold">{repName}</h1>
-            <p className="text-xs text-muted-foreground">{stats.total} meetings · {((stats.total / (teamMeetings.length || 1)) * 100).toFixed(0)}% of team volume</p>
+            <p className="text-xs text-muted-foreground">{hasFiltersActive ? `${meetings.length} of ${allRepMeetings.length}` : allRepMeetings.length} meetings · {((allRepMeetings.length / (teamMeetings.length || 1)) * 100).toFixed(0)}% of team volume</p>
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -233,7 +244,7 @@ export default function RepProfilePage({
               <SelectItem value="90d">Last 90 Days</SelectItem>
             </SelectContent>
           </Select>
-          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+          <Popover open={calendarOpen} onOpenChange={handleCalendarOpenChange}>
             <PopoverTrigger
               className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs hover:bg-muted transition-colors h-8"
             >
@@ -284,6 +295,20 @@ export default function RepProfilePage({
         </div>
       </div>
 
+      {!stats ? (
+        <div className="rounded-lg border bg-card p-8 text-center">
+          <CalendarDays className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+          <p className="text-sm font-medium">No meetings in this date range</p>
+          <p className="text-xs text-muted-foreground mt-1 mb-3">Try a different period or clear the filter</p>
+          <button
+            onClick={() => { handlePeriodChange("all"); clearDateRange(); }}
+            className="text-xs text-[#146DFA] hover:underline"
+          >
+            Clear all filters
+          </button>
+        </div>
+      ) : (
+      <>
       {/* KPI Row — tinted cards with score bars */}
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         <Card className={`transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${getScoreTint(stats.avgScore)}`}>
@@ -448,6 +473,8 @@ export default function RepProfilePage({
           </Link>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }
