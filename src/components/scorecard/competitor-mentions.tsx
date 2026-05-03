@@ -5,7 +5,18 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/lib/supabase/client";
 import { TRACKED_VENDORS } from "@/lib/constants";
-import { Radar, ExternalLink } from "lucide-react";
+import { BrandTooltip } from "@/components/shared/chart-tooltip";
+import { ChartDownload } from "@/components/shared/chart-download";
+import { Radar, ExternalLink, ChevronDown } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  Tooltip,
+  Cell,
+} from "recharts";
 
 interface VendorMention {
   vendor: string;
@@ -20,6 +31,7 @@ interface VendorMention {
 export function CompetitorMentions() {
   const [mentions, setMentions] = useState<VendorMention[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedVendor, setSelectedVendor] = useState<string | null>(null);
 
   useEffect(() => {
     async function findMentions() {
@@ -94,6 +106,20 @@ export function CompetitorMentions() {
     (a, b) => b[1].length - a[1].length
   );
 
+  const chartData = sortedEntries.slice(0, 8).map(([vendor, items]) => ({
+    name: vendor,
+    mentions: items.length,
+  }));
+
+  const chartHeight = Math.max(120, chartData.length * 40 + 20);
+  const selectedItems = selectedVendor ? grouped.get(selectedVendor) : null;
+
+  // Gradient from deep blue (most mentions) to lighter blue (fewest)
+  const getBarFill = (index: number) => {
+    const lightness = 40 + index * 5; // 40% → 75% lightness
+    return `hsl(217, 91%, ${Math.min(lightness, 72)}%)`;
+  };
+
   return (
     <Card>
       <CardContent className="p-6">
@@ -105,34 +131,103 @@ export function CompetitorMentions() {
           </span>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {sortedEntries.slice(0, 6).map(([vendor, items]) => (
-            <div key={vendor} className="rounded-lg border p-3">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">{vendor}</span>
-                <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                  {items.length} mention{items.length !== 1 ? "s" : ""}
-                </span>
-              </div>
-              <div className="space-y-1.5">
-                {items.slice(0, 2).map((item, i) => (
-                  <Link
-                    key={i}
-                    href={`/meetings/${item.meetingId}`}
-                    className="flex items-start gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <ExternalLink className="h-3 w-3 mt-0.5 shrink-0" />
-                    <span className="line-clamp-2">
-                      <span className="font-medium text-foreground">{item.topic}</span>
-                      {item.companyName && ` (${item.companyName})`}
-                      {" - "}{item.snippet}
-                    </span>
-                  </Link>
+        <ChartDownload title="Vendor Mentions">
+          <ResponsiveContainer width="100%" height={chartHeight}>
+            <BarChart
+              data={chartData}
+              layout="vertical"
+              margin={{ top: 0, right: 30, left: 0, bottom: 0 }}
+            >
+              <XAxis
+                type="number"
+                allowDecimals={false}
+                tick={{ fontSize: 11 }}
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis
+                type="category"
+                dataKey="name"
+                width={90}
+                tick={{ fontSize: 12 }}
+                tickLine={false}
+                axisLine={false}
+              />
+              <Tooltip
+                content={<BrandTooltip />}
+                cursor={{ fill: "transparent" }}
+              />
+              <Bar
+                dataKey="mentions"
+                name="Mentions"
+                radius={[0, 4, 4, 0]}
+                cursor="pointer"
+                onClick={(data: { name?: string }) => {
+                  const vendor = data.name;
+                  if (!vendor) return;
+                  setSelectedVendor((prev) =>
+                    prev === vendor ? null : vendor
+                  );
+                }}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell
+                    key={entry.name}
+                    fill={
+                      selectedVendor === entry.name
+                        ? "#0B4BC2"
+                        : getBarFill(index)
+                    }
+                    fillOpacity={
+                      selectedVendor && selectedVendor !== entry.name
+                        ? 0.3
+                        : 1
+                    }
+                  />
                 ))}
-              </div>
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartDownload>
+
+        {!selectedVendor && (
+          <p className="text-xs font-medium text-primary/60 mt-2 flex items-center gap-1.5">
+            <span className="inline-block h-1 w-1 rounded-full bg-primary/60" />
+            Click a bar to see meeting details
+          </p>
+        )}
+
+        {selectedVendor && selectedItems && (
+          <div className="mt-3 rounded-lg border bg-muted/30 p-3">
+            <button
+              className="flex items-center gap-1.5 text-sm font-medium mb-2 hover:text-primary transition-colors w-full text-left"
+              onClick={() => setSelectedVendor(null)}
+            >
+              <ChevronDown className="h-3.5 w-3.5" />
+              {selectedVendor} ({selectedItems.length} mention
+              {selectedItems.length !== 1 ? "s" : ""})
+            </button>
+            <div className="space-y-1.5">
+              {selectedItems.map((item, i) => (
+                <Link
+                  key={i}
+                  href={`/meetings/${item.meetingId}`}
+                  className="flex items-start gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ExternalLink className="h-3 w-3 mt-0.5 shrink-0" />
+                  <span className="line-clamp-2">
+                    <span className="font-medium text-foreground">
+                      {item.topic}
+                    </span>
+                    {item.companyName && ` (${item.companyName})`}
+                    {" - "}
+                    {item.snippet}
+                  </span>
+                </Link>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
