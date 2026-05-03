@@ -27,8 +27,8 @@ import { getStageLabel } from "@/lib/utils/stage";
 import { STAGE_CONFIG, type ScoringStageType } from "@/lib/constants";
 import { CoachingSummary } from "@/components/reps/coaching-summary";
 import { InternalInsightsSummary } from "@/components/reps/internal-insights-summary";
-import { ArrowLeft, User, TrendingUp, TrendingDown, Sparkles, ExternalLink, SlidersHorizontal } from "lucide-react";
-import { parseISO, startOfWeek, format } from "date-fns";
+import { ArrowLeft, User, TrendingUp, TrendingDown, Sparkles, ExternalLink, SlidersHorizontal, CalendarDays } from "lucide-react";
+import { parseISO, startOfWeek, format, subDays, subMonths } from "date-fns";
 
 const STAGE_COLORS: Record<string, string> = {
   discovery_scoping: "#146DFA",
@@ -65,14 +65,23 @@ export default function RepProfilePage({
   const { data: allMeetings, isLoading } = useMeetingsList();
   const router = useRouter();
 
-  // Meeting filter state
   const [stageFilter, setStageFilter] = useState("all");
   const [sortBy, setSortBy] = useState<"date" | "score">("date");
+  const [dateRange, setDateRange] = useState("all");
 
-  const meetings = useMemo(
-    () => (allMeetings ?? []).filter((m) => m.host_name === repName),
-    [allMeetings, repName]
-  );
+  const meetings = useMemo(() => {
+    const now = new Date();
+    const dateCutoff =
+      dateRange === "7d" ? subDays(now, 7) :
+      dateRange === "30d" ? subDays(now, 30) :
+      dateRange === "90d" ? subMonths(now, 3) : null;
+
+    return (allMeetings ?? []).filter((m) => {
+      if (m.host_name !== repName) return false;
+      if (dateCutoff && m.start_time && parseISO(m.start_time) < dateCutoff) return false;
+      return true;
+    });
+  }, [allMeetings, repName, dateRange]);
 
   const teamMeetings = useMemo(() => allMeetings ?? [], [allMeetings]);
 
@@ -317,8 +326,19 @@ export default function RepProfilePage({
           <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Meetings {stageFilter !== "all" ? `· Showing ${filteredMeetings.length} of ${meetings.length}` : `· ${meetings.length} total`}
           </h3>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <SlidersHorizontal className="h-3 w-3 text-muted-foreground" />
+            <Select value={dateRange} onValueChange={(v) => setDateRange(v ?? "all")}>
+              <SelectTrigger className="w-[100px] h-7 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="7d">7 Days</SelectItem>
+                <SelectItem value="30d">30 Days</SelectItem>
+                <SelectItem value="90d">90 Days</SelectItem>
+              </SelectContent>
+            </Select>
             <Select value={stageFilter} onValueChange={(v) => setStageFilter(v ?? "all")}>
               <SelectTrigger className="w-[130px] h-7 text-xs">
                 <SelectValue placeholder="All Stages" />
