@@ -232,7 +232,7 @@ export default function RepProfilePage({
             <p className="text-xs text-muted-foreground">{hasFiltersActive ? `${meetings.length} of ${allRepMeetings.length}` : allRepMeetings.length} meetings · {((allRepMeetings.length / (teamMeetings.length || 1)) * 100).toFixed(0)}% of team volume</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-end gap-3 flex-wrap">
           <div>
             <label className="text-[10px] font-medium text-muted-foreground mb-1 block">Stage</label>
             <Select value={stageFilter} onValueChange={(v) => setStageFilter(v ?? "all")}>
