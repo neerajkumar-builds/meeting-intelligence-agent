@@ -12,6 +12,7 @@ export interface MeetingsListParams {
   dateTo?: string;
   scoreMin?: number;
   scoreMax?: number;
+  excludeInternal?: boolean;
 }
 
 export function useMeetingsList(params: MeetingsListParams = {}) {
@@ -31,6 +32,8 @@ export function useMeetingsList(params: MeetingsListParams = {}) {
       }
       if (params.stageTypes?.length) {
         query = query.in("scoring_stage_type", params.stageTypes);
+      } else if (params.excludeInternal !== false) {
+        query = query.neq("scoring_stage_type", "internal");
       }
       if (params.dateFrom) {
         query = query.gte("start_time", params.dateFrom);

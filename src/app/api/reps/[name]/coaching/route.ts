@@ -27,6 +27,7 @@ export async function GET(
       .from("scored_meetings")
       .select("id, topic, start_time, scoring_stage_type, overall_score, rep_score")
       .eq("host_name", repName)
+      .or("scoring_stage_type.neq.internal,scoring_stage_type.is.null")
       .not("rep_score", "is", null)
       .order("start_time", { ascending: false });
 

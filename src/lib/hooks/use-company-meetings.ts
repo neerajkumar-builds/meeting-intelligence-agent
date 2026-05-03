@@ -14,6 +14,7 @@ export function useCompanyMeetings(companyName: string | null) {
         .from("meetings_list")
         .select("*")
         .eq("company_name", companyName)
+        .neq("scoring_stage_type", "internal")
         .order("start_time", { ascending: false });
 
       if (error) throw error;

@@ -2,7 +2,8 @@ import { describe, it, expect, vi } from "vitest";
 
 // Mock Supabase
 const mockOrder = vi.fn().mockResolvedValue({ data: [], error: null });
-const mockEq = vi.fn().mockReturnValue({ order: mockOrder });
+const mockOr = vi.fn().mockReturnValue({ order: mockOrder });
+const mockEq = vi.fn().mockReturnValue({ or: mockOr, order: mockOrder });
 const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
 const mockFrom = vi.fn().mockReturnValue({ select: mockSelect });
 const mockIlike = vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue({ data: [] }) });
@@ -49,6 +50,22 @@ describe("Intelligence API", () => {
     expect(data.meddicGaps).toBeDefined();
     expect(data.meddicGaps.dimensions).toHaveLength(6);
     expect(data.meddicGaps.overallCoverage).toBe(0);
+  });
+});
+
+describe("Internal meeting exclusion (CR-004)", () => {
+  it("excludes internal meetings from query", async () => {
+    mockOr.mockClear();
+    const { GET } = await import("@/app/api/companies/[name]/intelligence/route");
+    const request = new Request("http://localhost/api/companies/Acme/intelligence");
+    const params = Promise.resolve({ name: "Acme" });
+
+    await GET(
+      request as unknown as Parameters<typeof GET>[0],
+      { params } as unknown as Parameters<typeof GET>[1]
+    );
+
+    expect(mockOr).toHaveBeenCalledWith("scoring_stage_type.neq.internal,scoring_stage_type.is.null");
   });
 });
 
