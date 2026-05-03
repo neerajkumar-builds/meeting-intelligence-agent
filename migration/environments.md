@@ -19,7 +19,7 @@
 | **Vercel** | Project `prj_3sbGLoNzzEAXAOGorABwnFf61Oqm` |
 | **Vercel URL** | _Current personal URL_ |
 | **Supabase** | `burcfsxsxgabknmodsrd` — `https://burcfsxsxgabknmodsrd.supabase.co` (FF_Internal_Initiatives) |
-| **n8n Workflows** | MI\|0-DEV through MI\|4-DEV (dormant) |
+| **n8n Workflows** | MI-DEV\|1 through MI-DEV\|4 (dormant, tagged "Dev") |
 | **Slack Channels** | `#meeting-intel-dev` |
 
 ## Environment Variables

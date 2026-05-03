@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -42,4 +43,9 @@ next-env.d.ts
 test-results/
 
 # migration operational data (secrets + logs)
-.migration/
+.migration/env-*
+.migration/checkpoints.log
+.migration/promotions.log
+.migration/incidents.log
+.migration/*-backup
+.migration/*.backup
