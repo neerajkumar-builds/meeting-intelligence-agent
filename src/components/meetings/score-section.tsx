@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { CircularGauge } from "@/components/shared/circular-gauge";
 import { ScoreBadge } from "@/components/shared/score-badge";
 import type { ScoringStageType } from "@/lib/constants";
@@ -39,35 +40,56 @@ export function ScoreSection(props: ScoreSectionProps) {
       </div>
 
       <div className="rounded-lg border bg-card p-4">
-        <div className="flex flex-wrap items-start justify-center gap-6 md:gap-10">
-          {stageType === "discovery_scoping" && (
-            <DiscoveryScores
-              meetingScore={props.meetingScore as DiscoveryMeetingScore | null}
-              repScore={props.repScore as DiscoveryRepScore | null}
-              icpScore={props.icpScore as IcpScore | null}
-            />
-          )}
-          {stageType === "follow_up" && (
-            <FollowUpScores
-              meetingScore={props.meetingScore as FollowUpMeetingScore | null}
-              repScore={props.repScore as FollowUpRepScore | null}
-              clientHealthScore={props.clientHealthScore}
-            />
-          )}
-          {stageType === "onboarding" && (
-            <OnboardingScores
-              meetingScore={props.meetingScore as OnboardingMeetingScore | null}
-              repScore={props.repScore as OnboardingRepScore | null}
-              clientHealthScore={props.clientHealthScore}
-            />
-          )}
-          {stageType === "internal" && (
-            <InternalScores
-              meetingScore={props.meetingScore as InternalMeetingScore | null}
-            />
-          )}
-        </div>
+        {stageType === "discovery_scoping" && (
+          <DiscoveryScores
+            meetingScore={props.meetingScore as DiscoveryMeetingScore | null}
+            repScore={props.repScore as DiscoveryRepScore | null}
+            icpScore={props.icpScore as IcpScore | null}
+          />
+        )}
+        {stageType === "follow_up" && (
+          <FollowUpScores
+            meetingScore={props.meetingScore as FollowUpMeetingScore | null}
+            repScore={props.repScore as FollowUpRepScore | null}
+            clientHealthScore={props.clientHealthScore}
+          />
+        )}
+        {stageType === "onboarding" && (
+          <OnboardingScores
+            meetingScore={props.meetingScore as OnboardingMeetingScore | null}
+            repScore={props.repScore as OnboardingRepScore | null}
+            clientHealthScore={props.clientHealthScore}
+          />
+        )}
+        {stageType === "internal" && (
+          <InternalScores
+            meetingScore={props.meetingScore as InternalMeetingScore | null}
+          />
+        )}
       </div>
+    </div>
+  );
+}
+
+function ScoreReasonItem({ label, reason }: { label: string; reason?: string }) {
+  const [expanded, setExpanded] = useState(false);
+  if (!reason) return null;
+
+  const isLong = reason.length > 180;
+  const displayText = !expanded && isLong ? reason.slice(0, 180) + "..." : reason;
+
+  return (
+    <div className="space-y-1">
+      <p className="text-xs font-semibold text-muted-foreground">{label}</p>
+      <p className="text-sm leading-relaxed">{displayText}</p>
+      {isLong && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="text-xs text-[#146DFA] hover:underline"
+        >
+          {expanded ? "Show less" : "Show more"}
+        </button>
+      )}
     </div>
   );
 }
@@ -83,24 +105,31 @@ function DiscoveryScores({
 }) {
   return (
     <>
-      <CircularGauge
-        size={90}
-        score={meetingScore?.lead_score ?? null}
-        label="Meeting Outcome"
-        subtitle={meetingScore?.deal_sentiment ?? undefined}
-      />
-      <CircularGauge
-        size={90}
-        score={repScore?.rep_performance_score ?? null}
-        label="Rep Performance"
-        subtitle={repScore?.meeting_quality_rating ?? undefined}
-      />
-      <CircularGauge
-        size={90}
-        score={icpScore?.icp_fit_score ?? null}
-        label="ICP Fit"
-        subtitle={icpScore?.confidence_level ?? undefined}
-      />
+      <div className="flex flex-wrap items-start justify-center gap-6 md:gap-10 w-full">
+        <CircularGauge
+          size={90}
+          score={meetingScore?.lead_score ?? null}
+          label="Meeting Outcome"
+          subtitle={meetingScore?.deal_sentiment ?? undefined}
+        />
+        <CircularGauge
+          size={90}
+          score={repScore?.rep_performance_score ?? null}
+          label="Rep Performance"
+          subtitle={repScore?.meeting_quality_rating ?? undefined}
+        />
+        <CircularGauge
+          size={90}
+          score={icpScore?.icp_fit_score ?? null}
+          label="ICP Fit"
+          subtitle={icpScore?.confidence_level ?? undefined}
+        />
+      </div>
+      <div className="w-full border-t pt-4 mt-2 space-y-3">
+        <ScoreReasonItem label="Meeting Outcome" reason={meetingScore?.reasoning_summary} />
+        <ScoreReasonItem label="Rep Performance" reason={repScore?.meeting_quality_rating} />
+        <ScoreReasonItem label="ICP Fit" reason={icpScore?.reason_for_score} />
+      </div>
     </>
   );
 }
@@ -116,24 +145,30 @@ function FollowUpScores({
 }) {
   return (
     <>
-      <CircularGauge
-        size={90}
-        score={meetingScore?.engagement_score ?? null}
-        label="Engagement"
-        subtitle={meetingScore?.engagement_level ?? undefined}
-      />
-      <CircularGauge
-        size={90}
-        score={repScore?.rep_performance_score ?? null}
-        label="Rep Performance"
-        subtitle={repScore?.meeting_quality_rating ?? undefined}
-      />
-      <CircularGauge
-        size={90}
-        score={clientHealthScore}
-        label="Account Health"
-        subtitle={meetingScore?.relationship_health ?? undefined}
-      />
+      <div className="flex flex-wrap items-start justify-center gap-6 md:gap-10 w-full">
+        <CircularGauge
+          size={90}
+          score={meetingScore?.engagement_score ?? null}
+          label="Engagement"
+          subtitle={meetingScore?.engagement_level ?? undefined}
+        />
+        <CircularGauge
+          size={90}
+          score={repScore?.rep_performance_score ?? null}
+          label="Rep Performance"
+          subtitle={repScore?.meeting_quality_rating ?? undefined}
+        />
+        <CircularGauge
+          size={90}
+          score={clientHealthScore}
+          label="Account Health"
+          subtitle={meetingScore?.relationship_health ?? undefined}
+        />
+      </div>
+      <div className="w-full border-t pt-4 mt-2 space-y-3">
+        <ScoreReasonItem label="Engagement" reason={meetingScore?.reasoning_summary} />
+        <ScoreReasonItem label="Rep Performance" reason={repScore?.meeting_quality_rating} />
+      </div>
     </>
   );
 }
@@ -149,24 +184,30 @@ function OnboardingScores({
 }) {
   return (
     <>
-      <CircularGauge
-        size={90}
-        score={meetingScore?.delivery_score ?? null}
-        label="Delivery"
-        subtitle={meetingScore?.delivery_status ?? undefined}
-      />
-      <CircularGauge
-        size={90}
-        score={repScore?.rep_performance_score ?? null}
-        label="Rep Performance"
-        subtitle={repScore?.meeting_quality_rating ?? undefined}
-      />
-      <CircularGauge
-        size={90}
-        score={clientHealthScore}
-        label="Client Satisfaction"
-        subtitle={meetingScore?.current_phase ?? undefined}
-      />
+      <div className="flex flex-wrap items-start justify-center gap-6 md:gap-10 w-full">
+        <CircularGauge
+          size={90}
+          score={meetingScore?.delivery_score ?? null}
+          label="Delivery"
+          subtitle={meetingScore?.delivery_status ?? undefined}
+        />
+        <CircularGauge
+          size={90}
+          score={repScore?.rep_performance_score ?? null}
+          label="Rep Performance"
+          subtitle={repScore?.meeting_quality_rating ?? undefined}
+        />
+        <CircularGauge
+          size={90}
+          score={clientHealthScore}
+          label="Client Satisfaction"
+          subtitle={meetingScore?.current_phase ?? undefined}
+        />
+      </div>
+      <div className="w-full border-t pt-4 mt-2 space-y-3">
+        <ScoreReasonItem label="Delivery" reason={meetingScore?.reasoning_summary} />
+        <ScoreReasonItem label="Rep Performance" reason={repScore?.meeting_quality_rating} />
+      </div>
     </>
   );
 }
@@ -177,10 +218,17 @@ function InternalScores({
   meetingScore: InternalMeetingScore | null;
 }) {
   return (
-    <CircularGauge
-      score={meetingScore?.meeting_quality_score ?? null}
-      label="Meeting Quality"
-      subtitle={meetingScore?.productivity_rating ?? undefined}
-    />
+    <>
+      <div className="flex flex-wrap items-start justify-center gap-6 md:gap-10 w-full">
+        <CircularGauge
+          score={meetingScore?.meeting_quality_score ?? null}
+          label="Meeting Quality"
+          subtitle={meetingScore?.productivity_rating ?? undefined}
+        />
+      </div>
+      <div className="w-full border-t pt-4 mt-2 space-y-3">
+        <ScoreReasonItem label="Key Insight" reason={meetingScore?.key_insight} />
+      </div>
+    </>
   );
 }
