@@ -72,14 +72,19 @@ export default function RepProfilePage({
   const [sortBy, setSortBy] = useState<"date" | "score">("date");
   const [periodPreset, setPeriodPreset] = useState("all");
   const [customRange, setCustomRange] = useState<DateRange | undefined>();
+  const [pendingRange, setPendingRange] = useState<DateRange | undefined>();
 
   function handlePeriodChange(v: string) {
     setPeriodPreset(v);
     setCustomRange(undefined);
+    setPendingRange(undefined);
   }
   function handleRangeSelect(range: DateRange | undefined) {
-    setCustomRange(range);
-    if (range?.from) setPeriodPreset("all");
+    setPendingRange(range);
+    if (range?.from && range?.to) {
+      setCustomRange(range);
+      setPeriodPreset("all");
+    }
   }
 
   const meetings = useMemo(() => {
@@ -227,10 +232,13 @@ export default function RepProfilePage({
               className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs hover:bg-muted transition-colors h-8"
             >
               <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
-              {customRange?.from ? (
+              {customRange?.from && customRange?.to ? (
                 <span>
-                  {format(customRange.from, "MMM d")}
-                  {customRange.to ? ` – ${format(customRange.to, "MMM d")}` : ""}
+                  {format(customRange.from, "MMM d")} – {format(customRange.to, "MMM d")}
+                </span>
+              ) : pendingRange?.from && !pendingRange?.to ? (
+                <span className="text-muted-foreground">
+                  {format(pendingRange.from, "MMM d")} – ...
                 </span>
               ) : (
                 <span className="text-muted-foreground">Pick dates</span>
@@ -239,7 +247,7 @@ export default function RepProfilePage({
             <PopoverContent align="end" className="w-auto p-0">
               <Calendar
                 mode="range"
-                selected={customRange}
+                selected={pendingRange}
                 onSelect={handleRangeSelect}
                 numberOfMonths={2}
                 disabled={{ after: new Date() }}
