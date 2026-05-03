@@ -232,31 +232,39 @@ export default function RepProfilePage({
             <p className="text-xs text-muted-foreground">{hasFiltersActive ? `${meetings.length} of ${allRepMeetings.length}` : allRepMeetings.length} meetings · {((allRepMeetings.length / (teamMeetings.length || 1)) * 100).toFixed(0)}% of team volume</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <Select value={stageFilter} onValueChange={(v) => setStageFilter(v ?? "all")}>
-            <SelectTrigger className="w-[120px] h-8 text-xs">
-              <SelectValue placeholder="All Stages" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Stages</SelectItem>
-              {(Object.entries(STAGE_CONFIG) as [ScoringStageType, (typeof STAGE_CONFIG)[ScoringStageType]][]).map(
-                ([key, config]) => (
-                  <SelectItem key={key} value={key}>{config.label}</SelectItem>
-                )
-              )}
-            </SelectContent>
-          </Select>
-          <Select value={periodPreset} onValueChange={(v) => handlePeriodChange(v ?? "all")}>
-            <SelectTrigger className="w-[110px] h-8 text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Time</SelectItem>
-              <SelectItem value="7d">Last 7 Days</SelectItem>
-              <SelectItem value="30d">Last 30 Days</SelectItem>
-              <SelectItem value="90d">Last 90 Days</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="flex items-center gap-3 flex-wrap">
+          <div>
+            <label className="text-[10px] font-medium text-muted-foreground mb-1 block">Stage</label>
+            <Select value={stageFilter} onValueChange={(v) => setStageFilter(v ?? "all")}>
+              <SelectTrigger className="w-[120px] h-8 text-xs">
+                <SelectValue placeholder="All Stages" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Stages</SelectItem>
+                {(Object.entries(STAGE_CONFIG) as [ScoringStageType, (typeof STAGE_CONFIG)[ScoringStageType]][]).map(
+                  ([key, config]) => (
+                    <SelectItem key={key} value={key}>{config.label}</SelectItem>
+                  )
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-[10px] font-medium text-muted-foreground mb-1 block">Period</label>
+            <Select value={periodPreset} onValueChange={(v) => handlePeriodChange(v ?? "all")}>
+              <SelectTrigger className="w-[110px] h-8 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="7d">Last 7 Days</SelectItem>
+                <SelectItem value="30d">Last 30 Days</SelectItem>
+                <SelectItem value="90d">Last 90 Days</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-[10px] font-medium text-muted-foreground mb-1 block">Date Range</label>
           <Popover open={calendarOpen} onOpenChange={handleCalendarOpenChange}>
             <PopoverTrigger
               className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs hover:bg-muted transition-colors h-8"
@@ -295,6 +303,7 @@ export default function RepProfilePage({
               </div>
             </PopoverContent>
           </Popover>
+          </div>
           <button
             onClick={() => {
               const query = encodeURIComponent(`Show coaching insights for ${repName} across all meetings`);
