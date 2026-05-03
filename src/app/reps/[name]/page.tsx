@@ -8,7 +8,9 @@ import {
   PieChart, Pie, Cell, Tooltip,
 } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import type { DateRange } from "react-day-picker";
 import {
   Select,
   SelectContent,
@@ -68,38 +70,33 @@ export default function RepProfilePage({
 
   const [stageFilter, setStageFilter] = useState("all");
   const [sortBy, setSortBy] = useState<"date" | "score">("date");
-  const [dateRange, setDateRange] = useState("all");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [periodPreset, setPeriodPreset] = useState("all");
+  const [customRange, setCustomRange] = useState<DateRange | undefined>();
 
   function handlePeriodChange(v: string) {
-    setDateRange(v);
-    if (v !== "all") { setDateFrom(""); setDateTo(""); }
+    setPeriodPreset(v);
+    setCustomRange(undefined);
   }
-  function handleDateFromChange(v: string) {
-    setDateFrom(v);
-    if (v) setDateRange("all");
-  }
-  function handleDateToChange(v: string) {
-    setDateTo(v);
-    if (v) setDateRange("all");
+  function handleRangeSelect(range: DateRange | undefined) {
+    setCustomRange(range);
+    if (range?.from) setPeriodPreset("all");
   }
 
   const meetings = useMemo(() => {
     const now = new Date();
     const dateCutoff =
-      dateRange === "7d" ? subDays(now, 7) :
-      dateRange === "30d" ? subDays(now, 30) :
-      dateRange === "90d" ? subMonths(now, 3) : null;
+      periodPreset === "7d" ? subDays(now, 7) :
+      periodPreset === "30d" ? subDays(now, 30) :
+      periodPreset === "90d" ? subMonths(now, 3) : null;
 
     return (allMeetings ?? []).filter((m) => {
       if (m.host_name !== repName) return false;
       if (dateCutoff && m.start_time && parseISO(m.start_time) < dateCutoff) return false;
-      if (dateFrom && m.start_time && parseISO(m.start_time) < parseISO(dateFrom + "T00:00:00")) return false;
-      if (dateTo && m.start_time && parseISO(m.start_time) > parseISO(dateTo + "T23:59:59")) return false;
+      if (customRange?.from && m.start_time && parseISO(m.start_time) < customRange.from) return false;
+      if (customRange?.to && m.start_time && parseISO(m.start_time) > customRange.to) return false;
       return true;
     });
-  }, [allMeetings, repName, dateRange, dateFrom, dateTo]);
+  }, [allMeetings, repName, periodPreset, customRange]);
 
   const teamMeetings = useMemo(() => allMeetings ?? [], [allMeetings]);
 
@@ -214,36 +211,41 @@ export default function RepProfilePage({
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-1.5">
-            <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
-            <Select value={dateRange} onValueChange={(v) => handlePeriodChange(v ?? "all")}>
-              <SelectTrigger className="w-[110px] h-8 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Time</SelectItem>
-                <SelectItem value="7d">Last 7 Days</SelectItem>
-                <SelectItem value="30d">Last 30 Days</SelectItem>
-                <SelectItem value="90d">Last 90 Days</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Input
-              type="date"
-              value={dateFrom}
-              onChange={(e) => handleDateFromChange(e.target.value)}
-              className="w-[135px] h-8 text-xs"
-              placeholder="From"
-            />
-            <Input
-              type="date"
-              value={dateTo}
-              onChange={(e) => handleDateToChange(e.target.value)}
-              className="w-[135px] h-8 text-xs"
-              placeholder="To"
-            />
-          </div>
+          <Select value={periodPreset} onValueChange={(v) => handlePeriodChange(v ?? "all")}>
+            <SelectTrigger className="w-[110px] h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Time</SelectItem>
+              <SelectItem value="7d">Last 7 Days</SelectItem>
+              <SelectItem value="30d">Last 30 Days</SelectItem>
+              <SelectItem value="90d">Last 90 Days</SelectItem>
+            </SelectContent>
+          </Select>
+          <Popover>
+            <PopoverTrigger
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs hover:bg-muted transition-colors h-8"
+            >
+              <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
+              {customRange?.from ? (
+                <span>
+                  {format(customRange.from, "MMM d")}
+                  {customRange.to ? ` – ${format(customRange.to, "MMM d")}` : ""}
+                </span>
+              ) : (
+                <span className="text-muted-foreground">Pick dates</span>
+              )}
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-auto p-0">
+              <Calendar
+                mode="range"
+                selected={customRange}
+                onSelect={handleRangeSelect}
+                numberOfMonths={2}
+                disabled={{ after: new Date() }}
+              />
+            </PopoverContent>
+          </Popover>
           <button
             onClick={() => {
               const query = encodeURIComponent(`Show coaching insights for ${repName} across all meetings`);
