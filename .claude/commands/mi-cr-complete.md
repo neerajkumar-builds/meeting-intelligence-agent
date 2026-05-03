@@ -130,4 +130,4 @@ Next:
 - Or continue to the next CR: /mi-cr-start <next-CR-ID>
 ```
 
-Read `change-requests.json` to suggest the next CR in implementation order.
+Read `migration/change-requests.json` to suggest the next CR in implementation order.

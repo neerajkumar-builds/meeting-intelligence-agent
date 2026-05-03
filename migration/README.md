@@ -11,8 +11,8 @@
 | Step 3: Dev Supabase project | Done | 2026-05-03 |
 | Step 4: Dev n8n workflows (dormant) | Done | 2026-05-03 |
 | Step 5: Switch dev environment | Done | 2026-05-03 |
-| Step 6: Promotion workflow verified | Pending | |
-| Step 7: Documentation finalized | Pending | |
+| Step 6: Promotion workflow verified | Pending | Will be tested with first CR promotion |
+| Step 7: Documentation finalized | Mostly Done | 2026-05-03 (SOP, runbooks, knowledge graph, tracker — replication guide update pending) |
 
 ## Change Request Progress
 

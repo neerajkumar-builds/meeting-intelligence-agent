@@ -109,7 +109,18 @@ project_tracker (13 rows: 9 CRs + 1 session + 3 decisions)
    - Dashboard-only change, no n8n/schema changes needed
 2. After CR-004: CR-005 (score reasons), CR-009 (meeting detail refinement)
 
-## Open Questions
-- Vercel GitHub App not installed on `neerajkumar-builds` — auto-deploy not working, using CLI deploy
-- `#meeting-intel-dev` Slack channel not yet created
-- `.migration/env-production` file not yet created (blocks `/mi-seed-dev` skill)
+## Uncommitted Changes (pre-existing, NOT from this session)
+These were modified before this session started — likely from a prior coding session:
+- `src/components/companies/intelligence-sidebar/meddic-section.tsx` — radar chart addition
+- `src/components/scorecard/competitor-mentions.tsx` — enhancements
+- `docs/progress.md` — untracked
+
+These are NOT committed. Decide whether to commit, stash, or discard in next session.
+
+## Open Items
+- [ ] Vercel GitHub App not installed on `neerajkumar-builds` — auto-deploy not working, using CLI deploy via `/mi-promote`
+- [ ] `#meeting-intel-dev` Slack channel not yet created (needed for dev Slack sends)
+- [ ] `.migration/env-production` file not yet created (blocks `/mi-seed-dev` skill — needs production service_role key)
+- [ ] Step 6 (promotion workflow) not yet tested end-to-end with a real change
+- [ ] Step 7 (documentation finalization) — update `docs/11-replication-guide.md` with correct schema SQL
+- [ ] Personal Vercel not redeployed with dev env vars (still points to prod Supabase)
