@@ -17,6 +17,7 @@ import {
   Lock,
   BarChart3,
   ChevronRight,
+  Settings,
 } from "lucide-react";
 
 const ICON_MAP = {
@@ -30,11 +31,14 @@ const ICON_MAP = {
   HeartHandshake,
   Lock,
   BarChart3,
+  Settings,
 } as const;
 
 const TOOL_ITEMS = [
   { label: "System Health", href: "/health", icon: "Activity" as const },
 ];
+
+const ADMIN_ITEM = { label: "Admin", href: "/admin", icon: "Settings" as const };
 
 interface SidebarNavProps {
   collapsed?: boolean;
@@ -42,12 +46,13 @@ interface SidebarNavProps {
 
 export function SidebarNav({ collapsed = false }: SidebarNavProps) {
   const pathname = usePathname();
-  const { activeSection, setActiveSection } = useSection();
+  const { activeSection, setActiveSection, allowedSections, isAdmin } = useSection();
 
   return (
     <nav className="flex flex-col gap-1 px-2">
-      {(Object.entries(SECTIONS) as [SectionKey, (typeof SECTIONS)[SectionKey]][]).map(
-        ([key, section]) => {
+      {(Object.entries(SECTIONS) as [SectionKey, (typeof SECTIONS)[SectionKey]][])
+        .filter(([key]) => allowedSections.includes(key))
+        .map(([key, section]) => {
           const SectionIcon = ICON_MAP[section.icon];
           const isActive = key === activeSection;
 
@@ -147,8 +152,8 @@ export function SidebarNav({ collapsed = false }: SidebarNavProps) {
             Tools
           </p>
         )}
-        {TOOL_ITEMS.map((item) => {
-          const Icon = ICON_MAP[item.icon];
+        {[...TOOL_ITEMS, ...(isAdmin ? [ADMIN_ITEM] : [])].map((item) => {
+          const Icon = ICON_MAP[item.icon as keyof typeof ICON_MAP];
           const isActive = pathname.startsWith(item.href);
 
           return (
