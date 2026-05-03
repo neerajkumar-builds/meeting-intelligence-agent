@@ -8,13 +8,13 @@ import { MeetingCard } from "@/components/shared/meeting-card";
 import { MeetingFilters } from "@/components/meetings/meeting-filters";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useMeetingsList } from "@/lib/hooks/use-meetings-list";
+import { useSectionMeetings } from "@/lib/hooks/use-section-meetings";
 import { CalendarDays } from "lucide-react";
 type SortKey = "date" | "score" | "rep" | "company";
 
 export default function MeetingFeedPage() {
   const searchParams = useSearchParams();
-  const { data: meetings, isLoading, error } = useMeetingsList({ excludeInternal: false });
+  const { data: meetings, isLoading, error } = useSectionMeetings();
   const [repFilter, setRepFilter] = useState(searchParams.get("rep") ?? "all");
   const [stageFilter, setStageFilter] = useState(searchParams.get("stage") ?? "all");
   const [companyFilter, setCompanyFilter] = useState(searchParams.get("company") ?? "");
@@ -43,11 +43,7 @@ export default function MeetingFeedPage() {
 
     const result = meetings.filter((m) => {
       if (repFilter !== "all" && m.host_name !== repFilter) return false;
-      if (stageFilter === "all") {
-        if (m.scoring_stage_type === "internal") return false;
-      } else if (m.scoring_stage_type !== stageFilter) {
-        return false;
-      }
+      if (stageFilter !== "all" && m.scoring_stage_type !== stageFilter) return false;
       if (companyFilter && !m.company_name?.toLowerCase().includes(companyFilter.toLowerCase())) return false;
       if (dateCutoff && m.start_time && parseISO(m.start_time) < dateCutoff) return false;
       if (dateFrom && m.start_time && parseISO(m.start_time) < parseISO(dateFrom + "T00:00:00")) return false;

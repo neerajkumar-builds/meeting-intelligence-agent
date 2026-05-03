@@ -24,7 +24,7 @@ import { BrandTooltip } from "@/components/shared/chart-tooltip";
 import { ChartDownload } from "@/components/shared/chart-download";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
-import { useMeetingsList } from "@/lib/hooks/use-meetings-list";
+import { useSectionMeetings } from "@/lib/hooks/use-section-meetings";
 import { formatScore } from "@/lib/utils/format";
 import { getStageLabel } from "@/lib/utils/stage";
 import { STAGE_CONFIG, type ScoringStageType } from "@/lib/constants";
@@ -65,7 +65,7 @@ export default function RepProfilePage({
 }) {
   const { name } = use(params);
   const repName = decodeURIComponent(name);
-  const { data: allMeetings, isLoading } = useMeetingsList();
+  const { data: allMeetings, isLoading } = useSectionMeetings();
   const router = useRouter();
 
   const [stageFilter, setStageFilter] = useState("all");

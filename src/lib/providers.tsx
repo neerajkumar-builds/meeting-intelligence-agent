@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SectionProvider } from "@/lib/section-context";
 import { useState } from "react";
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -28,7 +29,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
         enableSystem
         disableTransitionOnChange
       >
-        <TooltipProvider>{children}</TooltipProvider>
+        <SectionProvider>
+          <TooltipProvider>{children}</TooltipProvider>
+        </SectionProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

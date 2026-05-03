@@ -47,6 +47,45 @@ export function getScoreBand(score: number | null) {
   return SCORE_BANDS.low;
 }
 
+// ── Analysis Sections ───────────────────────────
+export type SectionKey = "sales" | "cs" | "internal";
+
+export interface SectionConfig {
+  label: string;
+  shortLabel: string;
+  stageTypes: ScoringStageType[];
+  icon: "TrendingUp" | "HeartHandshake" | "Lock";
+}
+
+export const SECTIONS: Record<SectionKey, SectionConfig> = {
+  sales: {
+    label: "Sales Call Analysis",
+    shortLabel: "Sales",
+    stageTypes: ["discovery_scoping", "follow_up"],
+    icon: "TrendingUp",
+  },
+  cs: {
+    label: "Customer Success",
+    shortLabel: "CS",
+    stageTypes: ["onboarding"],
+    icon: "HeartHandshake",
+  },
+  internal: {
+    label: "Internal Meetings",
+    shortLabel: "Internal",
+    stageTypes: ["internal"],
+    icon: "Lock",
+  },
+};
+
+export const SECTION_NAV_ITEMS = [
+  { label: "Scorecard", href: "/", icon: "LayoutDashboard" as const },
+  { label: "Meetings", href: "/meetings", icon: "CalendarDays" as const },
+  { label: "Companies", href: "/companies", icon: "Building2" as const },
+  { label: "Reps", href: "/reps", icon: "Users" as const },
+  { label: "Ask Blarney", href: "/search", icon: "Search" as const },
+];
+
 export const NAV_ITEMS = [
   { label: "Scorecard", href: "/", icon: "LayoutDashboard" as const, group: "Analysis" },
   { label: "Meetings", href: "/meetings", icon: "CalendarDays" as const, group: "Analysis" },

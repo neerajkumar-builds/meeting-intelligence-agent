@@ -7,7 +7,7 @@ import { ScoreBadge } from "@/components/shared/score-badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
-import { useMeetingsList } from "@/lib/hooks/use-meetings-list";
+import { useSectionMeetings } from "@/lib/hooks/use-section-meetings";
 import { formatScore, formatRelativeDate } from "@/lib/utils/format";
 import {
   Select,
@@ -28,7 +28,7 @@ interface RepStats {
 }
 
 export default function RepsIndexPage() {
-  const { data: meetings, isLoading, error } = useMeetingsList();
+  const { data: meetings, isLoading, error } = useSectionMeetings();
   const [sortBy, setSortBy] = useState<"score" | "meetings" | "az" | "health">("score");
   const [view, setView] = useState<"table" | "cards">("table");
 

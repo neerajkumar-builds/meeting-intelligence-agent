@@ -7,7 +7,7 @@ import { ScoreBadge } from "@/components/shared/score-badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
-import { useMeetingsList } from "@/lib/hooks/use-meetings-list";
+import { useSectionMeetings } from "@/lib/hooks/use-section-meetings";
 import { formatDate, formatScore } from "@/lib/utils/format";
 import { Input } from "@/components/ui/input";
 import {
@@ -29,7 +29,7 @@ interface CompanyStats {
 }
 
 export default function CompaniesIndexPage() {
-  const { data: meetings, isLoading, error } = useMeetingsList();
+  const { data: meetings, isLoading, error } = useSectionMeetings();
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"recent" | "az" | "za" | "score" | "health" | "meetings">("recent");
 

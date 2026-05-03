@@ -11,7 +11,7 @@ import { StageDistribution } from "@/components/scorecard/stage-distribution";
 import { RecentActivity } from "@/components/scorecard/recent-activity";
 import { CompetitorMentions } from "@/components/scorecard/competitor-mentions";
 // import { PipelineFunnel } from "@/components/scorecard/pipeline-funnel"; // Backlog: re-enable when companies span multiple stages
-import { useMeetingsList } from "@/lib/hooks/use-meetings-list";
+import { useSectionMeetings } from "@/lib/hooks/use-section-meetings";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
 import {
@@ -43,7 +43,7 @@ function SectionHeader({ title }: { title: string }) {
 }
 
 export default function TeamScorecardPage() {
-  const { data: meetings, isLoading, error } = useMeetingsList();
+  const { data: meetings, isLoading, error } = useSectionMeetings();
   const [period, setPeriod] = useState("all");
 
   const filtered = useMemo(() => {
