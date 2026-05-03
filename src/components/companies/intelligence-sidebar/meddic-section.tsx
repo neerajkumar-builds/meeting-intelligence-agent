@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { MeddicAnalysis, MeddicDimension } from "@/types/intelligence";
-import { FRAMEWORKS, ACTIVE_FRAMEWORK } from "@/lib/constants";
+import { FRAMEWORKS, DISPLAY_FRAMEWORKS, type FrameworkKey } from "@/lib/constants";
 import {
   RadarChart,
   Radar,
@@ -18,13 +18,6 @@ const STATUS_INDICATOR: Record<MeddicDimension["status"], { className: string; l
   missing: { className: "border-2 border-gray-300 dark:border-gray-600", label: "Missing" },
 };
 
-const SHORT_LABELS: Record<string, string> = {
-  "Economic Buyer": "Econ. Buyer",
-  "Decision Criteria": "Dec. Criteria",
-  "Decision Process": "Dec. Process",
-  "Identify Pain": "Pain",
-};
-
 interface RadarDataPoint {
   dimension: string;
   fullLabel: string;
@@ -32,7 +25,7 @@ interface RadarDataPoint {
   status: string;
 }
 
-function MeddicTooltip({
+function FrameworkTooltip({
   active,
   payload,
 }: {
@@ -41,22 +34,26 @@ function MeddicTooltip({
 }) {
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
-  const statusLabel =
-    d.status === "known"
-      ? "Known"
-      : d.status === "partial"
-        ? "Partial"
-        : "Missing";
   return (
     <div className="rounded-lg border bg-popover px-3 py-2 shadow-lg">
       <p className="text-xs font-medium">{d.fullLabel}</p>
-      <p className="text-[10px] text-muted-foreground">{statusLabel}</p>
+      <p className="text-[10px] text-muted-foreground">
+        {d.status === "known" ? "Known" : d.status === "partial" ? "Partial" : "Missing"}
+      </p>
     </div>
   );
 }
 
-export function MeddicSection({ data }: { data: MeddicAnalysis }) {
-  const framework = FRAMEWORKS[ACTIVE_FRAMEWORK];
+function FrameworkPanel({
+  frameworkKey,
+  data,
+  defaultOpen,
+}: {
+  frameworkKey: FrameworkKey;
+  data: MeddicAnalysis;
+  defaultOpen: boolean;
+}) {
+  const framework = FRAMEWORKS[frameworkKey];
   const dimMap = new Map(data.dimensions.map((d) => [d.key, d]));
 
   const mappedDimensions = framework.dimensions.map((fd) => {
@@ -82,7 +79,7 @@ export function MeddicSection({ data }: { data: MeddicAnalysis }) {
   }));
 
   return (
-    <details className="group py-3">
+    <details className="group py-3" open={defaultOpen}>
       <summary className="flex items-center justify-between cursor-pointer text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground">
         {framework.label} Gaps
         <span className="text-[10px] font-normal normal-case text-foreground">
@@ -99,11 +96,8 @@ export function MeddicSection({ data }: { data: MeddicAnalysis }) {
             <ResponsiveContainer width="100%" height={180}>
               <RadarChart data={radarData} cx="50%" cy="50%">
                 <PolarGrid strokeOpacity={0.3} />
-                <PolarAngleAxis
-                  dataKey="dimension"
-                  tick={{ fontSize: 9 }}
-                />
-                <Tooltip content={<MeddicTooltip />} />
+                <PolarAngleAxis dataKey="dimension" tick={{ fontSize: 9 }} />
+                <Tooltip content={<FrameworkTooltip />} />
                 <Radar
                   dataKey="value"
                   fill="#146DFA"
@@ -154,5 +148,15 @@ export function MeddicSection({ data }: { data: MeddicAnalysis }) {
         </div>
       </div>
     </details>
+  );
+}
+
+export function MeddicSection({ data }: { data: MeddicAnalysis }) {
+  return (
+    <>
+      {DISPLAY_FRAMEWORKS.map((key, i) => (
+        <FrameworkPanel key={key} frameworkKey={key} data={data} defaultOpen={i === 0} />
+      ))}
+    </>
   );
 }

@@ -112,7 +112,7 @@ export const FRAMEWORKS: Record<FrameworkKey, FrameworkConfig> = {
   },
 };
 
-export const ACTIVE_FRAMEWORK: FrameworkKey = "bant";
+export const DISPLAY_FRAMEWORKS: FrameworkKey[] = ["bant", "meddic"];
 
 // Vendors/tools to track in CLIENT meeting transcripts (excludes internal meetings)
 // Excludes FullFunnel's own stack (Clay, HubSpot, HeyReach, Instantly) to focus

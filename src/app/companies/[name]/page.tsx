@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCompanyMeetings } from "@/lib/hooks/use-company-meetings";
 import { IntelligenceSidebar } from "@/components/companies/intelligence-sidebar";
+import { FRAMEWORKS, DISPLAY_FRAMEWORKS } from "@/lib/constants";
 import { ArrowLeft, Building2, Sparkles, Target, Swords } from "lucide-react";
 
 export default function CompanyViewPage({
@@ -86,13 +87,15 @@ export default function CompanyViewPage({
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => {
-              const q = encodeURIComponent(`Give me a MEDDIC analysis for ${companyName} based on all meeting data. For each element (Metrics, Economic Buyer, Decision Criteria, Decision Process, Identify Pain, Champion), cite specific evidence from meetings or note where data is missing.`);
+              const fw = FRAMEWORKS[DISPLAY_FRAMEWORKS[0]];
+              const dims = fw.dimensions.map((d) => d.label).join(", ");
+              const q = encodeURIComponent(`Give me a ${fw.label} analysis for ${companyName} based on all meeting data. For each element (${dims}), cite specific evidence from meetings or note where data is missing.`);
               router.push(`/search?q=${q}`);
             }}
             className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
           >
             <Target className="h-3.5 w-3.5" />
-            MEDDIC Analysis
+            {FRAMEWORKS[DISPLAY_FRAMEWORKS[0]].label} Analysis
           </button>
           <button
             onClick={() => {
