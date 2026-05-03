@@ -127,7 +127,7 @@ function DiscoveryScores({
       </div>
       <div className="w-full border-t pt-4 mt-2 space-y-3">
         <ScoreReasonItem label="Meeting Outcome" reason={meetingScore?.reasoning_summary} />
-        <ScoreReasonItem label="Rep Performance" reason={repScore?.meeting_quality_rating} />
+        <ScoreReasonItem label="Rep Performance" reason={repScore?.strengths} />
         <ScoreReasonItem label="ICP Fit" reason={icpScore?.reason_for_score} />
       </div>
     </>
@@ -167,7 +167,7 @@ function FollowUpScores({
       </div>
       <div className="w-full border-t pt-4 mt-2 space-y-3">
         <ScoreReasonItem label="Engagement" reason={meetingScore?.reasoning_summary} />
-        <ScoreReasonItem label="Rep Performance" reason={repScore?.meeting_quality_rating} />
+        <ScoreReasonItem label="Rep Performance" reason={repScore?.strengths} />
       </div>
     </>
   );
@@ -206,7 +206,7 @@ function OnboardingScores({
       </div>
       <div className="w-full border-t pt-4 mt-2 space-y-3">
         <ScoreReasonItem label="Delivery" reason={meetingScore?.reasoning_summary} />
-        <ScoreReasonItem label="Rep Performance" reason={repScore?.meeting_quality_rating} />
+        <ScoreReasonItem label="Rep Performance" reason={repScore?.strengths} />
       </div>
     </>
   );
