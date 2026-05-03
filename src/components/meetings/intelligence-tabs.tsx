@@ -263,8 +263,9 @@ function DiscoverySummaryDetails({ ms }: { ms: DiscoveryMeetingScore | null }) {
   return (
     <div className="mt-4 space-y-2">
       <TextBlock label="Deal Sentiment" text={ms.deal_sentiment} sentiment />
-      <TextBlock label="Next Steps" text={ms.next_actionables} />
-      <TextBlock label="Reasoning" text={ms.reasoning_summary} />
+      {ms.tentative_closure_date && (
+        <TextBlock label="Tentative Close" text={ms.tentative_closure_date} />
+      )}
     </div>
   );
 }
@@ -276,7 +277,6 @@ function FollowUpSummaryDetails({ ms }: { ms: FollowUpMeetingScore | null }) {
       <TextBlock label="Relationship Health" text={ms.relationship_health} sentiment />
       <ListBlock label="Expansion Signals" items={ms.expansion_signals} variant="positive" />
       <ListBlock label="Churn Risk Signals" items={ms.churn_risk_signals} variant="risk" />
-      <TextBlock label="Reasoning" text={ms.reasoning_summary} />
     </div>
   );
 }
