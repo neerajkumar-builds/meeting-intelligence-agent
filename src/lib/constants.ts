@@ -65,6 +65,55 @@ export const SUGGESTED_PROMPTS = [
   "What's the breakdown of meeting stages across all reps?",
 ];
 
+// ── Sales Frameworks ────────────────────────────
+export type FrameworkKey = "meddic" | "bant" | "spiced";
+
+export interface FrameworkDimension {
+  key: string;
+  label: string;
+  meddicKey: "metrics" | "economic_buyer" | "decision_criteria" | "decision_process" | "identify_pain" | "champion";
+}
+
+export interface FrameworkConfig {
+  label: string;
+  dimensions: FrameworkDimension[];
+}
+
+export const FRAMEWORKS: Record<FrameworkKey, FrameworkConfig> = {
+  meddic: {
+    label: "MEDDIC",
+    dimensions: [
+      { key: "metrics", label: "Metrics", meddicKey: "metrics" },
+      { key: "economic_buyer", label: "Economic Buyer", meddicKey: "economic_buyer" },
+      { key: "decision_criteria", label: "Decision Criteria", meddicKey: "decision_criteria" },
+      { key: "decision_process", label: "Decision Process", meddicKey: "decision_process" },
+      { key: "identify_pain", label: "Identify Pain", meddicKey: "identify_pain" },
+      { key: "champion", label: "Champion", meddicKey: "champion" },
+    ],
+  },
+  bant: {
+    label: "BANT",
+    dimensions: [
+      { key: "budget", label: "Budget", meddicKey: "metrics" },
+      { key: "authority", label: "Authority", meddicKey: "economic_buyer" },
+      { key: "need", label: "Need", meddicKey: "identify_pain" },
+      { key: "timeline", label: "Timeline", meddicKey: "decision_process" },
+    ],
+  },
+  spiced: {
+    label: "SPICED",
+    dimensions: [
+      { key: "situation", label: "Situation", meddicKey: "champion" },
+      { key: "pain", label: "Pain", meddicKey: "identify_pain" },
+      { key: "impact", label: "Impact", meddicKey: "metrics" },
+      { key: "critical_event", label: "Critical Event", meddicKey: "decision_process" },
+      { key: "decision", label: "Decision", meddicKey: "decision_criteria" },
+    ],
+  },
+};
+
+export const ACTIVE_FRAMEWORK: FrameworkKey = "bant";
+
 // Vendors/tools to track in CLIENT meeting transcripts (excludes internal meetings)
 // Excludes FullFunnel's own stack (Clay, HubSpot, HeyReach, Instantly) to focus
 // on what prospects/clients are using or evaluating

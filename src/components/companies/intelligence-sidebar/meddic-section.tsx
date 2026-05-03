@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { MeddicAnalysis, MeddicDimension } from "@/types/intelligence";
+import { FRAMEWORKS, ACTIVE_FRAMEWORK } from "@/lib/constants";
 import {
   RadarChart,
   Radar,
@@ -55,9 +56,26 @@ function MeddicTooltip({
 }
 
 export function MeddicSection({ data }: { data: MeddicAnalysis }) {
-  const allMissing = data.dimensions.every((d) => d.status === "missing");
-  const radarData: RadarDataPoint[] = data.dimensions.map((dim) => ({
-    dimension: SHORT_LABELS[dim.label] ?? dim.label,
+  const framework = FRAMEWORKS[ACTIVE_FRAMEWORK];
+  const dimMap = new Map(data.dimensions.map((d) => [d.key, d]));
+
+  const mappedDimensions = framework.dimensions.map((fd) => {
+    const source = dimMap.get(fd.meddicKey);
+    return {
+      ...fd,
+      status: source?.status ?? ("missing" as const),
+      evidence: source?.evidence ?? null,
+      sourceMeetingId: source?.sourceMeetingId ?? null,
+    };
+  });
+
+  const allMissing = mappedDimensions.every((d) => d.status === "missing");
+  const knownCount = mappedDimensions.filter((d) => d.status === "known").length;
+  const partialCount = mappedDimensions.filter((d) => d.status === "partial").length;
+  const coverage = Math.round(((knownCount + partialCount * 0.5) / mappedDimensions.length) * 100);
+
+  const radarData: RadarDataPoint[] = mappedDimensions.map((dim) => ({
+    dimension: dim.label.length > 12 ? dim.label.slice(0, 10) + "..." : dim.label,
     fullLabel: dim.label,
     value: dim.status === "known" ? 100 : dim.status === "partial" ? 50 : 0,
     status: dim.status,
@@ -66,16 +84,15 @@ export function MeddicSection({ data }: { data: MeddicAnalysis }) {
   return (
     <details className="group py-3">
       <summary className="flex items-center justify-between cursor-pointer text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground">
-        MEDDIC Gaps
+        {framework.label} Gaps
         <span className="text-[10px] font-normal normal-case text-foreground">
-          {data.overallCoverage}% coverage
+          {coverage}% coverage
         </span>
       </summary>
       <div className="mt-3">
-        {/* Radar chart */}
         {allMissing ? (
           <p className="text-[10px] text-muted-foreground text-center py-4">
-            No MEDDIC data discovered yet
+            No {framework.label} data discovered yet
           </p>
         ) : (
           <div className="mb-3">
@@ -100,9 +117,8 @@ export function MeddicSection({ data }: { data: MeddicAnalysis }) {
           </div>
         )}
 
-        {/* Dimension grid */}
         <div className="space-y-2">
-          {data.dimensions.map((dim) => {
+          {mappedDimensions.map((dim) => {
             const status = STATUS_INDICATOR[dim.status];
             return (
               <div key={dim.key} className="flex items-start gap-2.5">
