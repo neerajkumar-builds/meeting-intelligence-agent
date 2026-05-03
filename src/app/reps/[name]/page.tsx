@@ -73,18 +73,24 @@ export default function RepProfilePage({
   const [periodPreset, setPeriodPreset] = useState("all");
   const [customRange, setCustomRange] = useState<DateRange | undefined>();
   const [pendingRange, setPendingRange] = useState<DateRange | undefined>();
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   function handlePeriodChange(v: string) {
     setPeriodPreset(v);
     setCustomRange(undefined);
     setPendingRange(undefined);
   }
-  function handleRangeSelect(range: DateRange | undefined) {
-    setPendingRange(range);
-    if (range?.from && range?.to) {
-      setCustomRange(range);
+  function applyDateRange() {
+    if (pendingRange?.from && pendingRange?.to) {
+      setCustomRange(pendingRange);
       setPeriodPreset("all");
+      setCalendarOpen(false);
     }
+  }
+  function clearDateRange() {
+    setCustomRange(undefined);
+    setPendingRange(undefined);
+    setCalendarOpen(false);
   }
 
   const meetings = useMemo(() => {
@@ -227,7 +233,7 @@ export default function RepProfilePage({
               <SelectItem value="90d">Last 90 Days</SelectItem>
             </SelectContent>
           </Select>
-          <Popover>
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
             <PopoverTrigger
               className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs hover:bg-muted transition-colors h-8"
             >
@@ -236,22 +242,33 @@ export default function RepProfilePage({
                 <span>
                   {format(customRange.from, "MMM d")} – {format(customRange.to, "MMM d")}
                 </span>
-              ) : pendingRange?.from && !pendingRange?.to ? (
-                <span className="text-muted-foreground">
-                  {format(pendingRange.from, "MMM d")} – ...
-                </span>
               ) : (
                 <span className="text-muted-foreground">Pick dates</span>
               )}
             </PopoverTrigger>
-            <PopoverContent align="end" className="w-auto p-0">
+            <PopoverContent align="end" className="w-auto p-2">
               <Calendar
                 mode="range"
                 selected={pendingRange}
-                onSelect={handleRangeSelect}
+                onSelect={setPendingRange}
                 numberOfMonths={2}
                 disabled={{ after: new Date() }}
               />
+              <div className="flex items-center justify-between border-t pt-2 mt-1 px-1">
+                <button
+                  onClick={clearDateRange}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Clear
+                </button>
+                <button
+                  onClick={applyDateRange}
+                  disabled={!pendingRange?.from || !pendingRange?.to || pendingRange.from.getTime() === pendingRange.to.getTime()}
+                  className="rounded-md bg-[#146DFA] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#146DFA]/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  Apply
+                </button>
+              </div>
             </PopoverContent>
           </Popover>
           <button
