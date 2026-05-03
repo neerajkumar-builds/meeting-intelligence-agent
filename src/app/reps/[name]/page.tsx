@@ -99,7 +99,7 @@ export default function RepProfilePage({
       if (dateTo && m.start_time && parseISO(m.start_time) > parseISO(dateTo + "T23:59:59")) return false;
       return true;
     });
-  }, [allMeetings, repName, dateRange]);
+  }, [allMeetings, repName, dateRange, dateFrom, dateTo]);
 
   const teamMeetings = useMemo(() => allMeetings ?? [], [allMeetings]);
 
