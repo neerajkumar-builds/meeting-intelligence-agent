@@ -9,12 +9,14 @@ import { MeetingFilters } from "@/components/meetings/meeting-filters";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSectionMeetings } from "@/lib/hooks/use-section-meetings";
+import { useSection } from "@/lib/section-context";
 import { CalendarDays } from "lucide-react";
 type SortKey = "date" | "score" | "rep" | "company";
 
 export default function MeetingFeedPage() {
   const searchParams = useSearchParams();
   const { data: meetings, isLoading, error } = useSectionMeetings();
+  const { sectionLabel, stageTypes: sectionStageTypes } = useSection();
   const [repFilter, setRepFilter] = useState(searchParams.get("rep") ?? "all");
   const [stageFilter, setStageFilter] = useState(searchParams.get("stage") ?? "all");
   const [companyFilter, setCompanyFilter] = useState(searchParams.get("company") ?? "");
@@ -82,7 +84,7 @@ export default function MeetingFeedPage() {
   if (error) {
     return (
       <div>
-        <PageHeader title="Meeting Feed" />
+        <PageHeader title={`${sectionLabel} — Meetings`} />
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
           <p className="text-sm text-destructive">
             Failed to load meetings: {(error as Error).message}
@@ -95,7 +97,7 @@ export default function MeetingFeedPage() {
   return (
     <div>
       <PageHeader
-        title="Meeting Feed"
+        title={`${sectionLabel} — Meetings`}
         description={hasActiveFilters ? `Showing ${filtered.length} of ${meetings?.length ?? 0} meetings` : `${filtered.length} meeting${filtered.length !== 1 ? "s" : ""}`}
       />
 
@@ -125,6 +127,7 @@ export default function MeetingFeedPage() {
             reps={reps}
             hasActiveFilters={hasActiveFilters}
             onClearFilters={clearFilters}
+            availableStages={sectionStageTypes}
           />
 
           {filtered.length === 0 ? (

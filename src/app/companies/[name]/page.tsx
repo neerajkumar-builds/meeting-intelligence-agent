@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useCompanyMeetings } from "@/lib/hooks/use-company-meetings";
 import { IntelligenceSidebar } from "@/components/companies/intelligence-sidebar";
 import { FRAMEWORKS, DISPLAY_FRAMEWORKS } from "@/lib/constants";
+import { useSection } from "@/lib/section-context";
 import { ArrowLeft, Building2, Sparkles, Target, Swords } from "lucide-react";
 
 export default function CompanyViewPage({
@@ -21,6 +22,7 @@ export default function CompanyViewPage({
   const { name } = use(params);
   const companyName = decodeURIComponent(name);
   const { data: meetings, isLoading, error } = useCompanyMeetings(companyName);
+  const { sectionLabel } = useSection();
   const router = useRouter();
 
   if (error) {
@@ -89,7 +91,7 @@ export default function CompanyViewPage({
             onClick={() => {
               const fw = FRAMEWORKS[DISPLAY_FRAMEWORKS[0]];
               const dims = fw.dimensions.map((d) => d.label).join(", ");
-              const q = encodeURIComponent(`Give me a ${fw.label} analysis for ${companyName} based on all meeting data. For each element (${dims}), cite specific evidence from meetings or note where data is missing.`);
+              const q = encodeURIComponent(`Give me a ${fw.label} analysis for ${companyName} based on ${sectionLabel.toLowerCase()} meeting data. For each element (${dims}), cite specific evidence from meetings or note where data is missing.`);
               router.push(`/search?q=${q}`);
             }}
             className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm font-medium text-primary hover:bg-primary/10 transition-colors"

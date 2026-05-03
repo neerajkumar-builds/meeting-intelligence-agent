@@ -12,6 +12,7 @@ import { RecentActivity } from "@/components/scorecard/recent-activity";
 import { CompetitorMentions } from "@/components/scorecard/competitor-mentions";
 // import { PipelineFunnel } from "@/components/scorecard/pipeline-funnel"; // Backlog: re-enable when companies span multiple stages
 import { useSectionMeetings } from "@/lib/hooks/use-section-meetings";
+import { useSection } from "@/lib/section-context";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
 import {
@@ -44,6 +45,7 @@ function SectionHeader({ title }: { title: string }) {
 
 export default function TeamScorecardPage() {
   const { data: meetings, isLoading, error } = useSectionMeetings();
+  const { sectionLabel } = useSection();
   const [period, setPeriod] = useState("all");
 
   const filtered = useMemo(() => {
@@ -61,7 +63,7 @@ export default function TeamScorecardPage() {
   if (error) {
     return (
       <div>
-        <PageHeader title="Team Scorecard" />
+        <PageHeader title={`${sectionLabel} Scorecard`} />
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
           <p className="text-sm text-destructive">
             Failed to load meetings: {(error as Error).message}
@@ -74,7 +76,7 @@ export default function TeamScorecardPage() {
   return (
     <div>
       <PageHeader
-        title="Team Scorecard"
+        title={`${sectionLabel} Scorecard`}
         description="Rep performance overview and meeting score distribution"
       >
         <div>

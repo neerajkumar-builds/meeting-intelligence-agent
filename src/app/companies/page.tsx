@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { useSectionMeetings } from "@/lib/hooks/use-section-meetings";
+import { useSection } from "@/lib/section-context";
 import { formatDate, formatScore } from "@/lib/utils/format";
 import { Input } from "@/components/ui/input";
 import {
@@ -30,6 +31,7 @@ interface CompanyStats {
 
 export default function CompaniesIndexPage() {
   const { data: meetings, isLoading, error } = useSectionMeetings();
+  const { sectionLabel } = useSection();
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"recent" | "az" | "za" | "score" | "health" | "meetings">("recent");
 
@@ -77,7 +79,7 @@ export default function CompaniesIndexPage() {
   if (error) {
     return (
       <div>
-        <PageHeader title="Companies" />
+        <PageHeader title={`${sectionLabel} — Companies`} />
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
           <p className="text-sm text-destructive">Failed to load data: {(error as Error).message}</p>
         </div>
@@ -88,7 +90,7 @@ export default function CompaniesIndexPage() {
   return (
     <div>
       <PageHeader
-        title="Companies"
+        title={`${sectionLabel} — Companies`}
         description={search ? `Showing ${companies.filter(c => c.name.toLowerCase().includes(search.toLowerCase())).length} of ${companies.length} companies` : `${companies.length} companies with scored meetings`}
       />
 

@@ -11,18 +11,18 @@ interface SectionContextValue {
 }
 
 const SectionContext = createContext<SectionContextValue>({
-  activeSection: "sales",
+  activeSection: "all",
   setActiveSection: () => {},
-  stageTypes: SECTIONS.sales.stageTypes,
-  sectionLabel: SECTIONS.sales.label,
+  stageTypes: SECTIONS.all.stageTypes,
+  sectionLabel: SECTIONS.all.label,
 });
 
 export function SectionProvider({ children }: { children: React.ReactNode }) {
   const [activeSection, setActiveSectionState] = useState<SectionKey>(() => {
     if (typeof window !== "undefined") {
-      return (localStorage.getItem("mi-section") as SectionKey) || "sales";
+      return (localStorage.getItem("mi-section") as SectionKey) || "all";
     }
-    return "sales";
+    return "all";
   });
 
   const setActiveSection = useCallback((section: SectionKey) => {

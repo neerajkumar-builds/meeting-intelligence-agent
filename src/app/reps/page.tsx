@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { useSectionMeetings } from "@/lib/hooks/use-section-meetings";
+import { useSection } from "@/lib/section-context";
 import { formatScore, formatRelativeDate } from "@/lib/utils/format";
 import {
   Select,
@@ -29,6 +30,7 @@ interface RepStats {
 
 export default function RepsIndexPage() {
   const { data: meetings, isLoading, error } = useSectionMeetings();
+  const { sectionLabel } = useSection();
   const [sortBy, setSortBy] = useState<"score" | "meetings" | "az" | "health">("score");
   const [view, setView] = useState<"table" | "cards">("table");
 
@@ -87,7 +89,7 @@ export default function RepsIndexPage() {
   if (error) {
     return (
       <div>
-        <PageHeader title="Reps" />
+        <PageHeader title={`${sectionLabel} — Reps`} />
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
           <p className="text-sm text-destructive">Failed to load rep data: {(error as Error).message}</p>
         </div>
@@ -98,7 +100,7 @@ export default function RepsIndexPage() {
   return (
     <div>
       <PageHeader
-        title="Reps"
+        title={`${sectionLabel} — Reps`}
         description={reps.length > 0 ? `${reps.length} reps with scored meetings` : undefined}
       />
 

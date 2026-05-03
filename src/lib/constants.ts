@@ -48,16 +48,22 @@ export function getScoreBand(score: number | null) {
 }
 
 // ── Analysis Sections ───────────────────────────
-export type SectionKey = "sales" | "cs" | "internal";
+export type SectionKey = "all" | "sales" | "cs" | "internal";
 
 export interface SectionConfig {
   label: string;
   shortLabel: string;
   stageTypes: ScoringStageType[];
-  icon: "TrendingUp" | "HeartHandshake" | "Lock";
+  icon: "BarChart3" | "TrendingUp" | "HeartHandshake" | "Lock";
 }
 
 export const SECTIONS: Record<SectionKey, SectionConfig> = {
+  all: {
+    label: "All Analysis",
+    shortLabel: "All",
+    stageTypes: ["discovery_scoping", "follow_up", "onboarding", "internal"],
+    icon: "BarChart3",
+  },
   sales: {
     label: "Sales Call Analysis",
     shortLabel: "Sales",
@@ -95,14 +101,40 @@ export const NAV_ITEMS = [
   { label: "System Health", href: "/health", icon: "Activity" as const, group: "Tools" },
 ];
 
-export const SUGGESTED_PROMPTS = [
-  "Compare all reps' average meeting scores",
-  "What action items came from last week's internal meetings?",
-  "Which accounts need attention based on recent health scores?",
-  "What competitors were mentioned in recent calls?",
-  "Show coaching insights for Tyler across all meetings",
-  "What's the breakdown of meeting stages across all reps?",
-];
+export const SECTION_PROMPTS: Record<SectionKey, string[]> = {
+  all: [
+    "Compare all reps' average meeting scores",
+    "Which accounts need attention based on recent health scores?",
+    "What competitors were mentioned in recent calls?",
+    "Show coaching insights for Tyler across all meetings",
+    "What's the breakdown of meeting stages across all reps?",
+    "What action items came from last week's meetings?",
+  ],
+  sales: [
+    "Compare reps' discovery call scores",
+    "Which prospects showed strong buying signals recently?",
+    "Show ICP fit trends across recent discovery calls",
+    "What competitors were mentioned in sales calls?",
+    "Which follow-up meetings had declining deal sentiment?",
+    "Show coaching insights for reps on discovery calls",
+  ],
+  cs: [
+    "Which clients have declining health scores?",
+    "Show onboarding progress across all accounts",
+    "What blockers were raised in recent onboarding meetings?",
+    "Which clients need immediate attention?",
+    "Compare delivery scores across the CS team",
+    "What milestones were discussed in recent check-ins?",
+  ],
+  internal: [
+    "What action items came from recent team syncs?",
+    "Show key decisions made this week",
+    "Which clients were discussed in internal meetings?",
+    "What are the open action items by owner?",
+    "Summarize the major decisions from the last 7 days",
+    "Which internal meetings had the highest productivity scores?",
+  ],
+};
 
 // ── Sales Frameworks ────────────────────────────
 export type FrameworkKey = "meddic" | "bant" | "spiced";

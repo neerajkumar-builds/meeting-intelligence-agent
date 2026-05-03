@@ -19,6 +19,7 @@ interface MeetingFiltersProps {
   onCompanyFilterChange: (value: string) => void;
   stageFilter: string;
   onStageFilterChange: (value: string) => void;
+  availableStages?: string[];
   sortBy: string;
   onSortChange: (value: string) => void;
   dateRange: string;
@@ -50,6 +51,7 @@ export function MeetingFilters({
   reps,
   hasActiveFilters,
   onClearFilters,
+  availableStages,
 }: MeetingFiltersProps) {
   // When Period preset is selected, clear custom dates
   function handlePeriodChange(v: string) {
@@ -112,11 +114,11 @@ export function MeetingFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Stages</SelectItem>
-              {(Object.entries(STAGE_CONFIG) as [ScoringStageType, (typeof STAGE_CONFIG)[ScoringStageType]][]).map(
-                ([key, config]) => (
+              {(Object.entries(STAGE_CONFIG) as [ScoringStageType, (typeof STAGE_CONFIG)[ScoringStageType]][])
+                .filter(([key]) => !availableStages || availableStages.includes(key))
+                .map(([key, config]) => (
                   <SelectItem key={key} value={key}>{config.label}</SelectItem>
-                )
-              )}
+                ))}
             </SelectContent>
           </Select>
         </div>

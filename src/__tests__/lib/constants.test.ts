@@ -4,7 +4,7 @@ import {
   SCORE_BANDS,
   getScoreBand,
   NAV_ITEMS,
-  SUGGESTED_PROMPTS,
+  SECTION_PROMPTS,
   TRACKED_VENDORS,
 } from "@/lib/constants";
 
@@ -80,15 +80,19 @@ describe("NAV_ITEMS", () => {
   });
 });
 
-describe("SUGGESTED_PROMPTS", () => {
-  it("has at least 5 prompts", () => {
-    expect(SUGGESTED_PROMPTS.length).toBeGreaterThanOrEqual(5);
+describe("SECTION_PROMPTS", () => {
+  it("has prompts for each section", () => {
+    for (const prompts of Object.values(SECTION_PROMPTS)) {
+      expect(prompts.length).toBeGreaterThanOrEqual(5);
+    }
   });
 
   it("each prompt is a non-empty string", () => {
-    for (const prompt of SUGGESTED_PROMPTS) {
-      expect(typeof prompt).toBe("string");
-      expect(prompt.length).toBeGreaterThan(10);
+    for (const prompts of Object.values(SECTION_PROMPTS)) {
+      for (const prompt of prompts) {
+        expect(typeof prompt).toBe("string");
+        expect(prompt.length).toBeGreaterThan(10);
+      }
     }
   });
 });

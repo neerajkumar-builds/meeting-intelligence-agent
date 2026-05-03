@@ -49,7 +49,7 @@ function getSessionId(): string {
   return id;
 }
 
-export function ChatInterface({ initialQuery }: { initialQuery?: string }) {
+export function ChatInterface({ initialQuery, suggestedPrompts, sectionLabel }: { initialQuery?: string; suggestedPrompts?: string[]; sectionLabel?: string }) {
   const [messages, setMessages] = useState<Message[]>(() => {
     // If initialQuery matches the first user message in localStorage, restore it
     // Otherwise start fresh (new query from "Ask Blarney" button)
@@ -126,7 +126,7 @@ export function ChatInterface({ initialQuery }: { initialQuery?: string }) {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: content, history, sessionId: getSessionId(), userEmail }),
+        body: JSON.stringify({ message: content, history, sessionId: getSessionId(), userEmail, sectionLabel }),
       });
 
       if (!response.ok) {
@@ -236,7 +236,7 @@ export function ChatInterface({ initialQuery }: { initialQuery?: string }) {
       {/* Messages area */}
       <div className="flex-1 overflow-hidden">
         {messages.length === 0 ? (
-          <SuggestedPrompts onSelect={sendMessage} />
+          <SuggestedPrompts onSelect={sendMessage} prompts={suggestedPrompts} />
         ) : (
           <div className="h-full overflow-y-auto" ref={scrollRef}>
             <div className="max-w-3xl mx-auto px-4 pb-4">

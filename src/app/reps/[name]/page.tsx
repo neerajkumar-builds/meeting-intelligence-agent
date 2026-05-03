@@ -25,6 +25,7 @@ import { ChartDownload } from "@/components/shared/chart-download";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useSectionMeetings } from "@/lib/hooks/use-section-meetings";
+import { useSection } from "@/lib/section-context";
 import { formatScore } from "@/lib/utils/format";
 import { getStageLabel } from "@/lib/utils/stage";
 import { STAGE_CONFIG, type ScoringStageType } from "@/lib/constants";
@@ -66,6 +67,7 @@ export default function RepProfilePage({
   const { name } = use(params);
   const repName = decodeURIComponent(name);
   const { data: allMeetings, isLoading } = useSectionMeetings();
+  const { activeSection, sectionLabel, stageTypes: sectionStageTypes } = useSection();
   const router = useRouter();
 
   const [stageFilter, setStageFilter] = useState("all");
@@ -241,7 +243,9 @@ export default function RepProfilePage({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Stages</SelectItem>
-                {(Object.entries(STAGE_CONFIG) as [ScoringStageType, (typeof STAGE_CONFIG)[ScoringStageType]][]).map(
+                {(Object.entries(STAGE_CONFIG) as [ScoringStageType, (typeof STAGE_CONFIG)[ScoringStageType]][])
+                  .filter(([key]) => sectionStageTypes.includes(key))
+                  .map(
                   ([key, config]) => (
                     <SelectItem key={key} value={key}>{config.label}</SelectItem>
                   )
@@ -306,7 +310,7 @@ export default function RepProfilePage({
           </div>
           <button
             onClick={() => {
-              const query = encodeURIComponent(`Show coaching insights for ${repName} across all meetings`);
+              const query = encodeURIComponent(`Show coaching insights for ${repName} across ${sectionLabel.toLowerCase()} meetings`);
               router.push(`/search?q=${query}`);
             }}
             className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-2.5 py-1.5 text-sm font-medium text-primary hover:bg-primary/10 transition-colors shrink-0"
@@ -441,8 +445,9 @@ export default function RepProfilePage({
       {/* Coaching Insights - from scored_meetings rep_score JSONB (read-only) */}
       <CoachingSummary repName={repName} />
 
-      {/* Internal Meeting Insights - from scored_meetings internal_summary JSONB (read-only) */}
-      <InternalInsightsSummary repName={repName} />
+      {(activeSection === "internal" || activeSection === "all") && (
+        <InternalInsightsSummary repName={repName} />
+      )}
 
       {/* Meetings */}
       <div>

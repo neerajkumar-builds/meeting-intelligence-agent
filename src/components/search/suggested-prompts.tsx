@@ -1,13 +1,15 @@
 "use client";
 
-import { SUGGESTED_PROMPTS } from "@/lib/constants";
+import { SECTION_PROMPTS } from "@/lib/constants";
 import { Sparkles } from "lucide-react";
 
 interface SuggestedPromptsProps {
   onSelect: (prompt: string) => void;
+  prompts?: string[];
 }
 
-export function SuggestedPrompts({ onSelect }: SuggestedPromptsProps) {
+export function SuggestedPrompts({ onSelect, prompts }: SuggestedPromptsProps) {
+  const displayPrompts = prompts ?? SECTION_PROMPTS.all;
   return (
     <div className="flex flex-col items-center justify-center py-16">
       {/* Animated AI icon */}
@@ -24,7 +26,7 @@ export function SuggestedPrompts({ onSelect }: SuggestedPromptsProps) {
       </p>
 
       <div className="grid gap-3 sm:grid-cols-2 max-w-2xl w-full">
-        {SUGGESTED_PROMPTS.map((prompt) => (
+        {displayPrompts.map((prompt) => (
           <button
             key={prompt}
             onClick={() => onSelect(prompt)}

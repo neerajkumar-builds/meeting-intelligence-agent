@@ -15,6 +15,7 @@ import {
   TrendingUp,
   HeartHandshake,
   Lock,
+  BarChart3,
   ChevronRight,
 } from "lucide-react";
 
@@ -28,6 +29,7 @@ const ICON_MAP = {
   TrendingUp,
   HeartHandshake,
   Lock,
+  BarChart3,
 } as const;
 
 const TOOL_ITEMS = [

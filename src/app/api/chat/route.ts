@@ -90,8 +90,8 @@ const MAX_CONTEXT_TOKENS = 4500;
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
   try {
-    const body: ChatRequest = await request.json();
-    const { message, history, sessionId, userEmail } = body;
+    const body: ChatRequest & { sectionLabel?: string } = await request.json();
+    const { message, history, sessionId, userEmail, sectionLabel } = body;
 
     if (!message) {
       return Response.json({ error: "Message is required" }, { status: 400 });
@@ -288,7 +288,9 @@ export async function POST(request: NextRequest) {
     const stream = anthropic.messages.stream({
       model: CHAT_MODEL,
       max_tokens: 4096,
-      system: RAG_SYSTEM_PROMPT,
+      system: sectionLabel && sectionLabel !== "All Analysis"
+        ? `${RAG_SYSTEM_PROMPT}\n\nIMPORTANT: The user is currently viewing the "${sectionLabel}" section. Focus your analysis on meetings relevant to this section. Reference other meeting types only when directly relevant to the question.`
+        : RAG_SYSTEM_PROMPT,
       messages: messageParams,
     });
 
