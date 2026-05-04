@@ -16,7 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSection } from "@/lib/section-context";
 import { supabase } from "@/lib/supabase/client";
 import { SECTIONS, type SectionKey } from "@/lib/constants";
-import { Shield, UserPlus, Pencil, Trash2, Check, X, Users } from "lucide-react";
+import { Shield, UserPlus, Pencil, UserX, Check, X, Users, UserCheck } from "lucide-react";
 import { toast } from "sonner";
 
 interface UserRoleRow {
@@ -154,11 +154,15 @@ export default function AdminPage() {
   }
 
   function toggleSection(section: string) {
-    setEditSections((prev) =>
-      prev.includes(section)
+    setEditSections((prev) => {
+      if (prev.includes(section) && prev.length <= 1) {
+        toast.error("At least one section is required");
+        return prev;
+      }
+      return prev.includes(section)
         ? prev.filter((s) => s !== section)
-        : [...prev, section]
-    );
+        : [...prev, section];
+    });
   }
 
   if (!isAdmin) {
@@ -344,9 +348,9 @@ export default function AdminPage() {
                           <button
                             onClick={() => toggleActive(user)}
                             className={`p-1 rounded ${user.is_active ? "text-red-400 hover:bg-red-400/10" : "text-emerald-500 hover:bg-emerald-500/10"}`}
-                            title={user.is_active ? "Deactivate" : "Activate"}
+                            title={user.is_active ? "Deactivate user" : "Activate user"}
                           >
-                            {user.is_active ? <Trash2 className="h-3.5 w-3.5" /> : <Check className="h-3.5 w-3.5" />}
+                            {user.is_active ? <UserX className="h-3.5 w-3.5" /> : <UserCheck className="h-3.5 w-3.5" />}
                           </button>
                         )}
                       </div>
