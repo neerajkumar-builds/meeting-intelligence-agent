@@ -62,8 +62,10 @@ export default function AdminPage() {
   const [newEmail, setNewEmail] = useState("");
   const [newName, setNewName] = useState("");
   const [newRole, setNewRole] = useState("viewer");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null));
     loadUsers();
   }, []);
 
@@ -338,13 +340,15 @@ export default function AdminPage() {
                         <button onClick={() => startEdit(user)} className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded" title="Edit">
                           <Pencil className="h-3.5 w-3.5" />
                         </button>
-                        <button
-                          onClick={() => toggleActive(user)}
-                          className={`p-1 rounded ${user.is_active ? "text-red-400 hover:bg-red-400/10" : "text-emerald-500 hover:bg-emerald-500/10"}`}
-                          title={user.is_active ? "Deactivate" : "Activate"}
-                        >
-                          {user.is_active ? <Trash2 className="h-3.5 w-3.5" /> : <Check className="h-3.5 w-3.5" />}
-                        </button>
+                        {user.user_id !== currentUserId && (
+                          <button
+                            onClick={() => toggleActive(user)}
+                            className={`p-1 rounded ${user.is_active ? "text-red-400 hover:bg-red-400/10" : "text-emerald-500 hover:bg-emerald-500/10"}`}
+                            title={user.is_active ? "Deactivate" : "Activate"}
+                          >
+                            {user.is_active ? <Trash2 className="h-3.5 w-3.5" /> : <Check className="h-3.5 w-3.5" />}
+                          </button>
+                        )}
                       </div>
                     )}
                   </td>
