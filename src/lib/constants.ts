@@ -11,26 +11,26 @@ export const STAGE_CONFIG: Record<
   discovery_scoping: {
     label: "Discovery",
     color: "blue",
-    bgClass: "bg-blue-100 text-blue-800",
-    darkBgClass: "dark:bg-blue-900 dark:text-blue-300",
+    bgClass: "bg-[#146DFA]/10 text-[#146DFA]",
+    darkBgClass: "dark:bg-[#146DFA]/20 dark:text-[#93b4f5]",
   },
   follow_up: {
     label: "Follow-Up",
-    color: "purple",
-    bgClass: "bg-purple-100 text-purple-800",
-    darkBgClass: "dark:bg-purple-900 dark:text-purple-300",
+    color: "slate",
+    bgClass: "bg-[#0A0A0A]/8 text-[#0A0A0A]",
+    darkBgClass: "dark:bg-white/10 dark:text-white/80",
   },
   onboarding: {
     label: "Onboarding",
-    color: "green",
-    bgClass: "bg-green-100 text-green-800",
-    darkBgClass: "dark:bg-green-900 dark:text-green-300",
+    color: "blue",
+    bgClass: "bg-[#146DFA]/5 text-[#146DFA]/80",
+    darkBgClass: "dark:bg-[#146DFA]/10 dark:text-[#93b4f5]/80",
   },
   internal: {
     label: "Internal",
     color: "gray",
-    bgClass: "bg-gray-100 text-gray-800",
-    darkBgClass: "dark:bg-gray-800 dark:text-gray-300",
+    bgClass: "bg-gray-100 text-gray-600",
+    darkBgClass: "dark:bg-gray-800 dark:text-gray-400",
   },
 };
 

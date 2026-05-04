@@ -13,7 +13,7 @@ interface StageDistributionProps {
 
 const STAGE_COLORS: Record<string, string> = {
   discovery_scoping: "#146DFA",
-  follow_up: "#8b5cf6",
+  follow_up: "#0A0A0A",
   onboarding: "#10b981",
   internal: "#94a3b8",
 };
