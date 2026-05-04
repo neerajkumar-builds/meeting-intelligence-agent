@@ -61,7 +61,9 @@ export default function AdminPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [newName, setNewName] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [newRole, setNewRole] = useState("viewer");
+  const [isAdding, setIsAdding] = useState(false);
   const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
@@ -126,29 +128,46 @@ export default function AdminPage() {
   }
 
   async function addUser() {
-    if (!newEmail) { toast.error("Email is required"); return; }
+    if (!newEmail || !newPassword) {
+      toast.error("Email and password are required");
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
 
-    const sections = ROLE_SECTION_DEFAULTS[newRole] ?? ["sales"];
+    setIsAdding(true);
+    try {
+      const sections = ROLE_SECTION_DEFAULTS[newRole] ?? ["sales"];
+      const res = await fetch("/api/admin/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: newEmail,
+          password: newPassword,
+          displayName: newName || null,
+          role: newRole,
+          allowedSections: sections,
+        }),
+      });
 
-    const { data: { user: currentUser } } = await supabase.auth.getUser();
-
-    const { error } = await supabase.from("user_roles").insert({
-      email: newEmail,
-      display_name: newName || null,
-      role: newRole,
-      allowed_sections: sections,
-      created_by: currentUser?.id,
-    });
-
-    if (error) {
-      toast.error(`Failed to add user: ${error.message}`);
-    } else {
-      toast.success(`User ${newEmail} added with role ${newRole}`);
-      setNewEmail("");
-      setNewName("");
-      setNewRole("viewer");
-      setShowAddForm(false);
-      loadUsers();
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Failed to create user");
+      } else {
+        toast.success(`${newEmail} created with role ${newRole}. They can now log in.`);
+        setNewEmail("");
+        setNewName("");
+        setNewPassword("");
+        setNewRole("viewer");
+        setShowAddForm(false);
+        loadUsers();
+      }
+    } catch {
+      toast.error("Failed to create user");
+    } finally {
+      setIsAdding(false);
     }
   }
 
@@ -198,13 +217,23 @@ export default function AdminPage() {
         <Card>
           <CardContent className="p-4">
             <h3 className="text-sm font-semibold mb-3">Add New User</h3>
-            <div className="grid gap-3 sm:grid-cols-4">
+            <div className="grid gap-3 sm:grid-cols-5">
               <div>
                 <label className="text-[10px] font-medium text-muted-foreground mb-1 block">Email</label>
                 <Input
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
                   placeholder="user@fullfunnel.co"
+                  className="h-8 text-xs"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-medium text-muted-foreground mb-1 block">Password</label>
+                <Input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Min 6 chars"
                   className="h-8 text-xs"
                 />
               </div>
@@ -231,8 +260,8 @@ export default function AdminPage() {
                 </Select>
               </div>
               <div className="flex items-end gap-2">
-                <Button onClick={addUser} size="sm" className="bg-[#146DFA] hover:bg-[#146DFA]/90">
-                  Add
+                <Button onClick={addUser} size="sm" className="bg-[#146DFA] hover:bg-[#146DFA]/90" disabled={isAdding}>
+                  {isAdding ? "Creating..." : "Add"}
                 </Button>
                 <Button onClick={() => setShowAddForm(false)} size="sm" variant="ghost">
                   Cancel
@@ -240,7 +269,7 @@ export default function AdminPage() {
               </div>
             </div>
             <p className="text-[10px] text-muted-foreground mt-2">
-              Sets dashboard role and section access. User will also need a Supabase Auth account to log in.
+              Creates login account and sets dashboard role. User can log in immediately after creation.
             </p>
           </CardContent>
         </Card>
