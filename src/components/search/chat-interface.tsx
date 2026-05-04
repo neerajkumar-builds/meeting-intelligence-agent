@@ -9,8 +9,8 @@ import { Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { logChatEvent } from "@/lib/analytics";
 
-const STORAGE_KEY = "meeting-intel-chat";
-const SESSION_KEY = "meeting-intel-session";
+const STORAGE_PREFIX = "meeting-intel-chat";
+const SESSION_PREFIX = "meeting-intel-session";
 
 interface Message {
   id: string;
@@ -18,9 +18,13 @@ interface Message {
   content: string;
 }
 
-function loadMessages(): Message[] {
+function storageKey(email: string | null): string {
+  return email ? `${STORAGE_PREFIX}-${email}` : STORAGE_PREFIX;
+}
+
+function loadMessages(email: string | null): Message[] {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = localStorage.getItem(storageKey(email));
     if (!stored) return [];
     return JSON.parse(stored) as Message[];
   } catch {
@@ -28,58 +32,63 @@ function loadMessages(): Message[] {
   }
 }
 
-function saveMessages(messages: Message[]) {
+function saveMessages(messages: Message[], email: string | null) {
   try {
+    const key = storageKey(email);
     if (messages.length === 0) {
-      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(key);
     } else {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+      localStorage.setItem(key, JSON.stringify(messages));
     }
   } catch {
     // Storage full or unavailable - ignore
   }
 }
 
-function getSessionId(): string {
-  let id = sessionStorage.getItem(SESSION_KEY);
+function getSessionId(email: string | null): string {
+  const key = email ? `${SESSION_PREFIX}-${email}` : SESSION_PREFIX;
+  let id = sessionStorage.getItem(key);
   if (!id) {
     id = crypto.randomUUID();
-    sessionStorage.setItem(SESSION_KEY, id);
+    sessionStorage.setItem(key, id);
   }
   return id;
 }
 
 export function ChatInterface({ initialQuery, suggestedPrompts, sectionLabel }: { initialQuery?: string; suggestedPrompts?: string[]; sectionLabel?: string }) {
-  const [messages, setMessages] = useState<Message[]>(() => {
-    // If initialQuery matches the first user message in localStorage, restore it
-    // Otherwise start fresh (new query from "Ask Blarney" button)
-    if (initialQuery) {
-      const stored = loadMessages();
-      const firstUserMsg = stored.find(m => m.role === "user");
-      if (firstUserMsg && firstUserMsg.content === initialQuery) return stored;
-      return [];
-    }
-    return loadMessages();
-  });
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const emailLoaded = useRef(false);
 
   const initialSent = useRef(false);
 
-  // Get user email for analytics + rate limiting
+  // Load user email, then restore chat history for that user
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      setUserEmail(data.user?.email ?? null);
+      const email = data.user?.email ?? null;
+      setUserEmail(email);
+      emailLoaded.current = true;
+
+      if (initialQuery) {
+        const stored = loadMessages(email);
+        const firstUserMsg = stored.find(m => m.role === "user");
+        if (firstUserMsg && firstUserMsg.content === initialQuery) {
+          setMessages(stored);
+        }
+      } else {
+        setMessages(loadMessages(email));
+      }
     });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Persist messages whenever they change (and not mid-stream)
   useEffect(() => {
-    if (!isStreaming) {
-      saveMessages(messages);
+    if (!isStreaming && emailLoaded.current) {
+      saveMessages(messages, userEmail);
     }
-  }, [messages, isStreaming]);
+  }, [messages, isStreaming, userEmail]);
 
   useEffect(() => {
     if (initialQuery && !initialSent.current && messages.length === 0) {
@@ -126,7 +135,7 @@ export function ChatInterface({ initialQuery, suggestedPrompts, sectionLabel }: 
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: content, history, sessionId: getSessionId(), userEmail, sectionLabel }),
+        body: JSON.stringify({ message: content, history, sessionId: getSessionId(userEmail), userEmail, sectionLabel }),
       });
 
       if (!response.ok) {
@@ -224,11 +233,11 @@ export function ChatInterface({ initialQuery, suggestedPrompts, sectionLabel }: 
 
   function resetConversation() {
     if (!window.confirm("Clear this conversation?")) return;
-    logChatEvent({ sessionId: getSessionId(), eventType: "clear", userEmail: userEmail ?? undefined });
+    logChatEvent({ sessionId: getSessionId(userEmail), eventType: "clear", userEmail: userEmail ?? undefined });
     setMessages([]);
-    saveMessages([]);
-    // Start a new session
-    sessionStorage.removeItem(SESSION_KEY);
+    saveMessages([], userEmail);
+    const sessionKey = userEmail ? `${SESSION_PREFIX}-${userEmail}` : SESSION_PREFIX;
+    sessionStorage.removeItem(sessionKey);
   }
 
   return (
@@ -251,7 +260,7 @@ export function ChatInterface({ initialQuery, suggestedPrompts, sectionLabel }: 
                     message.id === messages[messages.length - 1]?.id
                   }
                   onFollowUp={!isStreaming ? sendMessage : undefined}
-                  sessionId={getSessionId()}
+                  sessionId={getSessionId(userEmail)}
                   userEmail={userEmail ?? undefined}
                 />
               ))}
