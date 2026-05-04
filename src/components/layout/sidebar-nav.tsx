@@ -62,14 +62,16 @@ export function SidebarNav({ collapsed = false }: SidebarNavProps) {
                 onClick={() => setActiveSection(key)}
                 className={cn(
                   "flex items-center gap-2 w-full rounded-lg text-xs font-semibold transition-all duration-200",
-                  collapsed ? "px-2.5 py-2 justify-center" : "px-3 py-2",
+                  collapsed ? "px-2.5 py-2.5 justify-center relative" : "px-3 py-2",
                   isActive
-                    ? "text-white bg-white/8"
+                    ? collapsed
+                      ? "text-white bg-[#146DFA]/20 border border-[#146DFA]/30"
+                      : "text-white bg-white/8"
                     : "text-white/40 hover:text-white/60 hover:bg-white/5"
                 )}
                 title={collapsed ? section.label : undefined}
               >
-                <SectionIcon className="h-3.5 w-3.5 shrink-0" />
+                <SectionIcon className={cn("shrink-0", collapsed ? "h-4 w-4" : "h-3.5 w-3.5")} />
                 {!collapsed && (
                   <>
                     <span className="flex-1 text-left uppercase tracking-wider">
@@ -82,6 +84,9 @@ export function SidebarNav({ collapsed = false }: SidebarNavProps) {
                       )}
                     />
                   </>
+                )}
+                {isActive && collapsed && (
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-[#146DFA] rounded-r-full" />
                 )}
               </button>
 
@@ -107,34 +112,6 @@ export function SidebarNav({ collapsed = false }: SidebarNavProps) {
                       >
                         <Icon className="h-3.5 w-3.5 shrink-0" />
                         {item.label}
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
-
-              {isActive && collapsed && (
-                <div className="flex flex-col gap-0.5 mt-0.5">
-                  {SECTION_NAV_ITEMS.map((item) => {
-                    const Icon = ICON_MAP[item.icon];
-                    const isPageActive =
-                      item.href === "/"
-                        ? pathname === "/"
-                        : pathname.startsWith(item.href);
-
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        title={item.label}
-                        className={cn(
-                          "flex items-center justify-center rounded-lg transition-all duration-200 px-2.5 py-1.5",
-                          isPageActive
-                            ? "bg-[#146DFA] text-white"
-                            : "text-white/60 hover:bg-white/8 hover:text-white"
-                        )}
-                      >
-                        <Icon className="h-3.5 w-3.5" />
                       </Link>
                     );
                   })}
