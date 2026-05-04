@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase/client";
 import { useSection } from "@/lib/section-context";
 import { SECTIONS } from "@/lib/constants";
-import { LogOut, Pencil, User } from "lucide-react";
+import { LogOut, Pencil, Lock } from "lucide-react";
 import { toast } from "sonner";
 
 interface UserInfo {
@@ -161,57 +161,78 @@ export function UserMenu() {
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              Edit Profile
-            </DialogTitle>
+            <DialogTitle className="sr-only">Edit Profile</DialogTitle>
           </DialogHeader>
+
+          <div className="flex flex-col items-center pt-2 pb-4">
+            <div className="h-16 w-16 rounded-full bg-[#146DFA] flex items-center justify-center text-white text-xl font-semibold mb-3">
+              {initials}
+            </div>
+            <p className="text-sm font-semibold">{user.displayName}</p>
+            <p className="text-xs text-muted-foreground">{user.email}</p>
+          </div>
+
           <div className="space-y-4">
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-1 block">Display Name</label>
               <Input
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
-                className="h-8 text-sm"
+                className="h-9 text-sm"
               />
             </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">Email</label>
-              <Input value={user.email} disabled className="h-8 text-sm opacity-60" />
-            </div>
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">Role</label>
-                <Input value={roleLabel} disabled className="h-8 text-sm opacity-60" />
+
+            <div className="rounded-lg bg-muted/50 border p-3 space-y-2">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Lock className="h-3 w-3 text-muted-foreground" />
+                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Managed by admin</span>
               </div>
-              <div className="flex-1">
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">Sections</label>
-                <Input value={sectionLabels} disabled className="h-8 text-sm opacity-60" />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-[10px] text-muted-foreground">Email</p>
+                  <p className="text-xs font-medium truncate">{user.email}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground">Role</p>
+                  <p className="text-xs font-medium">{roleLabel}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-[10px] text-muted-foreground">Sections</p>
+                  <div className="flex flex-wrap gap-1 mt-0.5">
+                    {allowedSections.map(s => (
+                      <span key={s} className="text-[10px] bg-background border px-1.5 py-0.5 rounded">
+                        {SECTIONS[s]?.shortLabel ?? s}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
+
             <div className="border-t pt-4">
-              <p className="text-xs font-medium text-muted-foreground mb-2">Change Password</p>
+              <p className="text-xs font-medium mb-3">Change Password</p>
               <div className="space-y-2">
                 <Input
                   type="password"
                   placeholder="New password (min 6 chars)"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="h-8 text-sm"
+                  className="h-9 text-sm"
                 />
                 <Input
                   type="password"
                   placeholder="Confirm new password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="h-8 text-sm"
+                  className="h-9 text-sm"
                 />
               </div>
             </div>
+
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="ghost" size="sm" onClick={() => setEditOpen(false)}>Cancel</Button>
               <Button size="sm" onClick={saveProfile} disabled={isSaving} className="bg-[#146DFA] hover:bg-[#146DFA]/90">
-                {isSaving ? "Saving..." : "Save"}
+                {isSaving ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </div>
