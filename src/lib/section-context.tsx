@@ -18,6 +18,7 @@ interface SectionContextValue {
   allowedSections: SectionKey[];
   userRole: string | null;
   isAdmin: boolean;
+  isRoleLoaded: boolean;
 }
 
 const SectionContext = createContext<SectionContextValue>({
@@ -28,6 +29,7 @@ const SectionContext = createContext<SectionContextValue>({
   allowedSections: Object.keys(SECTIONS) as SectionKey[],
   userRole: null,
   isAdmin: false,
+  isRoleLoaded: false,
 });
 
 export function SectionProvider({ children }: { children: React.ReactNode }) {
@@ -42,6 +44,7 @@ export function SectionProvider({ children }: { children: React.ReactNode }) {
     Object.keys(SECTIONS) as SectionKey[]
   );
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [isRoleLoaded, setIsRoleLoaded] = useState(false);
 
   useEffect(() => {
     async function loadUserRole() {
@@ -62,6 +65,7 @@ export function SectionProvider({ children }: { children: React.ReactNode }) {
           return;
         }
         setUserRole(role.role);
+        setIsRoleLoaded(true);
         const sections = role.allowed_sections.filter(
           (s): s is SectionKey => s in SECTIONS
         );
@@ -73,6 +77,8 @@ export function SectionProvider({ children }: { children: React.ReactNode }) {
             localStorage.setItem("mi-section", sections[0]);
           }
         }
+      } else {
+        setIsRoleLoaded(true);
       }
     }
     loadUserRole();
@@ -97,6 +103,7 @@ export function SectionProvider({ children }: { children: React.ReactNode }) {
       allowedSections,
       userRole,
       isAdmin,
+      isRoleLoaded,
     }}>
       {children}
     </SectionContext>

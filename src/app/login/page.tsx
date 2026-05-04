@@ -21,7 +21,6 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [resetMode, setResetMode] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [recoveryMode, setRecoveryMode] = useState(false);
   const [newPassword, setNewPassword] = useState("");
@@ -82,7 +81,6 @@ export default function LoginPage() {
       setError(resetError.message);
     } else {
       setResetSent(true);
-      setResetMode(false);
     }
   }
 
@@ -199,7 +197,7 @@ export default function LoginPage() {
           <div className="flex justify-end">
             <button
               type="button"
-              onClick={() => { setResetMode(true); handleResetPassword(); }}
+              onClick={handleResetPassword}
               className="text-xs text-white/40 hover:text-white/70 transition-colors"
             >
               Forgot password?

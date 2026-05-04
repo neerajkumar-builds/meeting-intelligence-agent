@@ -10,12 +10,14 @@ import { ThemeToggle } from "./theme-toggle";
 import { Separator } from "@/components/ui/separator";
 import { SyncIndicator } from "@/components/shared/sync-indicator";
 import { NotificationsBell } from "@/components/shared/notifications-bell";
-import { PanelLeftClose, PanelLeft } from "lucide-react";
+import { PanelLeftClose, PanelLeft, Loader2 } from "lucide-react";
 import { UserMenu } from "./user-menu";
+import { useSection } from "@/lib/section-context";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
+  const { isRoleLoaded } = useSection();
 
   // Cmd+K / Ctrl+K shortcut to jump to Ask Blarney
   useEffect(() => {
@@ -100,7 +102,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+          {isRoleLoaded ? children : (
+            <div className="flex items-center justify-center h-[60vh]">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          )}
+        </main>
       </div>
     </div>
   );
