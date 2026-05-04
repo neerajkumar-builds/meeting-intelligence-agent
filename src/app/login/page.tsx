@@ -27,6 +27,13 @@ export default function LoginPage() {
   const [taglineVisible, setTaglineVisible] = useState(true);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error") === "deactivated") {
+      setError("Your account has been deactivated. Contact your admin.");
+    }
+  }, []);
+
+  useEffect(() => {
     const interval = setInterval(() => {
       setTaglineVisible(false);
       setTimeout(() => {

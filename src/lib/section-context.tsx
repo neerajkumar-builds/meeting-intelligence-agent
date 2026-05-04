@@ -50,12 +50,17 @@ export function SectionProvider({ children }: { children: React.ReactNode }) {
 
       const { data } = await supabase
         .from("user_roles")
-        .select("role, allowed_sections, display_name")
+        .select("role, allowed_sections, display_name, is_active")
         .eq("email", user.email)
         .single();
 
       if (data) {
-        const role = data as UserRole;
+        const role = data as UserRole & { is_active?: boolean };
+        if (role.is_active === false) {
+          await supabase.auth.signOut();
+          window.location.href = "/login?error=deactivated";
+          return;
+        }
         setUserRole(role.role);
         const sections = role.allowed_sections.filter(
           (s): s is SectionKey => s in SECTIONS

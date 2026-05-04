@@ -12,11 +12,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSection } from "@/lib/section-context";
 import { supabase } from "@/lib/supabase/client";
 import { SECTIONS, type SectionKey } from "@/lib/constants";
-import { Shield, UserPlus, Pencil, UserX, Check, X, Users, UserCheck } from "lucide-react";
+import { Shield, UserPlus, Pencil, UserX, Check, X, Users, UserCheck, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 
 interface UserRoleRow {
@@ -64,6 +65,8 @@ export default function AdminPage() {
   const [newPassword, setNewPassword] = useState("");
   const [newRole, setNewRole] = useState("viewer");
   const [isAdding, setIsAdding] = useState(false);
+  const [resetEmail, setResetEmail] = useState<string | null>(null);
+  const [resetPassword, setResetPassword] = useState("");
   const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
@@ -124,6 +127,27 @@ export default function AdminPage() {
     } else {
       toast.success(user.is_active ? "User deactivated" : "User activated");
       loadUsers();
+    }
+  }
+
+  async function handleResetPassword() {
+    if (!resetEmail || !resetPassword) return;
+    if (resetPassword.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+    const res = await fetch("/api/admin/users", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: resetEmail, newPassword: resetPassword }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      toast.error(data.error || "Failed to reset password");
+    } else {
+      toast.success(`Password reset for ${resetEmail}`);
+      setResetEmail(null);
+      setResetPassword("");
     }
   }
 
@@ -369,17 +393,26 @@ export default function AdminPage() {
                       </div>
                     ) : (
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => startEdit(user)} className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded" title="Edit">
+                        <button onClick={() => startEdit(user)} className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded" title="Edit role">
                           <Pencil className="h-3.5 w-3.5" />
                         </button>
                         {user.email !== currentUserEmail && (
-                          <button
-                            onClick={() => toggleActive(user)}
-                            className={`p-1 rounded ${user.is_active ? "text-red-400 hover:bg-red-400/10" : "text-emerald-500 hover:bg-emerald-500/10"}`}
-                            title={user.is_active ? "Deactivate user" : "Activate user"}
-                          >
-                            {user.is_active ? <UserX className="h-3.5 w-3.5" /> : <UserCheck className="h-3.5 w-3.5" />}
-                          </button>
+                          <>
+                            <button
+                              onClick={() => { setResetEmail(user.email); setResetPassword(""); }}
+                              className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded"
+                              title="Reset password"
+                            >
+                              <KeyRound className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => toggleActive(user)}
+                              className={`p-1 rounded ${user.is_active ? "text-red-400 hover:bg-red-400/10" : "text-emerald-500 hover:bg-emerald-500/10"}`}
+                              title={user.is_active ? "Deactivate user" : "Activate user"}
+                            >
+                              {user.is_active ? <UserX className="h-3.5 w-3.5" /> : <UserCheck className="h-3.5 w-3.5" />}
+                            </button>
+                          </>
                         )}
                       </div>
                     )}
@@ -409,6 +442,33 @@ export default function AdminPage() {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={resetEmail !== null} onOpenChange={(open) => { if (!open) setResetEmail(null); }}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-sm">
+              <KeyRound className="h-4 w-4" />
+              Reset Password
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground">Set a new password for <span className="font-medium text-foreground">{resetEmail}</span></p>
+            <Input
+              type="password"
+              placeholder="New password (min 6 chars)"
+              value={resetPassword}
+              onChange={(e) => setResetPassword(e.target.value)}
+              className="h-9 text-sm"
+            />
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setResetEmail(null)}>Cancel</Button>
+              <Button size="sm" onClick={handleResetPassword} className="bg-[#146DFA] hover:bg-[#146DFA]/90">
+                Reset
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { createServerSupabase } from "@/lib/supabase/server";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -48,6 +47,39 @@ export async function POST(request: NextRequest) {
     });
   } catch (err) {
     console.error("Admin create user error:", err);
+    return Response.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const { email, newPassword } = await request.json();
+
+    if (!email || !newPassword) {
+      return Response.json({ error: "Email and new password are required" }, { status: 400 });
+    }
+    if (newPassword.length < 6) {
+      return Response.json({ error: "Password must be at least 6 characters" }, { status: 400 });
+    }
+
+    const { data: users } = await supabaseAdmin.auth.admin.listUsers();
+    const authUser = users?.users?.find(u => u.email === email);
+
+    if (!authUser) {
+      return Response.json({ error: "User not found in auth" }, { status: 404 });
+    }
+
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(authUser.id, {
+      password: newPassword,
+    });
+
+    if (error) {
+      return Response.json({ error: error.message }, { status: 400 });
+    }
+
+    return Response.json({ success: true });
+  } catch (err) {
+    console.error("Admin reset password error:", err);
     return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 }
