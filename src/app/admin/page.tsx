@@ -62,10 +62,10 @@ export default function AdminPage() {
   const [newEmail, setNewEmail] = useState("");
   const [newName, setNewName] = useState("");
   const [newRole, setNewRole] = useState("viewer");
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null));
+    supabase.auth.getUser().then(({ data }) => setCurrentUserEmail(data.user?.email ?? null));
     loadUsers();
   }, []);
 
@@ -133,7 +133,6 @@ export default function AdminPage() {
     const { data: { user: currentUser } } = await supabase.auth.getUser();
 
     const { error } = await supabase.from("user_roles").insert({
-      user_id: crypto.randomUUID(),
       email: newEmail,
       display_name: newName || null,
       role: newRole,
@@ -241,7 +240,7 @@ export default function AdminPage() {
               </div>
             </div>
             <p className="text-[10px] text-muted-foreground mt-2">
-              Note: User must also exist in Supabase Auth. This sets their dashboard role and section access.
+              Sets dashboard role and section access. User will also need a Supabase Auth account to log in.
             </p>
           </CardContent>
         </Card>
@@ -344,7 +343,7 @@ export default function AdminPage() {
                         <button onClick={() => startEdit(user)} className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded" title="Edit">
                           <Pencil className="h-3.5 w-3.5" />
                         </button>
-                        {user.user_id !== currentUserId && (
+                        {user.email !== currentUserEmail && (
                           <button
                             onClick={() => toggleActive(user)}
                             className={`p-1 rounded ${user.is_active ? "text-red-400 hover:bg-red-400/10" : "text-emerald-500 hover:bg-emerald-500/10"}`}

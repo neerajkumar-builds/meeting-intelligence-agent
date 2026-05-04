@@ -51,7 +51,7 @@ export function SectionProvider({ children }: { children: React.ReactNode }) {
       const { data } = await supabase
         .from("user_roles")
         .select("role, allowed_sections, display_name")
-        .eq("user_id", user.id)
+        .eq("email", user.email)
         .single();
 
       if (data) {
