@@ -103,7 +103,6 @@ export function UserMenu() {
 
   async function handleSignOut() {
     setMenuOpen(false);
-    if (!window.confirm("Sign out?")) return;
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();
