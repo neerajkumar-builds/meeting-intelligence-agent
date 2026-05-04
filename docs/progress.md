@@ -1,15 +1,15 @@
 # Meeting Intelligence Dashboard — Progress
 
 ## Current State
-- **Status:** Dev/prod split complete, 9 CRs pending
-- **Last session:** 2026-05-03 (migration + SOP + knowledge system)
-- **Branch:** `main` (SHA: c30bef5)
+- **Status:** All 9 CRs complete + admin panel + RBAC deployed
+- **Last session:** 2026-05-04 (all CRs + admin panel + user profile + auth)
+- **Branch:** `main`, both remotes in sync
 - **Production URL:** https://dashboard-jet-seven-93.vercel.app (company Vercel)
-- **Dev:** localhost:3003 → Supabase burcfsxsxgabknmodsrd
+- **Dev:** localhost:3003 - Supabase burcfsxsxgabknmodsrd
 - **Deploy method:** `/mi-promote` skill (git push + Vercel CLI deploy)
-- **Tests:** 77 passing (13 test files, Vitest)
+- **Tests:** 80 passing (14 test files, Vitest)
 - **Stack:** Next.js 16.2.2, React 19, Supabase, Anthropic SDK 0.82+, Tailwind v4
-- **Full context:** See `migration/session-handover.md` and `migration/continuation-prompt.md`
+- **Full context:** See `migration/session-handover.md`
 
 ## Session Log
 
@@ -46,7 +46,51 @@
 - `faafb50` feat: make chat model configurable via CHAT_MODEL env var
 - `40e1e9e` fix: restore progressive streaming + thin overlay scrollbar
 
-### 2026-05-03 — Dev/Prod Migration + SOP + Knowledge System
+### 2026-05-04 - All 9 CRs + Admin Panel + RBAC + User Profile
+
+**Goal:** Implement all 9 change requests from Luke & Stephen, add section-based navigation, build admin panel with user management, add user profile and auth flows.
+
+**CRs Implemented (all deployed):**
+- CR-004: Remove internal meetings from analysis (Critical/Compliance)
+- CR-005: Score reason summaries below gauges
+- CR-009: Meeting detail page declutter
+- CR-002: Top 5 strengths/improvements on rep page
+- CR-003: Date range filter with calendar range picker
+- CR-007: Intelligence panel expanded by default
+- CR-008: BANT + MEDDIC dual framework display
+- CR-006: Zoom play URL + download with passcode disclaimer
+- CR-001: Section-based sidebar (All/Sales/CS/Internal)
+
+**Additional Features Built:**
+- CR-001 refinement: 12 section-awareness gaps fixed (titles, prompts, APIs, filters)
+- Admin panel at /admin: create users, edit roles, toggle sections, deactivate, password reset
+- User profile menu: initials dropdown, edit profile dialog, self-service password change
+- Forgot password: email reset flow with recovery form on login page
+- Deactivated user blocking with loading guard (no dashboard flash)
+- Per-user Ask Blarney chat history (localStorage keyed by email)
+- Brand color alignment: purple replaced with brand palette
+- Em dashes removed from entire codebase
+- Clean collapsed sidebar (sections only)
+- Single-step user creation via /api/admin/users (SUPABASE_SERVICE_ROLE_KEY)
+
+**Database Changes:**
+- `user_roles` table created on dev + prod Supabase
+- RLS policies: authenticated read, leadership/admin write
+- Migration SQL: `migration/sql/2026-05-04-user-roles.sql`
+
+**Tests:** 80/80 passing (3 new tests for internal exclusion + coaching API)
+
+**Reference Docs Created:**
+- `migration/product-team-feedback.md` - Slack + video feedback mapped to CRs
+- `migration/architecture-vision.md` - section-based sidebar architecture
+- `migration/brand-audit.md` - dashboard vs brand guidelines
+
+**Pending:**
+- n8n pipeline: add `client_meeting` + `internal_client_meeting` stage types
+- Supabase RLS on scored_meetings for backend section enforcement
+- Steps for both documented in `migration/session-handover.md`
+
+### 2026-05-03 - Dev/Prod Migration + SOP + Knowledge System
 
 **Goal:** Set up separate dev and prod environments, create operational safety net before implementing 9 change requests from Luke & Stephen.
 
@@ -86,22 +130,17 @@ Knowledge System:
 
 ## Pending / Next Session
 
-### Change Requests (Priority Order)
-1. [ ] CR-004: Remove internal meetings from analysis (Critical, Compliance)
-2. [ ] CR-005: Score reason summaries (High)
-3. [ ] CR-009: Meeting detail page refinement (High)
-4. [ ] CR-006: Watch recording (Medium)
-5. [ ] CR-002: Summarized strengths on rep page (High)
-6. [ ] CR-003: Date range filter on rep page (Medium)
-7. [ ] CR-007: Company Intel panel enhancements (Medium)
-8. [ ] CR-008: MEDDIC/BANT customization (Medium)
-9. [ ] CR-001: Section segmentation — Sales/CSM (Critical, needs n8n)
+### Change Requests
+- [x] CR-001 through CR-009: ALL COMPLETED (2026-05-04)
+
+### Next Work
+1. [ ] n8n pipeline: add `client_meeting` + `internal_client_meeting` stage types (see session-handover.md)
+2. [ ] Supabase RLS on scored_meetings for backend section enforcement (see session-handover.md)
 
 ### Open Items
 - [ ] Install Vercel GitHub App on neerajkumar-builds org (enables auto-deploy)
 - [ ] Create #meeting-intel-dev Slack channel
 - [ ] Create .migration/env-production file (blocks /mi-seed-dev)
-- [ ] Update docs/11-replication-guide.md with correct production schema SQL
 - [ ] Migrate middleware.ts to proxy convention (Next.js 16 deprecation)
 
 ### Unstaged Changes (from prior session, not committed)
