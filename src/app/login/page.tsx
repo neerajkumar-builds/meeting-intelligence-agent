@@ -21,6 +21,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetMode, setResetMode] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
   const [taglineIndex, setTaglineIndex] = useState(0);
   const [taglineVisible, setTaglineVisible] = useState(true);
 
@@ -34,6 +36,22 @@ export default function LoginPage() {
     }, 3500);
     return () => clearInterval(interval);
   }, []);
+
+  async function handleResetPassword() {
+    if (!email) { setError("Enter your email to reset password"); return; }
+    setLoading(true);
+    setError("");
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/login`,
+    });
+    setLoading(false);
+    if (resetError) {
+      setError(resetError.message);
+    } else {
+      setResetSent(true);
+      setResetMode(false);
+    }
+  }
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -110,6 +128,22 @@ export default function LoginPage() {
               </button>
             </div>
           </div>
+
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => { setResetMode(true); handleResetPassword(); }}
+              className="text-xs text-white/40 hover:text-white/70 transition-colors"
+            >
+              Forgot password?
+            </button>
+          </div>
+
+          {resetSent && (
+            <p className="text-sm text-emerald-400 bg-emerald-400/10 rounded-lg px-3 py-2">
+              Password reset email sent. Check your inbox.
+            </p>
+          )}
 
           {error && (
             <p className="text-sm text-red-400 bg-red-400/10 rounded-lg px-3 py-2">

@@ -8,10 +8,10 @@ import { SidebarNav } from "./sidebar-nav";
 import { MobileNav } from "./mobile-nav";
 import { ThemeToggle } from "./theme-toggle";
 import { Separator } from "@/components/ui/separator";
-import { supabase } from "@/lib/supabase/client";
 import { SyncIndicator } from "@/components/shared/sync-indicator";
 import { NotificationsBell } from "@/components/shared/notifications-bell";
-import { LogOut, PanelLeftClose, PanelLeft } from "lucide-react";
+import { PanelLeftClose, PanelLeft } from "lucide-react";
+import { UserMenu } from "./user-menu";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -28,13 +28,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [router]);
-
-  async function handleSignOut() {
-    if (!window.confirm("Sign out?")) return;
-    await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
-  }
 
   return (
     <div className="flex h-screen">
@@ -102,13 +95,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <span className="text-xs">&#8984;</span>K
             </kbd>
             <ThemeToggle />
-            <button
-              onClick={handleSignOut}
-              className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-              title="Sign out"
-            >
-              <LogOut className="h-3.5 w-3.5" />
-            </button>
+            <UserMenu />
           </div>
         </header>
 
