@@ -23,6 +23,9 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [resetMode, setResetMode] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [recoveryMode, setRecoveryMode] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [taglineIndex, setTaglineIndex] = useState(0);
   const [taglineVisible, setTaglineVisible] = useState(true);
 
@@ -31,6 +34,13 @@ export default function LoginPage() {
     if (params.get("error") === "deactivated") {
       setError("Your account has been deactivated. Contact your admin.");
     }
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setRecoveryMode(true);
+      }
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -43,6 +53,22 @@ export default function LoginPage() {
     }, 3500);
     return () => clearInterval(interval);
   }, []);
+
+  async function handleSetNewPassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (newPassword.length < 6) { setError("Password must be at least 6 characters"); return; }
+    if (newPassword !== confirmNewPassword) { setError("Passwords do not match"); return; }
+    setLoading(true);
+    setError("");
+    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+    setLoading(false);
+    if (updateError) {
+      setError(updateError.message);
+    } else {
+      setRecoveryMode(false);
+      window.location.href = "/";
+    }
+  }
 
   async function handleResetPassword() {
     if (!email) { setError("Enter your email to reset password"); return; }
@@ -98,6 +124,40 @@ export default function LoginPage() {
         </div>
 
         {/* Form */}
+        {recoveryMode ? (
+          <form onSubmit={handleSetNewPassword} className="space-y-4">
+            <h3 className="text-lg font-semibold text-white text-center">Set New Password</h3>
+            <p className="text-sm text-white/50 text-center">Enter your new password below</p>
+            <div>
+              <label className="text-sm text-white/80 mb-1 block">New Password</label>
+              <Input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Min 6 characters"
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#146DFA]"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-sm text-white/80 mb-1 block">Confirm Password</label>
+              <Input
+                type="password"
+                value={confirmNewPassword}
+                onChange={(e) => setConfirmNewPassword(e.target.value)}
+                placeholder="Confirm new password"
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#146DFA]"
+                required
+              />
+            </div>
+            {error && (
+              <p className="text-sm text-red-400 bg-red-400/10 rounded-lg px-3 py-2">{error}</p>
+            )}
+            <Button type="submit" disabled={loading} className="w-full bg-[#146DFA] hover:bg-[#146DFA]/90 text-white">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Update Password"}
+            </Button>
+          </form>
+        ) : (
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="text-xs font-medium text-white/60 mb-1.5 block">
@@ -170,6 +230,7 @@ export default function LoginPage() {
             )}
           </Button>
         </form>
+        )}
 
         {/* Rotating taglines */}
         <p
