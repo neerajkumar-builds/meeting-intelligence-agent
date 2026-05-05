@@ -354,14 +354,6 @@ function CoachingContent({
         accent="amber"
         icon={<span className="h-5 w-5 rounded bg-amber-100 dark:bg-amber-900 flex items-center justify-center text-amber-600 dark:text-amber-400 text-xs font-bold">!</span>}
       />
-      {rs.blind_spots && (
-        <TextBlock
-          label="Blind Spots"
-          text={rs.blind_spots}
-          accent="red"
-          icon={<span className="h-5 w-5 rounded bg-red-100 dark:bg-red-900 flex items-center justify-center text-red-600 dark:text-red-400 text-xs font-bold">?</span>}
-        />
-      )}
       <TextBlock
         label="Coaching Recommendations"
         text={rs.coaching_recommendations}
@@ -372,16 +364,8 @@ function CoachingContent({
         <TextBlock
           label="Objection Handling"
           text={rs.handling_analysis}
-          accent="purple"
-          icon={<span className="h-5 w-5 rounded bg-purple-100 dark:bg-purple-900 flex items-center justify-center text-purple-600 dark:text-purple-400 text-xs font-bold">O</span>}
-        />
-      )}
-      {rs.deal_progression_assessment && (
-        <TextBlock
-          label="Deal Progression"
-          text={rs.deal_progression_assessment}
-          accent="emerald"
-          icon={<span className="h-5 w-5 rounded bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-xs font-bold">D</span>}
+          accent="indigo"
+          icon={<span className="h-5 w-5 rounded bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-xs font-bold">O</span>}
         />
       )}
     </div>

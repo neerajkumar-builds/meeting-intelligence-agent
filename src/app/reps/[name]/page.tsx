@@ -359,6 +359,7 @@ export default function RepProfilePage({
             <p className="text-[10px] text-muted-foreground mt-1">Team avg: {formatScore(stats.teamAvg)}</p>
           </CardContent>
         </Card>
+        {(activeSection === "cs" || activeSection === "all") && (
         <Card className={`transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${getScoreTint(stats.avgHealth)}`}>
           <CardContent className="px-4 py-3">
             <p className="text-xs text-muted-foreground" title="Scale: 0-10. 8+ Healthy, 5-8 Monitor, below 5 At-Risk">Avg Health <span className="opacity-60">/ 10</span></p>
@@ -366,6 +367,7 @@ export default function RepProfilePage({
             <ScoreBar score={stats.avgHealth} />
           </CardContent>
         </Card>
+        )}
         <Card className="transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 border-t-2 border-t-blue-500/40">
           <CardContent className="px-4 py-3">
             <p className="text-xs text-muted-foreground">Best / Worst Call</p>

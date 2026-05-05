@@ -80,6 +80,17 @@ export default function MeetingDetailPage({
       <div>
         <div className="flex items-center gap-3 mb-2">
           <StageTypeBadge stage={meeting.scoring_stage_type} />
+          {(() => {
+            const ms = meeting.meeting_score as Record<string, unknown> | null;
+            const sentiment = ms?.deal_sentiment as string | null;
+            if (!sentiment) return null;
+            const cls = sentiment.toLowerCase().includes("positive") || sentiment.toLowerCase().includes("strong")
+              ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300"
+              : sentiment.toLowerCase().includes("negative") || sentiment.toLowerCase().includes("stall")
+                ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+                : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
+            return <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${cls}`}>{sentiment}</span>;
+          })()}
           <span className="text-sm text-muted-foreground">
             {formatDateTime(meeting.start_time)}
           </span>

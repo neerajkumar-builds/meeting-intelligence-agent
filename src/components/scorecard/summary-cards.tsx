@@ -6,6 +6,7 @@ import { formatScore } from "@/lib/utils/format";
 import { TrendingUp, TrendingDown, AlertTriangle } from "lucide-react";
 import { parseISO, subDays } from "date-fns";
 import type { MeetingsListRow } from "@/types/meetings";
+import { useSection } from "@/lib/section-context";
 
 interface SummaryCardsProps {
   meetings: MeetingsListRow[];
@@ -50,6 +51,8 @@ function getScoreTint(score: number | null): "info" | "good" | "mid" | "bad" {
 }
 
 export function SummaryCards({ meetings }: SummaryCardsProps) {
+  const { activeSection } = useSection();
+  const showHealthMetrics = activeSection === "cs" || activeSection === "all";
   const totalMeetings = meetings.length;
 
   const avgScore =
@@ -129,8 +132,8 @@ export function SummaryCards({ meetings }: SummaryCardsProps) {
         </CardContent>
       </Card>
 
-      {/* Avg Health */}
-      <Card className={`transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${getCardTint(getScoreTint(avgHealth))}`}>
+      {/* Avg Health - CS/All sections only */}
+      {showHealthMetrics && <Card className={`transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${getCardTint(getScoreTint(avgHealth))}`}>
         <CardContent className="p-5">
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider" title="Scale: 0-10. 8+ Healthy, 5-8 Monitor, below 5 At-Risk">Avg Health <span className="normal-case tracking-normal opacity-60">/ 10</span></p>
           <div className="flex items-center gap-2 mt-1.5">
@@ -144,10 +147,10 @@ export function SummaryCards({ meetings }: SummaryCardsProps) {
           </p>
           <ScoreBar score={avgHealth} />
         </CardContent>
-      </Card>
+      </Card>}
 
-      {/* At-Risk Accounts */}
-      <Card className={`transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${atRiskAccounts.length > 0 ? getCardTint("bad") : getCardTint("good")}`}>
+      {/* At-Risk Accounts - CS/All sections only */}
+      {showHealthMetrics && <Card className={`transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${atRiskAccounts.length > 0 ? getCardTint("bad") : getCardTint("good")}`}>
         <CardContent className="p-5">
           <div className="flex items-center gap-1.5">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">At-Risk</p>
@@ -181,7 +184,7 @@ export function SummaryCards({ meetings }: SummaryCardsProps) {
             <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">All healthy</p>
           )}
         </CardContent>
-      </Card>
+      </Card>}
     </div>
   );
 }
