@@ -71,7 +71,7 @@ Scores: ${JSON.stringify(meeting.meeting_score ?? {}, null, 2)}
 
 Rep Analysis: ${JSON.stringify(meeting.rep_score ?? {}, null, 2)}
 
-${meeting.scoring_stage_type === "internal" && meeting.internal_summary ? `Internal Summary: ${JSON.stringify(meeting.internal_summary, null, 2)}` : ""}
+${(meeting.scoring_stage_type === "internal" || meeting.scoring_stage_type === "internal_client_meeting") && meeting.internal_summary ? `Internal Summary: ${JSON.stringify(meeting.internal_summary, null, 2)}` : ""}
 
 Transcript (first 8000 chars):
 ${(meeting.transcript_text ?? "").substring(0, 8000)}`,

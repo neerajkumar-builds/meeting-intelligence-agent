@@ -33,7 +33,7 @@ export function useMeetingsList(params: MeetingsListParams = {}) {
       if (params.stageTypes?.length) {
         query = query.in("scoring_stage_type", params.stageTypes);
       } else if (params.excludeInternal !== false) {
-        query = query.neq("scoring_stage_type", "internal");
+        query = query.not("scoring_stage_type", "in", "(internal,internal_client_meeting)");
       }
       if (params.dateFrom) {
         query = query.gte("start_time", params.dateFrom);

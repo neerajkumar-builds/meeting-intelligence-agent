@@ -15,6 +15,8 @@ const STAGE_COLORS: Record<string, string> = {
   discovery_scoping: "#146DFA",
   follow_up: "#0A0A0A",
   onboarding: "#10b981",
+  client_meeting: "#14b8a6",
+  internal_client_meeting: "#f59e0b",
   internal: "#94a3b8",
 };
 

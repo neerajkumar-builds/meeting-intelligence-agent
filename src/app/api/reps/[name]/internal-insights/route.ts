@@ -44,7 +44,7 @@ export async function GET(
       .from("scored_meetings")
       .select("id, topic, start_time, scoring_stage_type, overall_score, internal_summary")
       .eq("host_name", repName)
-      .eq("scoring_stage_type", "internal")
+      .in("scoring_stage_type", ["internal", "internal_client_meeting"])
       .not("internal_summary", "is", null)
       .order("start_time", { ascending: false });
 

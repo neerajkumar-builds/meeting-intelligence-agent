@@ -2,6 +2,8 @@ export type ScoringStageType =
   | "discovery_scoping"
   | "follow_up"
   | "onboarding"
+  | "client_meeting"
+  | "internal_client_meeting"
   | "internal";
 
 export const STAGE_CONFIG: Record<
@@ -25,6 +27,18 @@ export const STAGE_CONFIG: Record<
     color: "blue",
     bgClass: "bg-[#146DFA]/5 text-[#146DFA]/80",
     darkBgClass: "dark:bg-[#146DFA]/10 dark:text-[#93b4f5]/80",
+  },
+  client_meeting: {
+    label: "Check-In",
+    color: "teal",
+    bgClass: "bg-teal-100 text-teal-700",
+    darkBgClass: "dark:bg-teal-900/30 dark:text-teal-400",
+  },
+  internal_client_meeting: {
+    label: "Internal Check-In",
+    color: "amber",
+    bgClass: "bg-amber-50 text-amber-700",
+    darkBgClass: "dark:bg-amber-900/20 dark:text-amber-400",
   },
   internal: {
     label: "Internal",
@@ -61,7 +75,7 @@ export const SECTIONS: Record<SectionKey, SectionConfig> = {
   all: {
     label: "All Analysis",
     shortLabel: "All",
-    stageTypes: ["discovery_scoping", "follow_up", "onboarding", "internal"],
+    stageTypes: ["discovery_scoping", "follow_up", "onboarding", "client_meeting", "internal_client_meeting", "internal"],
     icon: "BarChart3",
   },
   sales: {
@@ -73,13 +87,13 @@ export const SECTIONS: Record<SectionKey, SectionConfig> = {
   cs: {
     label: "Customer Success",
     shortLabel: "CS",
-    stageTypes: ["onboarding"],
+    stageTypes: ["onboarding", "client_meeting"],
     icon: "HeartHandshake",
   },
   internal: {
     label: "Internal Meetings",
     shortLabel: "Internal",
-    stageTypes: ["internal"],
+    stageTypes: ["internal", "internal_client_meeting"],
     icon: "Lock",
   },
 };

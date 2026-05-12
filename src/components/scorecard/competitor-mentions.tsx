@@ -50,7 +50,7 @@ export function CompetitorMentions() {
           const stageType = meta?.scoring_stage_type as string ?? meta?.stage_type as string ?? null;
 
           // Skip internal meetings - only track vendor mentions in client calls
-          if (stageType === "internal") continue;
+          if (stageType === "internal" || stageType === "internal_client_meeting") continue;
 
           const text = chunk.chunk_text as string;
           const idx = text.toLowerCase().indexOf(term.toLowerCase());

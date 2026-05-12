@@ -54,14 +54,14 @@ export function ScoreSection(props: ScoreSectionProps) {
             clientHealthScore={props.clientHealthScore}
           />
         )}
-        {stageType === "onboarding" && (
+        {(stageType === "onboarding" || stageType === "client_meeting") && (
           <OnboardingScores
             meetingScore={props.meetingScore as OnboardingMeetingScore | null}
             repScore={props.repScore as OnboardingRepScore | null}
             clientHealthScore={props.clientHealthScore}
           />
         )}
-        {stageType === "internal" && (
+        {(stageType === "internal" || stageType === "internal_client_meeting") && (
           <InternalScores
             meetingScore={props.meetingScore as InternalMeetingScore | null}
           />

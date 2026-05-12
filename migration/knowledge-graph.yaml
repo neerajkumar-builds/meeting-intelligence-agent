@@ -72,7 +72,8 @@ features:
       - src/components/companies/health-trend-chart.tsx
       - src/components/companies/intelligence-sidebar/
     hooks: [use-company-meetings, use-company-intelligence]
-    api_routes: [/api/companies/[name]/intelligence]
+    api_routes:
+      - "/api/companies/[name]/intelligence"
     supabase_tables: [meetings_list, scored_meetings, meeting_chunks]
     external_services: []
     affected_by_crs: [CR-001, CR-004, CR-007, CR-008]
@@ -183,6 +184,32 @@ critical_hooks:
     used_by: [rep-detail]
     affected_by_crs: [CR-002, CR-004]
 
+# Revision 2 features (planned, not yet implemented)
+revision_2_planned:
+  teams-capture:
+    location: "/teams-capture/ (project root, separate from dashboard)"
+    type: standalone MVP
+    supabase_tables: [teams_meetings]
+    external_services: [microsoft-graph-api, azure-ad]
+    affected_by_crs: [CR-010]
+    note: "Completely isolated from dashboard. Central auth pattern."
+
+  notification-system:
+    new_files_planned:
+      - src/app/api/notifications/preferences/route.ts
+      - src/app/api/notifications/trigger/route.ts
+      - src/app/api/notifications/digest/route.ts
+      - src/components/settings/notification-preferences.tsx
+    supabase_tables: [notification_preferences]
+    external_services: [slack, resend]
+    affected_by_crs: [CR-011]
+    note: "Complementary to existing manual Slack. Three dedicated channels."
+
+  scoring-config:
+    supabase_tables: [scoring_config]
+    affected_by_crs: [CR-012, CR-013]
+    note: "Configurable LLM prompts stored in Supabase. n8n reads from here."
+
 # CR impact map (reverse lookup: which features does each CR affect?)
 cr_impact:
   CR-001:
@@ -195,7 +222,10 @@ cr_impact:
   CR-002:
     features: [rep-detail]
     hooks: [use-rep-coaching]
-    new_files: [/api/reps/[name]/summary, components/reps/rep-strength-summary.tsx, hooks/use-rep-summary.ts]
+    new_files:
+      - "/api/reps/[name]/summary"
+      - components/reps/rep-strength-summary.tsx
+      - hooks/use-rep-summary.ts
     note: "New API route + component, localized to rep page"
 
   CR-003:
@@ -206,7 +236,9 @@ cr_impact:
   CR-004:
     features: [scorecard, meeting-feed, companies-index, company-detail, reps-index, rep-detail]
     hooks: [use-meetings-list, use-company-intelligence, use-rep-coaching]
-    api_routes: [/api/companies/[name]/intelligence, /api/reps/[name]/coaching]
+    api_routes:
+      - "/api/companies/[name]/intelligence"
+      - "/api/reps/[name]/coaching"
     note: "Filter-only change but wide impact - affects every page showing meeting data"
 
   CR-005:
@@ -221,13 +253,15 @@ cr_impact:
   CR-007:
     features: [company-detail, meeting-detail]
     components: [intelligence-sidebar/]
-    api_routes: [/api/companies/[name]/intelligence]
+    api_routes:
+      - "/api/companies/[name]/intelligence"
     note: "Intelligence panel visibility and content enhancements"
 
   CR-008:
     features: [company-detail]
     components: [intelligence-sidebar/meddic-section.tsx]
-    api_routes: [/api/companies/[name]/intelligence]
+    api_routes:
+      - "/api/companies/[name]/intelligence"
     types: [src/types/intelligence.ts]
     note: "Framework customization - MEDDIC to BANT/SPICED"
 
@@ -235,6 +269,69 @@ cr_impact:
     features: [meeting-detail]
     components: [score-section.tsx, intelligence-tabs.tsx]
     note: "UI declutter on meeting detail page"
+
+  # Revision 2 CRs (from 2026-05-12 product meeting)
+  CR-010:
+    features: [teams-capture]
+    location: "/teams-capture/ (isolated from dashboard)"
+    external_services: [microsoft-graph-api, azure-ad]
+    note: "Separate MVP - central auth, fetch all users' meetings. No dashboard changes during MVP."
+    requires_n8n: false
+
+  CR-011:
+    features: [meeting-detail, scorecard, system-health]
+    components: [notifications-bell.tsx]
+    preserve: [send-to-slack.tsx]
+    new_files:
+      - /api/notifications/preferences
+      - /api/notifications/trigger
+      - /api/notifications/digest
+      - settings/notification-preferences.tsx
+    supabase_tables: [notification_preferences, scored_meetings, user_roles]
+    external_services: [slack, resend]
+    note: "Complementary to manual Slack send. Three dedicated channels. Slack + email."
+    requires_n8n: true
+
+  CR-012:
+    features: [meeting-detail, scorecard]
+    components: [score-section.tsx, summary-cards.tsx]
+    types: [src/types/scores.ts]
+    api_routes:
+      - "/api/companies/[name]/intelligence"
+    supabase_tables: [scored_meetings, scoring_config]
+    note: "CS rubric - 6 weighted categories. New CSScores component. n8n MI|3 prompt change."
+    requires_n8n: true
+
+  CR-013:
+    features: [meeting-detail, scorecard, rep-detail]
+    components: [score-section.tsx, intelligence-tabs.tsx, summary-cards.tsx]
+    types: [src/types/scores.ts]
+    api_routes:
+      - "/api/reps/[name]/internal-insights"
+    supabase_tables: [scored_meetings]
+    note: "Enhanced internal scoring - 4 weighted categories + org signals. Backward compatible."
+    requires_n8n: true
+
+  CR-014:
+    features: [meeting-detail, system-health]
+    components: [score-section.tsx, system-health-components]
+    supabase_tables: [scored_meetings, scoring_run_log]
+    external_services: [hubspot]
+    note: "HubSpot writeback for discovery + follow-up + CS. Internal meetings SKIP. Primarily n8n."
+    requires_n8n: true
+
+  CR-015:
+    features: [scorecard, meeting-detail]
+    new_files: [/api/notifications/triggers]
+    supabase_tables: [scored_meetings (read-only trend query)]
+    note: "Pipeline trigger alerts - deal slipping/accelerating/poor discovery. Feeds into CR-011."
+    requires_n8n: false (dashboard SQL function + CR-011 delivery)
+
+  CR-016:
+    features: [admin, sidebar-nav]
+    supabase_tables: [modules (new), organization_config (new)]
+    note: "DEFERRED. Modular pricing/licensing. Section-based RBAC from CR-001 is foundation."
+    status: deferred
 
 # Decisions log
 decisions:
@@ -257,3 +354,28 @@ decisions:
     topic: promotion-workflow
     decision: "Manual git push + Vercel CLI deploy (no auto-deploy from GitHub)"
     reason: "Vercel GitHub App not installed on neerajkumar-builds org yet"
+
+  - date: 2026-05-12
+    topic: product-strategy-pivot
+    decision: "Pause Content Intelligence Agent. Focus exclusively on Meeting Intelligence Agent."
+    reason: "MI agent closer to market-ready. Stephen prioritizing for immediate sales readiness."
+
+  - date: 2026-05-12
+    topic: teams-integration-architecture
+    decision: "Separate MVP in teams-capture/ folder. Central auth pattern. Isolated from dashboard."
+    reason: "Validate Teams integration before touching MI product. Per-user workspaces not scalable."
+
+  - date: 2026-05-12
+    topic: notification-architecture
+    decision: "Complementary automated notifications + digests alongside existing manual Slack send."
+    reason: "Users won't live in MI lobby. Three dedicated channels (#mi-sales, #mi-cs, #mi-internal)."
+
+  - date: 2026-05-12
+    topic: scoring-architecture
+    decision: "All scoring changes need n8n + Supabase + Dashboard. Store prompts in scoring_config table."
+    reason: "Scoring prompts live in n8n MI|3. Configurable prompts avoid n8n edits for rubric tweaks."
+
+  - date: 2026-05-12
+    topic: hubspot-writeback
+    decision: "Internal meetings NEVER write to HubSpot. All other stages do."
+    reason: "Privacy compliance per CR-004 principles."

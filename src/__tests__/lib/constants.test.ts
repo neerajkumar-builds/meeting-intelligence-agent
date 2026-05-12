@@ -9,11 +9,13 @@ import {
 } from "@/lib/constants";
 
 describe("STAGE_CONFIG", () => {
-  it("has all 4 stage types", () => {
+  it("has all 6 stage types", () => {
     expect(Object.keys(STAGE_CONFIG)).toEqual([
       "discovery_scoping",
       "follow_up",
       "onboarding",
+      "client_meeting",
+      "internal_client_meeting",
       "internal",
     ]);
   });

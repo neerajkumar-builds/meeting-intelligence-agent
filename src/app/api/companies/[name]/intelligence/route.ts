@@ -30,7 +30,7 @@ export async function GET(
         "id, topic, host_name, start_time, scoring_stage_type, participant_names, primary_participant_name, meeting_score, engagement_score, internal_summary, client_health_score, overall_score, icp_score, rep_score"
       )
       .eq("company_name", companyName)
-      .or("scoring_stage_type.neq.internal,scoring_stage_type.is.null")
+      .not("scoring_stage_type", "in", "(internal,internal_client_meeting)")
       .order("start_time", { ascending: false });
 
     if (dbError) {

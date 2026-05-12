@@ -180,12 +180,12 @@ export function IntelligenceTabs({
                 ms={meetingScore as FollowUpMeetingScore | null}
               />
             )}
-            {stageType === "onboarding" && (
+            {(stageType === "onboarding" || stageType === "client_meeting") && (
               <OnboardingSummaryDetails
                 ms={meetingScore as OnboardingMeetingScore | null}
               />
             )}
-            {stageType === "internal" && (
+            {(stageType === "internal" || stageType === "internal_client_meeting") && (
               <InternalSummaryDetails
                 is={internalSummary as InternalSummary | null}
               />
@@ -204,7 +204,7 @@ export function IntelligenceTabs({
         </Card>
       </TabsContent>
 
-      {stageType === "internal" && (
+      {(stageType === "internal" || stageType === "internal_client_meeting") && (
         <>
           <TabsContent value="actions">
             <Card>
@@ -247,7 +247,7 @@ function getTabs(stageType: ScoringStageType | null) {
     { value: "summary", label: "Summary", icon: FileText },
     { value: "coaching", label: "Coaching", icon: GraduationCap },
   ];
-  if (stageType === "internal") {
+  if (stageType === "internal" || stageType === "internal_client_meeting") {
     return [
       ...base,
       { value: "actions", label: "Action Items", icon: ListChecks },
@@ -327,7 +327,7 @@ function CoachingContent({
   stageType: ScoringStageType | null;
   repScore: unknown;
 }) {
-  if (!repScore || stageType === "internal") {
+  if (!repScore || stageType === "internal" || stageType === "internal_client_meeting") {
     return <p className="text-sm text-muted-foreground">No coaching data for this meeting type.</p>;
   }
 

@@ -127,7 +127,7 @@ export default function PrintReportPage({
       </section>
 
       {/* Coaching (if available) */}
-      {rs && meeting.scoring_stage_type !== "internal" && (
+      {rs && meeting.scoring_stage_type !== "internal" && meeting.scoring_stage_type !== "internal_client_meeting" && (
         <section className="mb-6">
           <h2 className="text-sm font-semibold mb-2 pb-1 border-b">Coaching</h2>
           {(rs.strengths as string) && (

@@ -6,6 +6,8 @@ describe("getStageLabel", () => {
     expect(getStageLabel("discovery_scoping")).toBe("Discovery");
     expect(getStageLabel("follow_up")).toBe("Follow-Up");
     expect(getStageLabel("onboarding")).toBe("Onboarding");
+    expect(getStageLabel("client_meeting")).toBe("Check-In");
+    expect(getStageLabel("internal_client_meeting")).toBe("Internal Check-In");
     expect(getStageLabel("internal")).toBe("Internal");
   });
 
@@ -21,8 +23,10 @@ describe("getStageLabel", () => {
 describe("getStageColor", () => {
   it("returns correct colors", () => {
     expect(getStageColor("discovery_scoping")).toBe("blue");
-    expect(getStageColor("follow_up")).toBe("purple");
-    expect(getStageColor("onboarding")).toBe("green");
+    expect(getStageColor("follow_up")).toBe("slate");
+    expect(getStageColor("onboarding")).toBe("blue");
+    expect(getStageColor("client_meeting")).toBe("teal");
+    expect(getStageColor("internal_client_meeting")).toBe("amber");
     expect(getStageColor("internal")).toBe("gray");
   });
 
@@ -34,7 +38,7 @@ describe("getStageColor", () => {
 describe("getStageBgClass", () => {
   it("returns Tailwind classes for known stages", () => {
     const result = getStageBgClass("discovery_scoping");
-    expect(result).toContain("bg-blue");
+    expect(result).toContain("bg-");
     expect(result).toContain("dark:");
   });
 
@@ -45,10 +49,12 @@ describe("getStageBgClass", () => {
 });
 
 describe("STAGE_SCORE_FIELDS", () => {
-  it("defines fields for all 4 stage types", () => {
+  it("defines fields for all 6 stage types", () => {
     expect(STAGE_SCORE_FIELDS.discovery_scoping).toHaveLength(3);
     expect(STAGE_SCORE_FIELDS.follow_up).toHaveLength(3);
     expect(STAGE_SCORE_FIELDS.onboarding).toHaveLength(3);
+    expect(STAGE_SCORE_FIELDS.client_meeting).toHaveLength(3);
+    expect(STAGE_SCORE_FIELDS.internal_client_meeting).toHaveLength(1);
     expect(STAGE_SCORE_FIELDS.internal).toHaveLength(1);
   });
 

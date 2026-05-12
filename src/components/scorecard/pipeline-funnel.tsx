@@ -15,13 +15,14 @@ const FUNNEL_STAGES = [
   { key: "discovery_scoping", label: "Discovery", color: "#146DFA" },
   { key: "follow_up", label: "Follow-Up", color: "#8b5cf6" },
   { key: "onboarding", label: "Onboarding", color: "#10b981" },
+  { key: "client_meeting", label: "Check-In", color: "#14b8a6" },
 ];
 
 export function PipelineFunnel({ meetings }: PipelineFunnelProps) {
   const data = useMemo(() => {
     const counts = new Map<string, number>();
     for (const m of meetings) {
-      if (m.scoring_stage_type && m.scoring_stage_type !== "internal") {
+      if (m.scoring_stage_type && m.scoring_stage_type !== "internal" && m.scoring_stage_type !== "internal_client_meeting") {
         counts.set(m.scoring_stage_type, (counts.get(m.scoring_stage_type) ?? 0) + 1);
       }
     }

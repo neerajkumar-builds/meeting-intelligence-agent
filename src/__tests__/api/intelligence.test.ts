@@ -2,8 +2,8 @@ import { describe, it, expect, vi } from "vitest";
 
 // Mock Supabase
 const mockOrder = vi.fn().mockResolvedValue({ data: [], error: null });
-const mockOr = vi.fn().mockReturnValue({ order: mockOrder });
-const mockEq = vi.fn().mockReturnValue({ or: mockOr, order: mockOrder });
+const mockNot = vi.fn().mockReturnValue({ order: mockOrder });
+const mockEq = vi.fn().mockReturnValue({ not: mockNot, order: mockOrder });
 const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
 const mockFrom = vi.fn().mockReturnValue({ select: mockSelect });
 const mockIlike = vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue({ data: [] }) });
@@ -55,7 +55,7 @@ describe("Intelligence API", () => {
 
 describe("Internal meeting exclusion (CR-004)", () => {
   it("excludes internal meetings from query", async () => {
-    mockOr.mockClear();
+    mockNot.mockClear();
     const { GET } = await import("@/app/api/companies/[name]/intelligence/route");
     const request = new Request("http://localhost/api/companies/Acme/intelligence");
     const params = Promise.resolve({ name: "Acme" });
@@ -65,7 +65,7 @@ describe("Internal meeting exclusion (CR-004)", () => {
       { params } as unknown as Parameters<typeof GET>[1]
     );
 
-    expect(mockOr).toHaveBeenCalledWith("scoring_stage_type.neq.internal,scoring_stage_type.is.null");
+    expect(mockNot).toHaveBeenCalledWith("scoring_stage_type", "in", "(internal,internal_client_meeting)");
   });
 });
 

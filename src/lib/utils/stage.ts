@@ -37,6 +37,14 @@ export const STAGE_SCORE_FIELDS: Record<
     { field: "rep_score", label: "Rep Performance" },
     { field: "client_health_score", label: "Client Satisfaction" },
   ],
+  client_meeting: [
+    { field: "delivery_score", label: "Delivery" },
+    { field: "rep_score", label: "Rep Performance" },
+    { field: "client_health_score", label: "Client Health" },
+  ],
+  internal_client_meeting: [
+    { field: "internal_summary", label: "Meeting Quality" },
+  ],
   internal: [
     { field: "internal_summary", label: "Meeting Quality" },
   ],

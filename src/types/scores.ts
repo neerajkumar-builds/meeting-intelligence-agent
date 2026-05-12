@@ -156,11 +156,13 @@ export function getPrimaryScore(
       const ms = meetingScore as FollowUpMeetingScore | null;
       return ms?.engagement_score ?? null;
     }
-    case "onboarding": {
+    case "onboarding":
+    case "client_meeting": {
       const ms = meetingScore as OnboardingMeetingScore | null;
       return ms?.delivery_score ?? null;
     }
-    case "internal": {
+    case "internal":
+    case "internal_client_meeting": {
       const ms = meetingScore as InternalMeetingScore | null;
       return ms?.meeting_quality_score ?? null;
     }
