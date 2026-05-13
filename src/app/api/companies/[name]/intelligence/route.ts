@@ -6,6 +6,7 @@ import type {
   HealthPulse,
   Stakeholder,
   DealStatus,
+  CSInsights,
   RiskSignals,
   RiskSignalItem,
   ActionItem,
@@ -49,6 +50,7 @@ export async function GET(
       healthPulse: buildHealthPulse(allMeetings),
       stakeholders: buildStakeholders(allMeetings),
       dealStatus: buildDealStatus(allMeetings),
+      csInsights: buildCSInsights(allMeetings),
       riskSignals: buildRiskSignals(allMeetings),
       openActionItems: buildActionItems(allMeetings),
       competitorMentions,
@@ -158,6 +160,33 @@ function buildDealStatus(meetings: MeetingRow[]): DealStatus | null {
     nextActionables: (ms.next_actionables as string) ?? null,
     fromMeetingTopic: String(discovery.topic ?? ""),
     fromMeetingDate: String(discovery.start_time ?? ""),
+  };
+}
+
+function buildCSInsights(meetings: MeetingRow[]): CSInsights | null {
+  const csMeeting = meetings.find(
+    (m) => m.scoring_stage_type === "client_meeting" && m.meeting_score
+  );
+  if (!csMeeting) return null;
+
+  const ms = csMeeting.meeting_score as Record<string, unknown>;
+  const signals = ms.strategic_signals as Record<string, unknown> | null;
+
+  return {
+    latestHealthScore: (ms.overall_health_score as number) ?? null,
+    sentimentScore: (ms.sentiment_score as number) ?? null,
+    expansionLikelihood: (ms.expansion_likelihood as string) ?? null,
+    escalationRisk: (ms.escalation_risk as string) ?? null,
+    strategicSignals: signals
+      ? {
+          expansionOpportunity: Boolean(signals.expansion_opportunity),
+          renewalRisk: Boolean(signals.renewal_risk),
+          stakeholderMisalignment: Boolean(signals.stakeholder_misalignment),
+          adoptionConcerns: Boolean(signals.adoption_concerns),
+        }
+      : null,
+    fromMeetingTopic: String(csMeeting.topic ?? ""),
+    fromMeetingDate: String(csMeeting.start_time ?? ""),
   };
 }
 

@@ -1,30 +1,32 @@
 # Meeting Intelligence Dashboard — Progress
 
 ## Current State
-- **Status:** Sprint 1 + Sprint 2 deployed. CR-012 + CR-013 implemented.
-- **Last session:** 2026-05-13 (~8 hours, Sprint 1 + 2 + production deploy + n8n v4.4)
-- **Branch:** `main` at `de69842`, production remote in sync
-- **Production URL:** https://dashboard-jet-seven-93.vercel.app (company Vercel)
-- **Dev:** localhost:3003 - Supabase burcfsxsxgabknmodsrd (MI tables + 11 meetings including CS rubric test data)
-- **Deploy method:** `git push production main && npx vercel --prod`
+- **Status:** Sprint 1 + Sprint 2 deployed. Sprint 3 prep in progress.
+- **Last session:** 2026-05-13 (Sprint 3 prep: CS intelligence, pipeline triggers, notification schema)
+- **Branch:** `main`, production remote in sync
+- **Production URL:** https://dashboard-jet-seven-93.vercel.app (company Vercel, auto-deploy from GitHub)
+- **Dev:** localhost:3003 - Supabase burcfsxsxgabknmodsrd (MI tables + 42 meetings including 31 migrated from prod)
+- **Deploy method:** Auto-deploy via Vercel GitHub App on push to main (neerajkumar-builds org)
 - **Tests:** 80 passing (14 test files, Vitest)
 - **Stack:** Next.js 16.2.2, React 19, Supabase, Anthropic SDK 0.82+, Tailwind v4
 - **Stage types:** 6 (discovery_scoping, follow_up, onboarding, client_meeting, internal_client_meeting, internal)
-- **Supabase:** RLS active, scoring_config v2, dev has full MI schema
+- **Supabase:** RLS active, scoring_config v2, dev has full MI schema + notification_preferences + detect_pipeline_triggers()
 - **n8n prod:** MI|3 v4.4 with 6 LLM chains (Score CS + Score Internal Enhanced added)
+- **Git remote:** `production` only (broken `origin` removed)
 - **Full context:** See `migration/session-handover.md`
 
 ## Backlog
 - [x] Sprint 1: Add 2 new stage types + RLS + scoring_config (DONE 2026-05-13)
 - [x] Sprint 2: CR-012 CS Scoring Framework (DONE 2026-05-13)
 - [x] Sprint 2: CR-013 Internal Scoring Enhancement (DONE 2026-05-13)
-- [ ] Sprint 3: CR-011 Notification + Digest System (Slack channels + email)
+- [x] Dev GitHub remote (say2neeraj) removed - broken, replaced by production remote
+- [ ] Sprint 3: CR-011 Notification + Digest System (Phase 3.1 table+API done on dev)
 - [ ] Sprint 3: CR-014 HubSpot Score Writeback
-- [ ] Sprint 3: CR-015 Pipeline Trigger Alerts
+- [ ] Sprint 3: CR-015 Pipeline Trigger Alerts (Phase 3.6 SQL function done on dev)
 - [ ] Sprint 4: CR-010 Teams Recording Capture MVP
 - [ ] Deferred: CR-016 Modular Pricing
-- [ ] Dev GitHub remote (say2neeraj) repo not found - needs fix or removal
 - [ ] Monitor first real client_meeting scoring in next n8n cycle
+- [ ] Company intelligence CS extraction (done on dev, pending prod deploy)
 
 ## Session Log
 
@@ -203,18 +205,18 @@ Knowledge System:
 - [x] CR-001 through CR-009: ALL COMPLETED (2026-05-04)
 
 ### Next Work
-1. [ ] n8n pipeline: add `client_meeting` + `internal_client_meeting` stage types (see session-handover.md)
-2. [ ] Supabase RLS on scored_meetings for backend section enforcement (see session-handover.md)
+1. [x] n8n pipeline: add `client_meeting` + `internal_client_meeting` stage types (DONE Sprint 1)
+2. [x] Supabase RLS on scored_meetings (DONE Sprint 1)
+3. [ ] Deploy CS intelligence + pipeline triggers to production
+4. [ ] CR-011 Phase 3.2+: Slack channel setup + trigger engine (needs Stephen's templates)
+5. [ ] CR-014: HubSpot writeback (needs API key with write perms)
+6. [ ] CR-010: Teams MVP (needs Azure AD credentials)
 
 ### Open Items
-- [ ] Install Vercel GitHub App on neerajkumar-builds org (enables auto-deploy)
+- [x] Vercel GitHub App: WORKING (auto-deploy confirmed from neerajkumar-builds org)
 - [ ] Create #meeting-intel-dev Slack channel
-- [ ] Create .migration/env-production file (blocks /mi-seed-dev)
 - [ ] Migrate middleware.ts to proxy convention (Next.js 16 deprecation)
-
-### Unstaged Changes (from prior session, not committed)
-- `src/components/companies/intelligence-sidebar/meddic-section.tsx` — radar chart for MEDDIC
-- `src/components/scorecard/competitor-mentions.tsx` — bar chart for vendor mentions
+- [ ] Monitor first real client_meeting/internal_client_meeting scoring from n8n
 
 ## Environment Variables (Vercel Production)
 | Variable | Purpose | Notes |

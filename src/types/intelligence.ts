@@ -5,6 +5,7 @@ export interface CompanyIntelligence {
   healthPulse: HealthPulse;
   stakeholders: Stakeholder[];
   dealStatus: DealStatus | null;
+  csInsights: CSInsights | null;
   riskSignals: RiskSignals;
   openActionItems: ActionItem[];
   competitorMentions: CompetitorMention[];
@@ -67,6 +68,21 @@ export interface CompetitorMention {
     date: string;
     snippet: string;
   }[];
+}
+
+export interface CSInsights {
+  latestHealthScore: number | null;
+  sentimentScore: number | null;
+  expansionLikelihood: string | null;
+  escalationRisk: string | null;
+  strategicSignals: {
+    expansionOpportunity: boolean;
+    renewalRisk: boolean;
+    stakeholderMisalignment: boolean;
+    adoptionConcerns: boolean;
+  } | null;
+  fromMeetingTopic: string;
+  fromMeetingDate: string;
 }
 
 export interface MeddicAnalysis {

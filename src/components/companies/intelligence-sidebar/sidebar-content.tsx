@@ -9,6 +9,7 @@ import { DealStatusSection } from "./deal-status-section";
 import { RiskSignalsSection } from "./risk-signals-section";
 import { ActionItemsSection } from "./action-items-section";
 import { CompetitorSection } from "./competitor-section";
+import { CSInsightsSection } from "./cs-insights-section";
 import { MeddicSection } from "./meddic-section";
 
 interface SidebarContentProps {
@@ -61,6 +62,7 @@ export function SidebarContent({ data, isLoading, error, stageType }: SidebarCon
       <HealthPulseSection data={data.healthPulse} />
       <StakeholdersSection stakeholders={data.stakeholders} />
       <DealStatusSection data={data.dealStatus} />
+      <CSInsightsSection data={data.csInsights} />
       <RiskSignalsSection data={data.riskSignals} />
       <ActionItemsSection items={data.openActionItems} />
       <CompetitorSection mentions={data.competitorMentions} />
