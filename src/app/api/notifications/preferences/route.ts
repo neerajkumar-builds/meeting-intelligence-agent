@@ -1,4 +1,5 @@
 import { createServerSupabase } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
 
 export interface NotificationPreference {
   id: number;
@@ -13,7 +14,14 @@ export interface NotificationPreference {
   updated_at: string;
 }
 
-export async function GET(request: Request) {
+function createServiceClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
+
+export async function GET() {
   try {
     const supabase = createServerSupabase();
     const { data: { user } } = await supabase.auth.getUser();
@@ -22,13 +30,11 @@ export async function GET(request: Request) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const url = new URL(request.url);
-    const email = url.searchParams.get("email") || user.email;
-
-    const { data, error } = await supabase
+    const db = createServiceClient();
+    const { data, error } = await db
       .from("notification_preferences")
       .select("*")
-      .eq("user_email", email)
+      .eq("user_email", user.email)
       .order("section");
 
     if (error) {
@@ -58,7 +64,8 @@ export async function PUT(request: Request) {
       return Response.json({ error: "section and channel are required" }, { status: 400 });
     }
 
-    const { data, error } = await supabase
+    const db = createServiceClient();
+    const { data, error } = await db
       .from("notification_preferences")
       .upsert(
         {
