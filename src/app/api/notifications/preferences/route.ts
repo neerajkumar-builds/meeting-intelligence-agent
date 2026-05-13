@@ -1,4 +1,5 @@
-import { createServerSupabase } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
+import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 
 export interface NotificationPreference {
@@ -14,6 +15,17 @@ export interface NotificationPreference {
   updated_at: string;
 }
 
+async function getAuthEmail(): Promise<string | null> {
+  const cookieStore = await cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll: () => cookieStore.getAll() } }
+  );
+  const { data: { user } } = await supabase.auth.getUser();
+  return user?.email ?? null;
+}
+
 function createServiceClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -23,10 +35,8 @@ function createServiceClient() {
 
 export async function GET() {
   try {
-    const supabase = createServerSupabase();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user?.email) {
+    const email = await getAuthEmail();
+    if (!email) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -34,7 +44,7 @@ export async function GET() {
     const { data, error } = await db
       .from("notification_preferences")
       .select("*")
-      .eq("user_email", user.email)
+      .eq("user_email", email)
       .order("section");
 
     if (error) {
@@ -50,10 +60,8 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
-    const supabase = createServerSupabase();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user?.email) {
+    const email = await getAuthEmail();
+    if (!email) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -69,7 +77,7 @@ export async function PUT(request: Request) {
       .from("notification_preferences")
       .upsert(
         {
-          user_email: user.email,
+          user_email: email,
           section,
           channel,
           frequency: frequency ?? "daily",
