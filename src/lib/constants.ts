@@ -98,6 +98,22 @@ export const SECTIONS: Record<SectionKey, SectionConfig> = {
   },
 };
 
+export const SECTION_CHANNEL_MAP: Record<string, string | undefined> = {
+  sales: process.env.MI_SALES_CHANNEL_ID,
+  cs: process.env.MI_CS_CHANNEL_ID,
+  internal: process.env.MI_INTERNAL_CHANNEL_ID,
+};
+
+export function getSectionForStageType(stageType: string | null): SectionKey {
+  if (!stageType) return "all";
+  for (const [key, config] of Object.entries(SECTIONS)) {
+    if (key !== "all" && config.stageTypes.includes(stageType as ScoringStageType)) {
+      return key as SectionKey;
+    }
+  }
+  return "all";
+}
+
 export const SECTION_NAV_ITEMS = [
   { label: "Scorecard", href: "/", icon: "LayoutDashboard" as const },
   { label: "Meetings", href: "/meetings", icon: "CalendarDays" as const },
