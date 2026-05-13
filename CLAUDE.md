@@ -5,7 +5,9 @@ Sales meeting scoring platform. Zoom recordings → n8n (5 workflows, 8h cycle) 
 373 meetings, 1851 transcript chunks, 32 users. Live in production with daily active users.
 6 stage types: discovery_scoping, follow_up, onboarding, client_meeting, internal_client_meeting, internal.
 CS meetings scored with Stephen's 6-category rubric. Internal meetings scored with 4+2 category rubric.
-CRs 001-009 complete (revision 1). CRs 010-016 documented (revision 2). CR-012 + CR-013 implemented.
+CRs 001-009 complete (revision 1). CRs 010-016 documented (revision 2). CR-012 + CR-013 + CR-011 (notifications) + CR-015 (pipeline triggers) implemented.
+Automated Slack notifications: Mon/Tue-Thu/Fri digests to #mi-sales, #mi-cs, #mi-internal via Vercel Cron.
+Notification settings UI at /settings. Pipeline trigger detection live (deal slipping/accelerating/poor discovery).
 
 ## Environments
 

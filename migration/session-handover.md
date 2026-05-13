@@ -1,11 +1,104 @@
 # Session Handover: Meeting Intelligence
 
 ## Last Session
-- **Date:** 2026-05-13
-- **Duration:** ~8 hours (extended session covering Sprint 1 + Sprint 2)
+- **Date:** 2026-05-13 (Session 2)
+- **Duration:** Extended session covering Sprint 3 (notifications, CS intelligence, pipeline triggers)
 - **Operator:** Neeraj + Claude Opus 4.6
 
-## What Was Done (2026-05-13)
+## What Was Done (2026-05-13, Session 2)
+
+### Notification System (CR-011) - deployed commits `99b9f3a`, `3b61a79`, `4d1b859`, `cee29aa`
+- Digest engine at `/api/notifications/digest`: Mon priorities, Tue-Thu actions, Fri review
+- 3 Slack channels: #mi-sales (C0B32H6C0SK), #mi-cs (C0B3BKT18P5), #mi-internal (C0B32HBD1M5)
+- Vercel Cron in `vercel.json`: Mon 13:00 UTC, Tue-Thu 13:00 UTC, Fri 21:00 UTC
+- Real-time trigger POST at `/api/notifications/triggers` (for n8n webhook, not wired yet)
+- `notification_preferences` table on prod Supabase with RLS
+- `UNIQUE` constraint on `user_roles.email` (prod)
+- Settings UI at `/settings`: frequency/threshold controls per section, sidebar nav link
+- Env vars on Vercel: MI_SALES_CHANNEL_ID, MI_CS_CHANNEL_ID, MI_INTERNAL_CHANNEL_ID, CRON_SECRET
+- Preferences API uses `@supabase/ssr` createServerClient for cookie-based auth
+- Tested: all 3 digest types delivered to all 3 Slack channels on production
+
+### CS Intelligence Sidebar - deployed commit `cbb07d8`
+- `CSInsights` type + `buildCSInsights()` in intelligence API route
+- `cs-insights-section.tsx` sidebar component (health, sentiment, expansion, escalation, strategic signals)
+- Renders only for companies with `client_meeting` data, null for others
+- E2E verified with Playwright: Acme Corp shows CS Health, Barndoor does not
+
+### Pipeline Triggers (CR-015) - deployed commit `cbb07d8`
+- `detect_pipeline_triggers()` SQL function on prod Supabase
+- `/api/notifications/triggers` GET route
+- Detects: Duetto deal_slipping (health 8->0), IQVIA deal_accelerating (0->8), New Reward poor_discovery (score 4)
+
+### Dev Environment
+- 31 meetings migrated from prod to dev (6 companies: IQVIA, Barndoor, Franklin Alliance, Clay Labs, Boutique Recruiting, PartySlate)
+- Dev now has 42 meetings across 14 companies
+- `detect_pipeline_triggers()` function + `notification_preferences` table on dev
+
+### Bug Fixes
+- Preferences API auth: `createServerSupabase()` has no session - switched to `@supabase/ssr` `createServerClient`
+- CRON_SECRET whitespace in Vercel env var caused build failure
+- Channel ID env vars had trailing newlines from echo piping - re-added with printf
+
+### Files Created
+```
+src/app/settings/page.tsx
+src/app/api/notifications/digest/route.ts
+src/app/api/notifications/preferences/route.ts
+src/app/api/notifications/triggers/route.ts (extended with POST)
+src/components/companies/intelligence-sidebar/cs-insights-section.tsx
+migration/sql/2026-05-13-notification-preferences.sql
+migration/sql/2026-05-13-pipeline-triggers.sql
+vercel.json
+```
+
+### Files Modified
+```
+src/types/intelligence.ts (CSInsights interface, csInsights field)
+src/app/api/companies/[name]/intelligence/route.ts (buildCSInsights)
+src/components/companies/intelligence-sidebar/sidebar-content.tsx (CSInsightsSection)
+src/lib/constants.ts (SECTION_CHANNEL_MAP, getSectionForStageType, Bell nav item)
+src/components/layout/sidebar-nav.tsx (Bell icon, Notifications tool item)
+.env.example (channel ID vars, CRON_SECRET)
+docs/progress.md
+```
+
+### Memory Files Created
+```
+memory/feedback_real_data_testing.md
+memory/feedback_supabase_auth_pattern.md
+memory/project_notification_tradeoffs.md
+```
+
+## Current State
+- **Git:** branch `main` at `cee29aa`, production remote in sync
+- **Production:** dashboard-jet-seven-93.vercel.app (Sprint 1+2+3 deployed)
+- **Tests:** 80/80 passing
+- **Slack:** 3 channels active, bot invited, digests tested
+- **Vercel Cron:** 3 schedules registered
+- **Prod Supabase:** notification_preferences (3 rows), detect_pipeline_triggers(), email UNIQUE
+
+## What's Next
+
+### Immediate (no blockers)
+- Wire n8n MI|3 to POST `/api/notifications/triggers` after scoring (real-time Slack alerts)
+- Monitor first real client_meeting/internal_client_meeting from n8n 8h cycle
+
+### Blocked (needs external input)
+- CR-014: HubSpot Score Writeback (needs HubSpot API key with write permissions)
+- CR-010: Teams Recording Capture MVP (needs Azure AD app registration + credentials)
+- Stephen: Slack notification cadence/template refinements
+
+### Future (client-readiness, documented in memory)
+- Digest engine reads notification_preferences before sending
+- Personal Slack DMs for critical alerts (needs slack_user_id on user_roles)
+- Email delivery via Resend
+- Notification history/audit log
+- Notification batching/dedup
+
+---
+
+## Previous Session (2026-05-13, Session 1)
 
 ### Sprint 1: Foundation (deployed commit `30bf0f6`)
 - Added 2 new stage types (`client_meeting`, `internal_client_meeting`) across 18 source + 4 test files

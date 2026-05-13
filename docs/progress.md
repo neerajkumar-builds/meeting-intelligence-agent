@@ -1,36 +1,79 @@
 # Meeting Intelligence Dashboard — Progress
 
 ## Current State
-- **Status:** Sprint 1 + Sprint 2 deployed. Sprint 3 prep in progress.
-- **Last session:** 2026-05-13 (Sprint 3 prep: CS intelligence, pipeline triggers, notification schema)
-- **Branch:** `main`, production remote in sync
+- **Status:** Sprint 1 + 2 deployed. Sprint 3 (CR-011 notifications) deployed.
+- **Last session:** 2026-05-13 (Sprint 3: notification system + CS intelligence + pipeline triggers)
+- **Branch:** `main` at `cee29aa`, production remote in sync
 - **Production URL:** https://dashboard-jet-seven-93.vercel.app (company Vercel, auto-deploy from GitHub)
 - **Dev:** localhost:3003 - Supabase burcfsxsxgabknmodsrd (MI tables + 42 meetings including 31 migrated from prod)
 - **Deploy method:** Auto-deploy via Vercel GitHub App on push to main (neerajkumar-builds org)
 - **Tests:** 80 passing (14 test files, Vitest)
 - **Stack:** Next.js 16.2.2, React 19, Supabase, Anthropic SDK 0.82+, Tailwind v4
 - **Stage types:** 6 (discovery_scoping, follow_up, onboarding, client_meeting, internal_client_meeting, internal)
-- **Supabase:** RLS active, scoring_config v2, dev has full MI schema + notification_preferences + detect_pipeline_triggers()
-- **n8n prod:** MI|3 v4.4 with 6 LLM chains (Score CS + Score Internal Enhanced added)
-- **Git remote:** `production` only (broken `origin` removed)
+- **Supabase prod:** RLS active, scoring_config v2, notification_preferences, detect_pipeline_triggers(), user_roles email UNIQUE
+- **Supabase dev:** Full MI schema + 42 meetings (11 seed + 31 migrated from prod)
+- **n8n prod:** MI|3 v4.4 with 6 LLM chains
+- **Slack channels:** #mi-sales, #mi-cs, #mi-internal (bot invited, digests tested)
+- **Vercel Cron:** Mon 8am / Tue-Thu 8am / Fri 4pm EST digests active
+- **Git remote:** `production` only
 - **Full context:** See `migration/session-handover.md`
 
 ## Backlog
 - [x] Sprint 1: Add 2 new stage types + RLS + scoring_config (DONE 2026-05-13)
 - [x] Sprint 2: CR-012 CS Scoring Framework (DONE 2026-05-13)
 - [x] Sprint 2: CR-013 Internal Scoring Enhancement (DONE 2026-05-13)
-- [x] Dev GitHub remote (say2neeraj) removed - broken, replaced by production remote
-- [ ] Sprint 3: CR-011 Notification + Digest System (Phase 3.1 table+API done on dev)
-- [ ] Sprint 3: CR-014 HubSpot Score Writeback
-- [ ] Sprint 3: CR-015 Pipeline Trigger Alerts (Phase 3.6 SQL function done on dev)
-- [ ] Sprint 4: CR-010 Teams Recording Capture MVP
+- [x] Dev GitHub remote (say2neeraj) removed
+- [x] Sprint 3: CR-011 Notification + Digest System (digest engine + settings UI + Slack channels deployed)
+- [x] Sprint 3: CR-015 Pipeline Trigger Alerts (SQL function + API deployed to prod)
+- [x] Company intelligence CS extraction (deployed to prod)
+- [ ] Sprint 3: CR-014 HubSpot Score Writeback (blocked: needs API key with write perms)
+- [ ] Sprint 4: CR-010 Teams Recording Capture MVP (blocked: needs Azure AD credentials)
 - [ ] Deferred: CR-016 Modular Pricing
-- [ ] Monitor first real client_meeting scoring in next n8n cycle
-- [ ] Company intelligence CS extraction (done on dev, pending prod deploy)
+- [ ] Monitor first real client_meeting/internal_client_meeting scoring from n8n
+- [ ] Wire n8n MI|3 to POST real-time trigger after scoring
+- [ ] Digest engine to read notification_preferences (currently sends to channels regardless)
+- [ ] Email delivery via Resend (notification_preferences supports it, backend not wired)
+- [ ] Personal Slack DMs for critical alerts (low score, health drop)
 
 ## Session Log
 
-### 2026-05-13 - Sprint 2: CS + Internal Scoring Frameworks (CR-012, CR-013)
+### 2026-05-13 (Session 2) - Sprint 3: Notifications + CS Intelligence + Pipeline Triggers
+
+**Notification system (CR-011):**
+- Digest engine: Mon priorities, Tue-Thu actions, Fri review - sends to section channels
+- 3 Slack channels: #mi-sales (C0B32H6C0SK), #mi-cs (C0B3BKT18P5), #mi-internal (C0B32HBD1M5)
+- Vercel Cron: vercel.json with 3 schedules (UTC 13:00 Mon, 13:00 Tue-Thu, 21:00 Fri)
+- Real-time trigger POST endpoint for n8n webhook (not wired yet)
+- notification_preferences table on prod with RLS
+- Settings UI at /settings: frequency, thresholds, channel display per section
+- Sidebar: "Notifications" link under Tools
+- Slack delivery tested on production - all 3 channels receiving
+
+**CS intelligence (company sidebar):**
+- CSInsights type + buildCSInsights() in intelligence API
+- cs-insights-section.tsx sidebar component (health, sentiment, signals)
+- Renders for client_meeting companies only, null for others
+- E2E verified with Playwright on dev
+
+**Pipeline triggers (CR-015):**
+- detect_pipeline_triggers() SQL function on prod
+- /api/notifications/triggers GET (returns triggers) + POST (real-time alert)
+- Prod detects: Duetto deal_slipping, IQVIA deal_accelerating, New Reward poor_discovery
+
+**Dev environment:**
+- 31 meetings migrated from prod to dev (6 companies, diverse stages/scores)
+- Dev now has 42 meetings across 14 companies
+
+**Bug fixes:**
+- Preferences API: createServerSupabase() has no session - switched to @supabase/ssr createServerClient with cookies
+- CRON_SECRET whitespace in Vercel env var caused build failure - re-added clean
+- Channel ID env vars had trailing newlines - re-added with printf
+
+**Commits:** cbb07d8, 99b9f3a, 3b61a79, 4d1b859, cee29aa
+
+**Trade-offs documented:** 10 items in memory (project_notification_tradeoffs.md) for client-readiness
+
+### 2026-05-13 (Session 1) - Sprint 2: CS + Internal Scoring Frameworks (CR-012, CR-013)
 
 **Dashboard components:**
 - CSScores: 7 weighted gauges + strategic signal badges (expansion, risk, adoption, sponsor, timeline)
