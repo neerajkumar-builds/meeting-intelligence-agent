@@ -54,8 +54,8 @@ describe("getScoreBand", () => {
 });
 
 describe("NAV_ITEMS", () => {
-  it("has 6 navigation items", () => {
-    expect(NAV_ITEMS).toHaveLength(6);
+  it("has 7 navigation items", () => {
+    expect(NAV_ITEMS).toHaveLength(7);
   });
 
   it("first item is Scorecard at /", () => {

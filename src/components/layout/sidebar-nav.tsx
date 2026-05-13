@@ -12,6 +12,7 @@ import {
   Users,
   Search,
   Activity,
+  Bell,
   TrendingUp,
   HeartHandshake,
   Lock,
@@ -27,6 +28,7 @@ const ICON_MAP = {
   Users,
   Search,
   Activity,
+  Bell,
   TrendingUp,
   HeartHandshake,
   Lock,
@@ -36,6 +38,7 @@ const ICON_MAP = {
 
 const TOOL_ITEMS = [
   { label: "System Health", href: "/health", icon: "Activity" as const },
+  { label: "Notifications", href: "/settings", icon: "Bell" as const },
 ];
 
 const ADMIN_ITEM = { label: "Admin", href: "/admin", icon: "Settings" as const };

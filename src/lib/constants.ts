@@ -129,6 +129,7 @@ export const NAV_ITEMS = [
   { label: "Reps", href: "/reps", icon: "Users" as const, group: "Analysis" },
   { label: "Ask Blarney", href: "/search", icon: "Search" as const, group: "Tools" },
   { label: "System Health", href: "/health", icon: "Activity" as const, group: "Tools" },
+  { label: "Notifications", href: "/settings", icon: "Bell" as const, group: "Tools" },
 ];
 
 export const SECTION_PROMPTS: Record<SectionKey, string[]> = {
