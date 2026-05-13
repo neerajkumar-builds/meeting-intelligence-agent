@@ -1,8 +1,115 @@
 # Session Handover: Meeting Intelligence
 
 ## Last Session
-- **Date:** 2026-05-12
-- **Duration:** ~2 hours
+- **Date:** 2026-05-13
+- **Duration:** ~8 hours (extended session covering Sprint 1 + Sprint 2)
+- **Operator:** Neeraj + Claude Opus 4.6
+
+## What Was Done (2026-05-13)
+
+### Sprint 1: Foundation (deployed commit `30bf0f6`)
+- Added 2 new stage types (`client_meeting`, `internal_client_meeting`) across 18 source + 4 test files
+- Supabase RLS on `scored_meetings` with `get_user_stage_types()` function (production)
+- `scoring_config` table created on both dev + production (6 rows with weights)
+- Dev Supabase: all 7 MI tables replicated from production schema + 9 seed meetings
+- Environment reference docs + CLAUDE.md safety rules
+
+### Sprint 2: CS + Internal Scoring Frameworks (deployed commits `65c2b1e`, `de69842`)
+- `CSScores` component: 7 weighted gauges (Overall Health + 6 categories) + strategic signal badges
+- `EnhancedInternalScores` component: 5 weighted gauges (Effectiveness + 4 categories) + org signal badges
+- Smart detection: `isCSRubricData()` detects new vs old JSONB format at runtime
+- Backward compatible: old meetings render with existing gauges
+- BANT/MEDDIC hidden from sidebar for non-sales meetings
+- Score null safety: validates typeof number, caps at 10
+- Rep page STAGE_COLORS updated for new types
+- CS + Internal Enhanced LLM prompts written and tested with real LLM output
+- End-to-end verified: n8n LLM -> Supabase -> Dashboard rendering (Playwright screenshots)
+
+### n8n Pipeline Updates
+- MI-DEV|3: All 6 stage types + Score CS + Score Internal Enhanced LLM chains
+- MI|3 (production): Published v4.4 with Score CS + Score Internal Enhanced
+  - Build Scoring Context: 6 stage classification with topic keyword fallback
+  - Route by Stage: 7 outputs (6 LLM chains + fallback)
+  - Process Scores: CS rubric (category_scores, strategic_signals, meetingScoreFull) + enhanced internal (enhanced_scoring, overall_effectiveness_score)
+  - Format Slack Message: CS Check-In + Internal Client Meeting formats
+  - Score CS -> Process Scores connection verified
+  - Score Internal Enhanced -> Process Scores connection verified
+
+### Change Requests Created
+- CR-010: Microsoft Teams Recording Capture (separate MVP)
+- CR-011: Notification and Digest System (Slack + email)
+- CR-012: CS Scoring Framework (IMPLEMENTED in Sprint 2)
+- CR-013: Internal Scoring Enhancement (IMPLEMENTED in Sprint 2)
+- CR-014: HubSpot Score Writeback
+- CR-015: Pipeline Trigger Alerts
+- CR-016: Modular Pricing (DEFERRED)
+
+### Files Created
+```
+change_requests/revision_2/CR-010.md through CR-016.md
+teams-capture/README.md
+migration/env-reference.md
+migration/sql/2026-05-13-scored-meetings-rls.sql
+migration/sql/2026-05-13-scoring-config.sql
+migration/prompts/cs-scoring-prompt.txt
+migration/prompts/internal-enhanced-prompt.txt
+migration/prompts/process-scores-cs-block.js
+migration/prompts/process-scores-internal-enhanced-block.js
+```
+
+### Files Modified (key)
+```
+src/types/scores.ts - CS + enhanced internal types, getPrimaryScore updated
+src/components/meetings/score-section.tsx - CSScores, EnhancedInternalScores, SignalBadge
+src/components/companies/intelligence-sidebar/ - stageType prop, BANT hidden for non-sales
+src/lib/constants.ts - 6 stage types, SECTIONS updated
+src/lib/utils/stage.ts - STAGE_SCORE_FIELDS for new types
+15+ other files for stage type support
+```
+
+### Production Deploys
+- Sprint 1: commit `30bf0f6` (24 files, +498 -55)
+- Sprint 2: commit `65c2b1e` (10 files, +513 -19)
+- Fix: commit `de69842` (rep page STAGE_COLORS)
+- n8n MI|3: v4.3 (stage routing) then v4.4 (CS + Internal Enhanced LLM chains)
+
+## Current State
+- **Git:** branch `main`, production remote in sync at `de69842`
+- **Production:** dashboard-jet-seven-93.vercel.app (Sprint 1 + 2 deployed)
+- **Dev:** localhost:3003 with MI tables + seed data + CS rubric test data
+- **Tests:** 80/80 passing
+- **n8n prod:** MI|3 v4.4 active with 6 LLM chains
+- **n8n dev:** MI-DEV|3 with same structure (dormant)
+- **Supabase prod:** RLS active, scoring_config v2, 373 meetings
+- **Supabase dev:** MI tables + 11 meetings (9 seed + 2 rubric test)
+
+## What's Next
+
+### Sprint 3: Notifications + HubSpot (CR-011, CR-014, CR-015)
+1. CR-011: Notification preferences table + automated Slack triggers + email (Resend)
+2. CR-014: HubSpot property audit + discovery writeback in n8n
+3. CR-015: Pipeline trend detection SQL (deal slipping/accelerating)
+- Three dedicated Slack channels: #mi-sales, #mi-cs, #mi-internal
+- Complementary to existing manual Slack send (keep as-is)
+
+### Sprint 4: Teams + Digests (CR-010)
+4. CR-010: Teams MVP in teams-capture/ folder (Azure AD auth, separate from MI product)
+5. CR-011 Phase 3: Digest engine (daily/weekly summaries)
+
+### Pending Items
+- [ ] Monitor next n8n 8h cycle for first real client_meeting/internal_client_meeting scoring
+- [ ] Dev GitHub remote (say2neeraj) repo not found - needs fix or removal
+- [ ] Stephen still pending: Slack notification cadence and template requirements
+- [ ] Vercel GitHub App not installed on neerajkumar-builds org
+
+## Key Decisions Made This Session
+1. Teams integration: separate MVP first, central auth pattern
+2. Notifications: complementary to manual Slack, three dedicated channels, Slack + email
+3. Scoring: all 3 layers required (n8n + Supabase + Frontend)
+4. CS rubric: 6 weighted categories from Stephen's doc
+5. Internal rubric: 4+2 categories from Stephen's doc, backward compatible via optional enhanced_scoring
+6. BANT/MEDDIC: hidden for non-sales meetings
+7. No quick fixes ever: full implementation with proper testing before production
 - **Operator:** Neeraj + Claude Opus 4.6
 - **Type:** Product meeting analysis + CR creation (no code changes)
 

@@ -1,29 +1,56 @@
 # Meeting Intelligence Dashboard — Progress
 
 ## Current State
-- **Status:** Sprint 1 deployed. 7 new CRs (010-016) documented. Sprint 2 next.
-- **Last session:** 2026-05-12 (meeting analysis + Sprint 1 + production deploy)
-- **Branch:** `main`, production remote in sync. Dev remote (say2neeraj) not found.
+- **Status:** Sprint 1 + Sprint 2 deployed. CR-012 + CR-013 implemented.
+- **Last session:** 2026-05-13 (~8 hours, Sprint 1 + 2 + production deploy + n8n v4.4)
+- **Branch:** `main` at `de69842`, production remote in sync
 - **Production URL:** https://dashboard-jet-seven-93.vercel.app (company Vercel)
-- **Dev:** localhost:3003 - Supabase burcfsxsxgabknmodsrd (MI tables + 9 seed meetings)
+- **Dev:** localhost:3003 - Supabase burcfsxsxgabknmodsrd (MI tables + 11 meetings including CS rubric test data)
 - **Deploy method:** `git push production main && npx vercel --prod`
 - **Tests:** 80 passing (14 test files, Vitest)
 - **Stack:** Next.js 16.2.2, React 19, Supabase, Anthropic SDK 0.82+, Tailwind v4
 - **Stage types:** 6 (discovery_scoping, follow_up, onboarding, client_meeting, internal_client_meeting, internal)
-- **Supabase:** RLS active on scored_meetings + scoring_config. Dev has full MI schema.
+- **Supabase:** RLS active, scoring_config v2, dev has full MI schema
+- **n8n prod:** MI|3 v4.4 with 6 LLM chains (Score CS + Score Internal Enhanced added)
 - **Full context:** See `migration/session-handover.md`
 
 ## Backlog
-- [ ] Sprint 2: CR-012 CS Scoring Framework (n8n prompt + dashboard component)
-- [ ] Sprint 2: CR-013 Internal Scoring Enhancement (n8n prompt + dashboard component)
+- [x] Sprint 1: Add 2 new stage types + RLS + scoring_config (DONE 2026-05-13)
+- [x] Sprint 2: CR-012 CS Scoring Framework (DONE 2026-05-13)
+- [x] Sprint 2: CR-013 Internal Scoring Enhancement (DONE 2026-05-13)
 - [ ] Sprint 3: CR-011 Notification + Digest System (Slack channels + email)
 - [ ] Sprint 3: CR-014 HubSpot Score Writeback
 - [ ] Sprint 3: CR-015 Pipeline Trigger Alerts
 - [ ] Sprint 4: CR-010 Teams Recording Capture MVP
 - [ ] Deferred: CR-016 Modular Pricing
 - [ ] Dev GitHub remote (say2neeraj) repo not found - needs fix or removal
+- [ ] Monitor first real client_meeting scoring in next n8n cycle
 
 ## Session Log
+
+### 2026-05-13 - Sprint 2: CS + Internal Scoring Frameworks (CR-012, CR-013)
+
+**Dashboard components:**
+- CSScores: 7 weighted gauges + strategic signal badges (expansion, risk, adoption, sponsor, timeline)
+- EnhancedInternalScores: 5 weighted gauges + organizational signal badges (blockers, gaps, bottlenecks)
+- Smart isCSRubricData() detection for new vs old JSONB, backward compatible fallback
+- BANT/MEDDIC hidden from sidebar for non-sales meetings
+- Score null safety, rep page STAGE_COLORS fixed
+
+**n8n pipeline (MI|3 v4.4):**
+- Score CS LLM chain: Stephen's 6-category rubric prompt, tested with real LLM output
+- Score Internal Enhanced LLM chain: 4+2 category rubric, backward compatible
+- Build Scoring Context: 6 stage classification with topic keyword fallback
+- Route by Stage: 7 outputs, all connected to Process Scores
+- Process Scores: CS rubric mapping (meetingScoreFull with category_scores + strategic_signals)
+
+**End-to-end verified:**
+- n8n Score CS executed (45s, real LLM output matched CSMeetingScore TypeScript interface)
+- Output inserted into dev Supabase with Process Scores column mapping
+- Dashboard rendered 7 gauges + 4 signal badges correctly (Playwright verified)
+- Production n8n validated: all connections, Supabase URLs, stage order checked
+
+**Commits:** `65c2b1e` (Sprint 2 main), `de69842` (rep page fix)
 
 ### 2026-05-12 - Product Meeting Analysis + Sprint 1 Deploy
 

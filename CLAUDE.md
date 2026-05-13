@@ -1,9 +1,11 @@
 # Meeting Intelligence Dashboard
 
 ## What This Is
-Sales meeting scoring platform. Zoom recordings → n8n (5 workflows, 8h cycle) → Supabase (AI scoring with 4 LLMs) → Next.js 16 dashboard with RAG search.
+Sales meeting scoring platform. Zoom recordings → n8n (5 workflows, 8h cycle) → Supabase (AI scoring with 6 LLM chains) → Next.js 16 dashboard with RAG search.
 373 meetings, 1851 transcript chunks, 32 users. Live in production with daily active users.
 6 stage types: discovery_scoping, follow_up, onboarding, client_meeting, internal_client_meeting, internal.
+CS meetings scored with Stephen's 6-category rubric. Internal meetings scored with 4+2 category rubric.
+CRs 001-009 complete (revision 1). CRs 010-016 documented (revision 2). CR-012 + CR-013 implemented.
 
 ## Environments
 
