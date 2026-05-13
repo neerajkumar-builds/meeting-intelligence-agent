@@ -55,12 +55,18 @@ export async function GET(request: Request) {
     }
 
     const allMeetings = meetings as ScoredMeeting[];
-    const results: { section: string; channel: string; sent: boolean; meetingCount: number }[] = [];
+    const results: { section: string; channel: string; sent: boolean; meetingCount: number; skippedReason?: string }[] = [];
 
     for (const sectionKey of ["sales", "cs", "internal"] as SectionKey[]) {
       const config = SECTIONS[sectionKey];
       const channelId = SECTION_CHANNEL_MAP[sectionKey];
       if (!channelId) continue;
+
+      const skipReason = await shouldSkipSection(supabase, sectionKey, digestType);
+      if (skipReason) {
+        results.push({ section: sectionKey, channel: channelId, sent: false, meetingCount: 0, skippedReason: skipReason });
+        continue;
+      }
 
       const sectionMeetings = allMeetings.filter(
         (m) => m.scoring_stage_type && config.stageTypes.includes(m.scoring_stage_type as never)
@@ -86,6 +92,39 @@ export async function GET(request: Request) {
     console.error("Digest error:", error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
   }
+}
+
+interface NotifPref {
+  is_active: boolean;
+  frequency: string;
+}
+
+async function shouldSkipSection(
+  supabase: { from: (table: string) => ReturnType<ReturnType<typeof createClient>["from"]> },
+  sectionKey: string,
+  digestType: DigestType
+): Promise<string | null> {
+  const { data } = await supabase
+    .from("notification_preferences")
+    .select("is_active, frequency")
+    .eq("channel", "slack")
+    .in("section", [sectionKey, "all"]);
+
+  const prefs = (data ?? []) as NotifPref[];
+  if (prefs.length === 0) return null;
+
+  const activePrefs = prefs.filter((p) => p.is_active);
+  if (activePrefs.length === 0) return "all_inactive";
+
+  const frequencyMatch = activePrefs.some((p) => {
+    if (p.frequency === "realtime" || p.frequency === "hourly") return true;
+    if (p.frequency === "daily") return true;
+    if (p.frequency === "weekly") return digestType !== "daily_actions";
+    return true;
+  });
+  if (!frequencyMatch) return "frequency_mismatch";
+
+  return null;
 }
 
 function detectDigestType(): DigestType {

@@ -24,6 +24,11 @@ const REQUIRED = [
 const FEATURE = [
   { name: 'GEMINI_API_KEY', pattern: /^AIza/, note: 'RAG search (Ask Blarney) will not work' },
   { name: 'CHAT_MODEL', pattern: /^claude-/, note: 'defaults to claude-sonnet-4-20250514' },
+  { name: 'SUPABASE_SERVICE_ROLE_KEY', pattern: /^eyJ/, note: 'digest engine, preferences API, admin routes will not work' },
+  { name: 'CRON_SECRET', note: 'Vercel Cron digest jobs will fail auth' },
+  { name: 'MI_SALES_CHANNEL_ID', pattern: /^C/, note: 'Sales digest delivery will not work' },
+  { name: 'MI_CS_CHANNEL_ID', pattern: /^C/, note: 'CS digest delivery will not work' },
+  { name: 'MI_INTERNAL_CHANNEL_ID', pattern: /^C/, note: 'Internal digest delivery will not work' },
 ];
 
 const OPTIONAL = [

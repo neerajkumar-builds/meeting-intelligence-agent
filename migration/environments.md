@@ -35,6 +35,11 @@
 | `SLACK_BOT_TOKEN` | Shared | Shared |
 | `SLACK_ALLOWED_CHANNELS` | Production channels | `meeting-intel-dev` |
 | `NEXT_PUBLIC_PIPELINE_INTERVAL_HOURS` | `8` | `24` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Production service role | Dev service role |
+| `CRON_SECRET` | `bDm2Botj_RJxHXY...` | Same (or local test value) |
+| `MI_SALES_CHANNEL_ID` | `C0B32H6C0SK` | Same (shared workspace) |
+| `MI_CS_CHANNEL_ID` | `C0B3BKT18P5` | Same (shared workspace) |
+| `MI_INTERNAL_CHANNEL_ID` | `C0B32HBD1M5` | Same (shared workspace) |
 | `DAILY_QUERY_LIMIT` | `50` | `200` |
 | `BURST_QUERY_LIMIT` | `10` | `50` |
 

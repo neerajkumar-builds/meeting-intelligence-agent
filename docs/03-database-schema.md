@@ -13,7 +13,8 @@ The Meeting Intelligence Dashboard uses 7 Supabase (PostgreSQL) tables plus 1 RP
 | Domain | Tables | Who Writes | Who Reads |
 |--------|--------|-----------|-----------|
 | **n8n Pipeline** | `scored_meetings`, `meetings_list`, `meeting_chunks`, `scoring_run_log`, `zoom_users` | n8n workflows (MI\|1 through MI\|4) | Dashboard (read-only) |
-| **Dashboard** | `chat_analytics`, `meeting_notes` | Next.js API routes | Next.js API routes + UI |
+| **Dashboard** | `chat_analytics`, `meeting_notes`, `notification_preferences` | Next.js API routes | Next.js API routes + UI |
+| **Config** | `user_roles`, `scoring_config` | Admin API | Dashboard (read-only) |
 
 **Critical rule:** The dashboard NEVER writes to n8n-owned tables. The n8n pipeline NEVER writes to dashboard-owned tables. This boundary is enforced by application convention (not RLS), and violating it risks data corruption on either side.
 
@@ -760,3 +761,138 @@ WHERE event_type = 'query'
 GROUP BY user_email
 ORDER BY query_count DESC;
 ```
+
+---
+
+## Table 8: `notification_preferences` (Dashboard domain)
+
+Per-user, per-section notification settings. Controls which digest types are delivered to which section channels.
+
+**Written by:** `/api/notifications/preferences` (PUT)
+**Read by:** `/api/notifications/digest` (checks before sending), `/app/settings` (UI display)
+**Migration:** `migration/sql/2026-05-13-notification-preferences.sql`
+
+### Columns
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | serial PK | Auto-increment |
+| `user_email` | text NOT NULL | FK to `user_roles.email` (UNIQUE constraint) |
+| `section` | text NOT NULL | `'sales'`, `'cs'`, `'internal'`, or `'all'`. CHECK constraint. |
+| `channel` | text NOT NULL | `'slack'` or `'email'`. CHECK constraint. |
+| `frequency` | text NOT NULL | `'realtime'`, `'hourly'`, `'daily'`, `'weekly'`. Default `'daily'`. |
+| `slack_channel_id` | text | Override channel ID (currently unused, uses env vars) |
+| `is_active` | boolean | Default `true`. When false, section channel is suppressed. |
+| `thresholds` | jsonb | `{"low_score": 5, "health_drop": 2}`. Controls alert sensitivity. |
+| `created_at` | timestamptz | Default `now()` |
+| `updated_at` | timestamptz | Default `now()`, updated on PUT |
+
+### Constraints
+- `UNIQUE(user_email, section, channel)` - one preference per user per section per channel
+- `user_email` FK references `user_roles(email)` - requires UNIQUE on `user_roles.email`
+
+### RLS Policies
+- Users read/update/insert own preferences (matched by `auth.jwt()->>'email'`)
+- Service role has full access (used by digest engine)
+
+---
+
+## Table 9: `user_roles` (Config domain)
+
+User accounts with role-based access control.
+
+**Written by:** Admin API (`/api/admin/users`)
+**Read by:** Middleware (auth guard), sidebar (section filtering), preferences API
+
+### Key Constraints (added 2026-05-13)
+- `user_roles_email_unique` UNIQUE constraint on `email` column (required for `notification_preferences` FK)
+
+---
+
+## Table 10: `scoring_config` (Config domain)
+
+Stage-specific scoring configuration. 6 rows, one per scoring stage type.
+
+**Written by:** Manual SQL (admin)
+**Read by:** n8n MI|3 (reads prompts + weights), Dashboard (score display)
+
+---
+
+## RPC Function 2: `detect_pipeline_triggers()`
+
+Cross-meeting trend detection. Compares consecutive meetings per company to identify deal movement.
+
+**Migration:** `migration/sql/2026-05-13-pipeline-triggers.sql`
+**Called by:** `/api/notifications/triggers` (GET)
+**Security:** SECURITY DEFINER (runs with owner permissions)
+
+### Return Columns
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `company_name` | text | Company with detected trigger |
+| `trigger_type` | text | `'deal_slipping'`, `'deal_accelerating'`, or `'poor_discovery'` |
+| `current_meeting_id` | text | Most recent meeting ID |
+| `previous_meeting_id` | text | Comparison meeting ID (null for poor_discovery) |
+| `current_score` | numeric | Current health/overall score |
+| `previous_score` | numeric | Previous score (null for poor_discovery) |
+| `score_delta` | numeric | Score change (negative = declining) |
+| `urgency` | text | `'high'` or `'medium'` |
+| `details` | jsonb | Additional context (sentiment, stage type) |
+
+### Trigger Logic
+- **deal_slipping:** `client_health_score` dropped > 2 points between consecutive meetings for same company. Urgency: high.
+- **deal_accelerating:** `client_health_score` rose > 2 points. Urgency: medium.
+- **poor_discovery:** `overall_score` < 5 for `discovery_scoping` meetings in last 90 days. Urgency: high.
+
+### SQL Approach
+Uses `ROW_NUMBER() OVER (PARTITION BY company_name ORDER BY scored_at DESC)` to rank meetings per company, then self-joins `rn=1` with `rn=2` to compare consecutive scores. Only considers `discovery_scoping`, `follow_up`, and `client_meeting` stage types.
+
+---
+
+## `client_meeting` Stage - `meeting_score` JSONB Structure
+
+When n8n MI|3 scores a `client_meeting` stage meeting, the `meeting_score` JSONB contains:
+
+```jsonb
+{
+  "overall_health_score": 6.7,
+  "sentiment_score": 7.0,
+  "expansion_likelihood": "medium",
+  "escalation_risk": "low",
+  "relationship_health_score": 7.5,
+  "category_scores": {
+    "proactive_communication": { "score": 7, "weight": 20, "signals": [...], "watchouts": [...] },
+    "expectation_management": { "score": 6, "weight": 20, ... },
+    "value_delivery": { "score": 7, "weight": 20, ... },
+    "relationship_building": { "score": 7, "weight": 15, ... },
+    "issue_resolution": { "score": 6, "weight": 15, ... },
+    "strategic_guidance": { "score": 7, "weight": 10, ... }
+  },
+  "strategic_signals": {
+    "expansion_opportunity": true/false,
+    "renewal_risk": true/false,
+    "stakeholder_misalignment": true/false,
+    "adoption_concerns": true/false,
+    "sponsor_absent": true/false,
+    "competitive_mention": true/false,
+    "timeline_pressure": true/false
+  },
+  "coaching_signals": {
+    "talk_ratio": 0.45,
+    "interruption_count": 2,
+    "question_quality": "high",
+    "active_listening_score": 8,
+    "empathy_score": 7,
+    "engagement_level": "high",
+    "confidence_level": "medium"
+  },
+  "call_notes": {
+    "client_action_items": [...],
+    "ff_action_items": [...],
+    "kantata_action_items": [...]
+  }
+}
+```
+
+This structure is read by `buildCSInsights()` in `/api/companies/[name]/intelligence/route.ts` and rendered by `CSScores` component and `cs-insights-section.tsx`.
