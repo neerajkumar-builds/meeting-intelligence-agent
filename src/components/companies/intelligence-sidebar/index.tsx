@@ -9,9 +9,10 @@ import { BrainCircuit, PanelRightClose, PanelRight } from "lucide-react";
 
 interface IntelligenceSidebarProps {
   companyName: string;
+  stageType?: string | null;
 }
 
-export function IntelligenceSidebar({ companyName }: IntelligenceSidebarProps) {
+export function IntelligenceSidebar({ companyName, stageType }: IntelligenceSidebarProps) {
   const { data, isLoading, error } = useCompanyIntelligence(companyName);
   const [expanded, setExpanded] = useState(true);
 
@@ -28,7 +29,7 @@ export function IntelligenceSidebar({ companyName }: IntelligenceSidebarProps) {
             >
               <PanelRightClose className="h-4 w-4" />
             </button>
-            <SidebarContent data={data} isLoading={isLoading} error={error} />
+            <SidebarContent data={data} isLoading={isLoading} error={error} stageType={stageType} />
           </aside>
         ) : (
           /* Floating edge tab - pinned to right edge of content area */
@@ -55,7 +56,7 @@ export function IntelligenceSidebar({ companyName }: IntelligenceSidebarProps) {
             Company Intel
           </SheetTrigger>
           <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto" showCloseButton={false}>
-            <SidebarContent data={data} isLoading={isLoading} error={error} />
+            <SidebarContent data={data} isLoading={isLoading} error={error} stageType={stageType} />
           </SheetContent>
         </Sheet>
       </div>

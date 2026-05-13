@@ -1,17 +1,59 @@
 # Meeting Intelligence Dashboard — Progress
 
 ## Current State
-- **Status:** All 9 CRs complete + admin panel + RBAC deployed
-- **Last session:** 2026-05-04 (all CRs + admin panel + user profile + auth)
-- **Branch:** `main`, both remotes in sync
+- **Status:** Sprint 1 deployed. 7 new CRs (010-016) documented. Sprint 2 next.
+- **Last session:** 2026-05-12 (meeting analysis + Sprint 1 + production deploy)
+- **Branch:** `main`, production remote in sync. Dev remote (say2neeraj) not found.
 - **Production URL:** https://dashboard-jet-seven-93.vercel.app (company Vercel)
-- **Dev:** localhost:3003 - Supabase burcfsxsxgabknmodsrd
-- **Deploy method:** `/mi-promote` skill (git push + Vercel CLI deploy)
+- **Dev:** localhost:3003 - Supabase burcfsxsxgabknmodsrd (MI tables + 9 seed meetings)
+- **Deploy method:** `git push production main && npx vercel --prod`
 - **Tests:** 80 passing (14 test files, Vitest)
 - **Stack:** Next.js 16.2.2, React 19, Supabase, Anthropic SDK 0.82+, Tailwind v4
+- **Stage types:** 6 (discovery_scoping, follow_up, onboarding, client_meeting, internal_client_meeting, internal)
+- **Supabase:** RLS active on scored_meetings + scoring_config. Dev has full MI schema.
 - **Full context:** See `migration/session-handover.md`
 
+## Backlog
+- [ ] Sprint 2: CR-012 CS Scoring Framework (n8n prompt + dashboard component)
+- [ ] Sprint 2: CR-013 Internal Scoring Enhancement (n8n prompt + dashboard component)
+- [ ] Sprint 3: CR-011 Notification + Digest System (Slack channels + email)
+- [ ] Sprint 3: CR-014 HubSpot Score Writeback
+- [ ] Sprint 3: CR-015 Pipeline Trigger Alerts
+- [ ] Sprint 4: CR-010 Teams Recording Capture MVP
+- [ ] Deferred: CR-016 Modular Pricing
+- [ ] Dev GitHub remote (say2neeraj) repo not found - needs fix or removal
+
 ## Session Log
+
+### 2026-05-12 - Product Meeting Analysis + Sprint 1 Deploy
+
+**Context:** Product meeting with Matthew (CEO), Stephen (COO), Luke. Strategic pivot to focus exclusively on MI agent.
+
+**Planning:**
+- Analyzed meeting notes + Stephen's CS/Internal scoring rubrics
+- Created 7 CRs (CR-010 through CR-016) in `change_requests/revision_2/`
+- Validated CR-012/CR-013 against rubrics, fixed 5 gaps (call_notes, coaching signals, org signals)
+- Created `teams-capture/` folder for future Teams MVP
+
+**Sprint 1 Implementation (18 source files + 4 test files):**
+- Added 2 new stage types (client_meeting, internal_client_meeting) across dashboard
+- Updated all conditional rendering, API filters, charts, badges
+- Fixed 4 pre-existing test failures (brand color mismatches)
+- Applied Supabase RLS on scored_meetings (production)
+- Created scoring_config table on dev + production (6 rows with weights)
+- Set up dev Supabase with all 7 MI tables + 9 seed meetings
+- Created env-reference.md with safety checklist
+
+**Deploy:**
+- Commit `30bf0f6`: 24 files, +498 -55
+- Production Vercel deploy verified end-to-end (scorecard, sections, meeting detail, stage filter)
+
+**Key files created:**
+- `change_requests/revision_2/CR-010.md` through `CR-016.md`
+- `teams-capture/README.md`
+- `migration/env-reference.md`
+- `migration/sql/2026-05-13-scored-meetings-rls.sql`
+- `migration/sql/2026-05-13-scoring-config.sql`
 
 ### 2026-04-14 — Ask Blarney Chat Fix + UX Improvements
 

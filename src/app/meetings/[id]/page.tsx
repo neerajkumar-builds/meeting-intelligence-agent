@@ -221,7 +221,7 @@ export default function MeetingDetailPage({
 
       {/* Intelligence Sidebar - only for external meetings with a company */}
       {meeting.company_name && (
-        <IntelligenceSidebar companyName={meeting.company_name} />
+        <IntelligenceSidebar companyName={meeting.company_name} stageType={meeting.scoring_stage_type} />
       )}
     </div>
   );

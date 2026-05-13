@@ -15,9 +15,12 @@ interface SidebarContentProps {
   data: CompanyIntelligence | null | undefined;
   isLoading: boolean;
   error: Error | null;
+  stageType?: string | null;
 }
 
-export function SidebarContent({ data, isLoading, error }: SidebarContentProps) {
+const SALES_STAGES = new Set(["discovery_scoping", "follow_up"]);
+
+export function SidebarContent({ data, isLoading, error, stageType }: SidebarContentProps) {
   if (isLoading) {
     return (
       <div className="p-4 space-y-4">
@@ -61,7 +64,9 @@ export function SidebarContent({ data, isLoading, error }: SidebarContentProps) 
       <RiskSignalsSection data={data.riskSignals} />
       <ActionItemsSection items={data.openActionItems} />
       <CompetitorSection mentions={data.competitorMentions} />
-      <MeddicSection data={data.meddicGaps} />
+      {(!stageType || SALES_STAGES.has(stageType)) && (
+        <MeddicSection data={data.meddicGaps} />
+      )}
     </div>
   );
 }
