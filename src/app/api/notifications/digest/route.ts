@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { SECTIONS, SECTION_CHANNEL_MAP, getSectionForStageType } from "@/lib/constants";
+import { SECTIONS, SECTION_CHANNEL_MAP } from "@/lib/constants";
 import type { SectionKey } from "@/lib/constants";
 
 const DASHBOARD_URL = process.env.NEXT_PUBLIC_VERCEL_URL
@@ -18,6 +18,26 @@ interface ScoredMeeting {
   client_health_score: number | null;
   scored_at: string | null;
   start_time: string | null;
+  duration_minutes: number | null;
+  meeting_score: Record<string, unknown> | null;
+  rep_score: Record<string, unknown> | null;
+  icp_score: Record<string, unknown> | null;
+}
+
+interface PipelineTrigger {
+  company_name: string;
+  trigger_type: string;
+  current_score: number | null;
+  previous_score: number | null;
+  score_delta: number | null;
+  urgency: string;
+}
+
+interface StaleCompany {
+  company_name: string;
+  days_since: number;
+  last_health: number | null;
+  last_score: number | null;
 }
 
 export async function GET(request: Request) {
@@ -44,7 +64,7 @@ export async function GET(request: Request) {
 
     const { data: meetings, error } = await supabase
       .from("scored_meetings")
-      .select("id, topic, host_name, company_name, scoring_stage_type, overall_score, client_health_score, scored_at, start_time")
+      .select("id, topic, host_name, company_name, scoring_stage_type, overall_score, client_health_score, scored_at, start_time, duration_minutes, meeting_score, rep_score, icp_score")
       .gte("scored_at", startDate.toISOString())
       .lte("scored_at", endDate.toISOString())
       .not("scoring_stage_type", "is", null)
@@ -55,6 +75,10 @@ export async function GET(request: Request) {
     }
 
     const allMeetings = meetings as ScoredMeeting[];
+
+    const triggers = await fetchPipelineTriggers(supabase);
+    const staleDeals = await fetchStaleDeals(supabase);
+
     const results: { section: string; channel: string; sent: boolean; meetingCount: number; skippedReason?: string }[] = [];
 
     for (const sectionKey of ["sales", "cs", "internal"] as SectionKey[]) {
@@ -72,12 +96,14 @@ export async function GET(request: Request) {
         (m) => m.scoring_stage_type && config.stageTypes.includes(m.scoring_stage_type as never)
       );
 
+      const sectionTriggers = sectionKey === "sales" ? triggers : triggers.filter(() => false);
+
       if (sectionMeetings.length === 0 && digestType === "daily_actions") {
         results.push({ section: sectionKey, channel: channelId, sent: false, meetingCount: 0 });
         continue;
       }
 
-      const message = buildDigestMessage(digestType, sectionKey, sectionMeetings, now);
+      const message = buildDigestMessage(digestType, sectionKey, sectionMeetings, now, sectionTriggers, staleDeals);
       const sent = await sendToSlack(message.title, message.body, channelId);
       results.push({ section: sectionKey, channel: channelId, sent, meetingCount: sectionMeetings.length });
     }
@@ -91,6 +117,53 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("Digest error:", error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function fetchPipelineTriggers(supabase: any): Promise<PipelineTrigger[]> {
+  try {
+    const { data } = await supabase.rpc("detect_pipeline_triggers");
+    return (data ?? []) as PipelineTrigger[];
+  } catch {
+    return [];
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function fetchStaleDeals(supabase: any): Promise<StaleCompany[]> {
+  try {
+    const { data } = await supabase
+      .from("scored_meetings")
+      .select("company_name, scored_at, client_health_score, overall_score")
+      .not("company_name", "is", null)
+      .not("scoring_stage_type", "is", null)
+      .order("scored_at", { ascending: false });
+
+    if (!data) return [];
+
+    const latestByCompany = new Map<string, { scored_at: string; health: number | null; score: number | null }>();
+    for (const row of data as Array<{ company_name: string; scored_at: string; client_health_score: number | null; overall_score: number | null }>) {
+      if (!latestByCompany.has(row.company_name)) {
+        latestByCompany.set(row.company_name, {
+          scored_at: row.scored_at,
+          health: row.client_health_score,
+          score: row.overall_score,
+        });
+      }
+    }
+
+    const now = Date.now();
+    const stale: StaleCompany[] = [];
+    for (const [name, info] of latestByCompany) {
+      const daysSince = Math.floor((now - new Date(info.scored_at).getTime()) / (1000 * 60 * 60 * 24));
+      if (daysSince >= 14) {
+        stale.push({ company_name: name, days_since: daysSince, last_health: info.health, last_score: info.score });
+      }
+    }
+    return stale.sort((a, b) => b.days_since - a.days_since).slice(0, 5);
+  } catch {
+    return [];
   }
 }
 
@@ -156,18 +229,60 @@ function getDateRange(type: DigestType, now: Date): { startDate: Date; endDate: 
   }
 }
 
+function getSentiment(m: ScoredMeeting): string | null {
+  const ms = m.meeting_score;
+  if (!ms) return null;
+  return (ms.deal_sentiment as string) ?? null;
+}
+
+function getNextActions(m: ScoredMeeting): string | null {
+  const ms = m.meeting_score;
+  if (!ms) return null;
+  const actions = ms.next_actionables as string;
+  if (!actions) return null;
+  return actions.length > 80 ? actions.substring(0, 80) + "..." : actions;
+}
+
+function getIcpFit(m: ScoredMeeting): number | null {
+  const icp = m.icp_score;
+  if (!icp) return null;
+  return (icp.icp_fit_score as number) ?? null;
+}
+
+function getCoachingHighlight(meetings: ScoredMeeting[]): string | null {
+  for (const m of meetings) {
+    const rs = m.rep_score;
+    if (!rs) continue;
+    const recs = rs.coaching_recommendations as string;
+    if (recs && recs.length > 10) {
+      return recs.length > 100 ? recs.substring(0, 100) + "..." : recs;
+    }
+  }
+  return null;
+}
+
+function sentimentIcon(sentiment: string | null): string {
+  if (!sentiment) return "";
+  const s = sentiment.toLowerCase();
+  if (s.includes("positive") || s.includes("strong")) return " :chart_with_upwards_trend:";
+  if (s.includes("negative") || s.includes("stall") || s.includes("cold")) return " :chart_with_downwards_trend:";
+  return "";
+}
+
 function buildDigestMessage(
   type: DigestType,
   section: SectionKey,
   meetings: ScoredMeeting[],
-  now: Date
+  now: Date,
+  triggers: PipelineTrigger[],
+  staleDeals: StaleCompany[]
 ): { title: string; body: string } {
   const sectionLabel = SECTIONS[section].shortLabel;
   const dateStr = now.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
 
   switch (type) {
     case "monday_priorities":
-      return buildMondayPriorities(sectionLabel, meetings, dateStr);
+      return buildMondayPriorities(sectionLabel, meetings, dateStr, triggers, staleDeals);
     case "daily_actions":
       return buildDailyActions(sectionLabel, meetings, dateStr);
     case "friday_review":
@@ -175,11 +290,15 @@ function buildDigestMessage(
   }
 }
 
-function buildMondayPriorities(section: string, meetings: ScoredMeeting[], dateStr: string) {
-  const title = `${section} - Week Priorities (${dateStr})`;
+function buildMondayPriorities(
+  section: string,
+  meetings: ScoredMeeting[],
+  dateStr: string,
+  triggers: PipelineTrigger[],
+  staleDeals: StaleCompany[]
+) {
+  const title = `${section} - What to Focus On (${dateStr})`;
 
-  const lowScores = meetings.filter((m) => m.overall_score != null && m.overall_score < 6);
-  const atRisk = meetings.filter((m) => m.client_health_score != null && m.client_health_score < 5);
   const avgScore = meetings.length > 0
     ? (meetings.reduce((sum, m) => sum + (m.overall_score ?? 0), 0) / meetings.length).toFixed(1)
     : "N/A";
@@ -189,6 +308,44 @@ function buildMondayPriorities(section: string, meetings: ScoredMeeting[], dateS
     "",
   ];
 
+  const slipping = triggers.filter((t) => t.trigger_type === "deal_slipping");
+  const accelerating = triggers.filter((t) => t.trigger_type === "deal_accelerating");
+  const poorDiscovery = triggers.filter((t) => t.trigger_type === "poor_discovery");
+
+  if (slipping.length > 0 || accelerating.length > 0 || staleDeals.length > 0) {
+    lines.push(`:dart: *Deals to Watch:*`);
+    for (const t of slipping.slice(0, 3)) {
+      const delta = t.score_delta != null ? ` (${t.previous_score} -> ${t.current_score})` : "";
+      lines.push(`  :rotating_light: ${t.company_name} - health dropping${delta}`);
+    }
+    for (const t of accelerating.slice(0, 3)) {
+      const delta = t.score_delta != null ? ` (${t.previous_score} -> ${t.current_score})` : "";
+      lines.push(`  :chart_with_upwards_trend: ${t.company_name} - momentum building${delta}`);
+    }
+    for (const s of staleDeals.slice(0, 3)) {
+      lines.push(`  :hourglass: ${s.company_name} - no meeting in ${s.days_since} days${s.last_health != null ? `, last health: ${s.last_health}` : ""}`);
+    }
+    lines.push("");
+  }
+
+  if (poorDiscovery.length > 0) {
+    lines.push(`:warning: *Discovery Calls Needing Attention:*`);
+    for (const t of poorDiscovery.slice(0, 3)) {
+      lines.push(`  - ${t.company_name} - score: ${t.current_score}`);
+    }
+    lines.push("");
+  }
+
+  const icpMeetings = meetings.filter((m) => getIcpFit(m) != null);
+  if (icpMeetings.length > 0) {
+    const highFit = icpMeetings.filter((m) => (getIcpFit(m) ?? 0) >= 7).length;
+    const midFit = icpMeetings.filter((m) => { const f = getIcpFit(m) ?? 0; return f >= 5 && f < 7; }).length;
+    const lowFit = icpMeetings.filter((m) => (getIcpFit(m) ?? 0) < 5).length;
+    lines.push(`:mag: *ICP Quality:* ${highFit} high-fit, ${midFit} mid-fit, ${lowFit} needs-work`);
+    lines.push("");
+  }
+
+  const atRisk = meetings.filter((m) => m.client_health_score != null && m.client_health_score < 5);
   if (atRisk.length > 0) {
     lines.push(`:rotating_light: *At-Risk Accounts (${atRisk.length}):*`);
     for (const m of atRisk.slice(0, 5)) {
@@ -197,21 +354,25 @@ function buildMondayPriorities(section: string, meetings: ScoredMeeting[], dateS
     lines.push("");
   }
 
-  if (lowScores.length > 0) {
-    lines.push(`:warning: *Low Scores (${lowScores.length}):*`);
-    for (const m of lowScores.slice(0, 5)) {
-      lines.push(`  - <${DASHBOARD_URL}/meetings/${m.id}|${m.topic}> - Score: ${m.overall_score} (${m.host_name})`);
+  const repScores: Record<string, { total: number; count: number; best: ScoredMeeting | null }> = {};
+  for (const m of meetings) {
+    if (!m.host_name || m.overall_score == null) continue;
+    if (!repScores[m.host_name]) repScores[m.host_name] = { total: 0, count: 0, best: null };
+    repScores[m.host_name].total += m.overall_score;
+    repScores[m.host_name].count += 1;
+    if (!repScores[m.host_name].best || m.overall_score > (repScores[m.host_name].best?.overall_score ?? 0)) {
+      repScores[m.host_name].best = m;
     }
-    lines.push("");
   }
 
-  const topPerformers = [...meetings]
-    .sort((a, b) => (b.overall_score ?? 0) - (a.overall_score ?? 0))
-    .slice(0, 3);
-  if (topPerformers.length > 0) {
-    lines.push(`:star: *Top Meetings:*`);
-    for (const m of topPerformers) {
-      lines.push(`  - <${DASHBOARD_URL}/meetings/${m.id}|${m.topic}> - Score: ${m.overall_score} (${m.host_name})`);
+  const repRanking = Object.entries(repScores)
+    .map(([name, { total, count }]) => ({ name, avg: total / count, count }))
+    .sort((a, b) => b.avg - a.avg);
+
+  if (repRanking.length > 0) {
+    lines.push(`:busts_in_silhouette: *Team Focus:*`);
+    for (const r of repRanking.slice(0, 5)) {
+      lines.push(`  ${r.name}: ${r.count} meetings, avg ${r.avg.toFixed(1)}`);
     }
   }
 
@@ -234,8 +395,16 @@ function buildDailyActions(section: string, meetings: ScoredMeeting[], dateStr: 
     const scoreStr = m.overall_score != null ? `${m.overall_score}/10` : "pending";
     const healthStr = m.client_health_score != null ? ` | Health: ${m.client_health_score}` : "";
     const icon = (m.overall_score ?? 10) < 5 ? ":red_circle:" : (m.overall_score ?? 10) < 7 ? ":large_yellow_circle:" : ":large_green_circle:";
-    lines.push(`${icon} <${DASHBOARD_URL}/meetings/${m.id}|${m.topic}> - ${scoreStr}${healthStr}`);
-    lines.push(`    _${m.host_name}${m.company_name ? ` - ${m.company_name}` : ""}_`);
+    const sentiment = getSentiment(m);
+    const sentIcon = sentimentIcon(sentiment);
+
+    lines.push(`${icon} <${DASHBOARD_URL}/meetings/${m.id}|${m.topic}> - ${scoreStr}${healthStr}${sentIcon}`);
+    lines.push(`    _${m.host_name}${m.company_name ? ` | ${m.company_name}` : ""}${sentiment ? ` | ${sentiment}` : ""}_`);
+
+    const nextActions = getNextActions(m);
+    if (nextActions) {
+      lines.push(`    :arrow_right: ${nextActions}`);
+    }
   }
 
   const alerts = meetings.filter((m) => m.overall_score != null && m.overall_score < 5);
@@ -244,45 +413,92 @@ function buildDailyActions(section: string, meetings: ScoredMeeting[], dateStr: 
     lines.push(`:rotating_light: *${alerts.length} meeting${alerts.length !== 1 ? "s" : ""} need attention* (score < 5)`);
   }
 
+  const churnSignals = meetings.filter((m) => {
+    const ms = m.meeting_score;
+    if (!ms) return false;
+    const signals = ms.churn_risk_signals as unknown[];
+    return Array.isArray(signals) && signals.length > 0;
+  });
+  if (churnSignals.length > 0) {
+    lines.push("");
+    lines.push(`:warning: *Churn risk detected in ${churnSignals.length} meeting${churnSignals.length !== 1 ? "s" : ""}:*`);
+    for (const m of churnSignals.slice(0, 3)) {
+      lines.push(`  - <${DASHBOARD_URL}/meetings/${m.id}|${m.company_name || m.topic}>`);
+    }
+  }
+
   return { title, body: lines.join("\n") };
 }
 
 function buildFridayReview(section: string, meetings: ScoredMeeting[], dateStr: string) {
   const title = `${section} - Week in Review (${dateStr})`;
 
+  const totalMinutes = meetings.reduce((sum, m) => sum + (m.duration_minutes ?? 0), 0);
+  const totalHours = (totalMinutes / 60).toFixed(1);
   const avgScore = meetings.length > 0
     ? (meetings.reduce((sum, m) => sum + (m.overall_score ?? 0), 0) / meetings.length).toFixed(1)
     : "N/A";
 
-  const avgHealth = meetings.filter((m) => m.client_health_score != null).length > 0
-    ? (meetings.filter((m) => m.client_health_score != null)
-        .reduce((sum, m) => sum + (m.client_health_score ?? 0), 0) /
-        meetings.filter((m) => m.client_health_score != null).length).toFixed(1)
-    : "N/A";
+  const lines: string[] = [
+    `:bar_chart: *Weekly Investment Summary*`,
+    `${meetings.length} meetings | ${totalHours}h invested | Avg Score: ${avgScore}`,
+    "",
+  ];
 
-  const repScores: Record<string, { total: number; count: number }> = {};
+  const repScores: Record<string, { total: number; count: number; minutes: number; high: number; low: number }> = {};
   for (const m of meetings) {
     if (!m.host_name || m.overall_score == null) continue;
-    if (!repScores[m.host_name]) repScores[m.host_name] = { total: 0, count: 0 };
+    if (!repScores[m.host_name]) repScores[m.host_name] = { total: 0, count: 0, minutes: 0, high: 0, low: 0 };
     repScores[m.host_name].total += m.overall_score;
     repScores[m.host_name].count += 1;
+    repScores[m.host_name].minutes += m.duration_minutes ?? 0;
+    if (m.overall_score >= 8) repScores[m.host_name].high += 1;
+    if (m.overall_score < 5) repScores[m.host_name].low += 1;
   }
 
   const repRanking = Object.entries(repScores)
-    .map(([name, { total, count }]) => ({ name, avg: total / count, count }))
+    .map(([name, s]) => ({ name, avg: s.total / s.count, count: s.count, hours: (s.minutes / 60).toFixed(1), high: s.high, low: s.low }))
     .sort((a, b) => b.avg - a.avg);
-
-  const lines: string[] = [
-    `:bar_chart: *Weekly Summary*`,
-    `Meetings: ${meetings.length} | Avg Score: ${avgScore} | Avg Health: ${avgHealth}`,
-    "",
-  ];
 
   if (repRanking.length > 0) {
     lines.push(`*Rep Performance:*`);
     for (const r of repRanking.slice(0, 5)) {
-      const medal = repRanking.indexOf(r) === 0 ? ":first_place_medal:" : "";
-      lines.push(`  ${medal} ${r.name}: ${r.avg.toFixed(1)} avg (${r.count} meetings)`);
+      const medal = repRanking.indexOf(r) === 0 ? ":first_place_medal: " : "  ";
+      const quality = [];
+      if (r.high > 0) quality.push(`${r.high} high-quality`);
+      if (r.low > 0) quality.push(`${r.low} needs work`);
+      const qualityStr = quality.length > 0 ? ` | ${quality.join(", ")}` : "";
+      lines.push(`${medal}${r.name}: ${r.count} meetings (${r.hours}h) | Avg ${r.avg.toFixed(1)}${qualityStr}`);
+    }
+    lines.push("");
+  }
+
+  const healthMeetings = meetings.filter((m) => m.client_health_score != null && m.company_name);
+  const companyHealth = new Map<string, number[]>();
+  for (const m of healthMeetings) {
+    const name = m.company_name!;
+    if (!companyHealth.has(name)) companyHealth.set(name, []);
+    companyHealth.get(name)!.push(m.client_health_score!);
+  }
+
+  const healthChanges: { name: string; current: number; trend: string }[] = [];
+  for (const [name, scores] of companyHealth) {
+    if (scores.length >= 1) {
+      const current = scores[0];
+      healthChanges.push({ name, current, trend: current >= 7 ? "strong" : current < 5 ? "at-risk" : "monitor" });
+    }
+  }
+
+  const atRiskCompanies = healthChanges.filter((h) => h.trend === "at-risk");
+  const strongCompanies = healthChanges.filter((h) => h.trend === "strong");
+
+  if (atRiskCompanies.length > 0 || strongCompanies.length > 0) {
+    lines.push(`:heartbeat: *Account Health:*`);
+    for (const c of strongCompanies.slice(0, 3)) {
+      lines.push(`  :large_green_circle: ${c.name}: ${c.current}`);
+    }
+    for (const c of atRiskCompanies.slice(0, 3)) {
+      lines.push(`  :red_circle: ${c.name}: ${c.current} - needs attention`);
     }
     lines.push("");
   }
@@ -295,6 +511,12 @@ function buildFridayReview(section: string, meetings: ScoredMeeting[], dateStr: 
   }
   if (worst && worst.id !== best?.id) {
     lines.push(`:eyes: *Needs Work:* <${DASHBOARD_URL}/meetings/${worst.id}|${worst.topic}> (${worst.overall_score}) - ${worst.host_name}`);
+  }
+
+  const coachingTip = getCoachingHighlight(meetings);
+  if (coachingTip) {
+    lines.push("");
+    lines.push(`:bulb: *Coaching Insight:* ${coachingTip}`);
   }
 
   return { title, body: lines.join("\n") };
