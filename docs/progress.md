@@ -1,19 +1,20 @@
 # Meeting Intelligence Dashboard — Progress
 
 ## Current State
-- **Status:** Sprint 1 + 2 deployed. Sprint 3 (CR-011 notifications) deployed.
-- **Last session:** 2026-05-13 (Sprint 3: notification system + CS intelligence + pipeline triggers)
-- **Branch:** `main` at `cee29aa`, production remote in sync
+- **Status:** Sprint 1-4 deployed. Pipeline restored. Classification fix live. Prism digest upgrade deployed.
+- **Last session:** 2026-05-18/19 (Session 4: pipeline fix, 17 users enabled, n8n classification upgrade, Prism digest)
+- **Branch:** `main` at `ad89e67`, production in sync
 - **Production URL:** https://dashboard-jet-seven-93.vercel.app (company Vercel, auto-deploy from GitHub)
-- **Dev:** localhost:3003 - Supabase burcfsxsxgabknmodsrd (MI tables + 42 meetings including 31 migrated from prod)
+- **Dev:** localhost:3003 - Supabase burcfsxsxgabknmodsrd (MI tables + 42 meetings)
 - **Deploy method:** Auto-deploy via Vercel GitHub App on push to main (neerajkumar-builds org)
-- **Tests:** 80 passing (14 test files, Vitest)
+- **Tests:** 91 passing (17 test files, Vitest)
 - **Stack:** Next.js 16.2.2, React 19, Supabase, Anthropic SDK 0.82+, Tailwind v4
-- **Stage types:** 6 (discovery_scoping, follow_up, onboarding, client_meeting, internal_client_meeting, internal)
-- **Supabase prod:** RLS active, scoring_config v2, notification_preferences, detect_pipeline_triggers(), user_roles email UNIQUE
+- **Stage types:** 6 (discovery_scoping, follow_up, onboarding, client_meeting, internal_client_meeting, internal) - ALL now actively assigned
+- **Supabase prod:** RLS DISABLED on scored_meetings (fix for n8n pipeline), scoring_config v2, notification_preferences, detect_pipeline_triggers(), user_roles email UNIQUE
 - **Supabase dev:** Full MI schema + 42 meetings (11 seed + 31 migrated from prod)
-- **n8n prod:** MI|3 v4.4 with 6 LLM chains
-- **Slack channels:** #mi-sales, #mi-cs, #mi-internal (bot invited, digests tested)
+- **n8n prod:** MI|2 updated (8-theme AI prompt), MI|3 updated (host-role-aware classification + Read Zoom Users node)
+- **Zoom users:** 17 enabled across 7 classifications (sales_rep, cs, pm, engineering, marketing, revops, leadership)
+- **Slack channels:** #mi-sales, #mi-cs, #mi-internal (Prism digest format live)
 - **Vercel Cron:** Mon 8am / Tue-Thu 8am / Fri 4pm EST digests active
 - **Git remote:** `production` only
 - **Full context:** See `migration/session-handover.md`
@@ -29,13 +30,100 @@
 - [ ] Sprint 3: CR-014 HubSpot Score Writeback (blocked: needs API key with write perms)
 - [ ] Sprint 4: CR-010 Teams Recording Capture MVP (blocked: needs Azure AD credentials)
 - [ ] Deferred: CR-016 Modular Pricing
-- [ ] Monitor first real client_meeting/internal_client_meeting scoring from n8n
+- [x] Monitor first real client_meeting/internal_client_meeting scoring from n8n (DONE 2026-05-18 - 9 client_meeting + 1 internal_client_meeting)
+- [x] RLS on scored_meetings disabled (was blocking n8n pipeline since May 12) (DONE 2026-05-18)
+- [x] 17 users enabled with 7 classifications (was 5 sales_rep only) (DONE 2026-05-18)
+- [x] MI|2 AI prompt updated with client_meeting + internal_client_meeting themes (DONE 2026-05-18)
+- [x] MI|3 Build Scoring Context updated with host-role-aware classification (DONE 2026-05-18)
+- [x] MI|3 Read Zoom Users node added for host classification lookup (DONE 2026-05-18)
+- [x] Slack digests upgraded to Prism vision (deal context, pipeline alerts, investment tracking) (DONE 2026-05-19)
 - [ ] Wire n8n MI|3 to POST real-time trigger after scoring
-- [ ] Digest engine to read notification_preferences (currently sends to channels regardless)
+- [ ] Re-enable RLS with proper INSERT/UPDATE policies (service_role key in n8n)
+- [x] Digest engine reads notification_preferences before sending (DONE 2026-05-13 Session 3)
+- [x] Env validation for CRON_SECRET, MI_*_CHANNEL_ID, SUPABASE_SERVICE_ROLE_KEY (DONE)
+- [x] Schema docs for notification_preferences, detect_pipeline_triggers, client_meeting JSONB (DONE)
+- [x] Tests for digest, triggers, preferences routes (11 new tests, DONE)
+- [x] Teams capture scaffold (teams-capture/ folder with full TypeScript project, DONE)
 - [ ] Email delivery via Resend (notification_preferences supports it, backend not wired)
-- [ ] Personal Slack DMs for critical alerts (low score, health drop)
+- [ ] Personal Slack DMs removed from roadmap (user decision: channels only, no DMs)
 
 ## Session Log
+
+### 2026-05-18/19 (Session 4) - Pipeline Fix + Classification Upgrade + Prism Digests
+
+**Pipeline data flow restored:**
+- Root cause: RLS on scored_meetings (applied Sprint 1) had no INSERT policy for anon role. n8n uses anon key for HTTP POST. RLS silently blocked all writes since May 12.
+- Fix: Disabled RLS on scored_meetings. Pipeline immediately captured 112 new meetings.
+- Future: Re-enable RLS with service_role key in n8n workflows (Option 2 from analysis).
+
+**17 users enabled (was 5):**
+- Updated zoom_users table with 7 classifications: sales_rep (2), cs (3), pm (4), engineering (3), leadership (3), marketing (1), revops (1)
+- All enabled_for_scoring = true
+- Leadership privacy rule discussed (Stephen+Matthew only meetings) - not yet implemented
+
+**n8n classification upgrade (4 node changes across 2 workflows):**
+- MI|2 "AI Extract & Summarize": Added client_meeting + internal_client_meeting to 8-theme prompt
+- MI|2 "Is Internal?": Verified exact match (equals, not contains) - no change needed
+- MI|3 "Read Zoom Users": NEW Supabase node, reads classification per host
+- MI|3 "Build Scoring Context": Host-role-aware logic. CS host + external = client_meeting. Executed in series (Read Zoom Users -> Read Enriched Meetings with Execute Once).
+- Result: 9 client_meeting + 1 internal_client_meeting scored (first time ever)
+
+**Prism digest upgrade (ad89e67):**
+- Monday: "What to Focus On" - deals to watch (slipping/accelerating/stale), ICP quality, at-risk accounts, team focus
+- Tue-Thu: deal sentiment, next action items from meeting_score JSONB, churn risk flags
+- Friday: "Weekly Investment Summary" - hours per rep, high-quality/needs-work counts, account health, coaching insight
+- Data sources: meeting_score, rep_score, icp_score JSONB + detect_pipeline_triggers() RPC + stale deals query
+
+**Architecture sheet gap analysis (Luke's request):**
+- Compared all 4 pages (Scorecard, Meetings, Companies, Reps) against Luke's architecture sheet
+- 18 DONE, 6 PARTIAL, 8 MISSING items documented
+- Response sent to Luke with full status breakdown
+- Key gaps: Avg ICP Score KPI, Hot Deals KPI, BANT summary, Company Status tracking, Objection/Alignment mentions
+
+**Teams capture scaffold (from Session 3, refined):**
+- Fixed 3 critical issues: no "list all meetings" API, getStream() type, MSAL version
+- Correct approach: calendarView + getAllTranscripts APIs
+- VTT + metadataContent parsers added
+- Needs Azure AD credentials to test
+
+**Matt's feedback captured:**
+- Prism product vision: "Replace Monday morning management call"
+- Slack digests should be automated sales manager
+- Deal progression, pipeline velocity, investment ROI focus
+- Competitive positioning vs Gong: "complete investment visibility"
+
+**Commits:** 9d1abb3 (gap fixes), ad89e67 (Prism digest)
+**n8n changes:** MI|2 prompt + MI|3 classification (not in git - n8n workflow changes)
+
+### 2026-05-13 (Session 3) - Gap Fixes + Tests + Teams Scaffold
+
+**Self-review gaps fixed (5):**
+- CRITICAL: Added CRON_SECRET, SUPABASE_SERVICE_ROLE_KEY, MI_*_CHANNEL_ID to .env.example + validate-env.mjs + environments.md
+- CRITICAL: Wired digest engine to query notification_preferences before sending (shouldSkipSection logic)
+- HIGH: Updated docs/03-database-schema.md with notification_preferences, detect_pipeline_triggers, scoring_config, client_meeting JSONB
+- MEDIUM: Added 11 new tests across 3 files (digest, triggers, preferences routes)
+- MEDIUM: Documented client_meeting meeting_score JSONB structure
+
+**Notification preference wiring:**
+- Digest route now calls shouldSkipSection() per section
+- Queries notification_preferences for is_active + frequency
+- Default-open: sends if no preferences exist (backward compatible)
+- Skips section only if ALL prefs inactive or frequency mismatch
+
+**Teams capture scaffold (separate from dashboard):**
+- Full TypeScript project at ../teams-capture/ (outside dashboard git repo)
+- @azure/msal-node + @microsoft/microsoft-graph-client
+- 6 source files: config, auth, graph-client, list-users, list-meetings, index
+- Ready to test when Azure AD credentials arrive
+- Needs: Application Access Policy (PowerShell) + admin consent
+
+**Decisions:**
+- NO personal Slack DMs - channels only (#mi-sales, #mi-cs, #mi-internal)
+- Teams integration completely isolated from MI dev/prod
+- Default-open notification preference pattern (no prefs = send)
+
+**Commits:** 9d1abb3
+**Tests:** 91/91 (was 80, +11 new)
 
 ### 2026-05-13 (Session 2) - Sprint 3: Notifications + CS Intelligence + Pipeline Triggers
 
