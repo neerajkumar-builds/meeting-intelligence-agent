@@ -2,9 +2,7 @@ import { createServerSupabase } from "@/lib/supabase/server";
 import { createClient } from "@supabase/supabase-js";
 import { SECTION_CHANNEL_MAP, getSectionForStageType } from "@/lib/constants";
 
-const DASHBOARD_URL = process.env.NEXT_PUBLIC_VERCEL_URL
-  ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-  : "https://dashboard-jet-seven-93.vercel.app";
+const DASHBOARD_URL = process.env.NEXT_PUBLIC_DASHBOARD_URL || "https://dashboard-jet-seven-93.vercel.app";
 
 export interface PipelineTrigger {
   company_name: string;

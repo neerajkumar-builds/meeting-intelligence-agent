@@ -2,9 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { SECTIONS, SECTION_CHANNEL_MAP } from "@/lib/constants";
 import type { SectionKey } from "@/lib/constants";
 
-const DASHBOARD_URL = process.env.NEXT_PUBLIC_VERCEL_URL
-  ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-  : "https://dashboard-jet-seven-93.vercel.app";
+const DASHBOARD_URL = process.env.NEXT_PUBLIC_DASHBOARD_URL || "https://dashboard-jet-seven-93.vercel.app";
 
 type DigestType = "monday_priorities" | "daily_actions" | "friday_review";
 
