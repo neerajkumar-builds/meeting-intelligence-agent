@@ -21,7 +21,7 @@ export function MobileNav() {
       </SheetTrigger>
       <SheetContent side="left" className="w-64 p-0 pt-10 bg-[#0A0A0A] text-white border-r-0" showCloseButton={false}>
         <div className="px-4 pb-4">
-          <h2 className="text-lg font-semibold text-white">Meeting Intel</h2>
+          <h2 className="text-lg font-semibold text-white">Prism</h2>
           <p className="text-xs text-white/50">FullFunnel</p>
         </div>
         <div onClick={() => setOpen(false)}>

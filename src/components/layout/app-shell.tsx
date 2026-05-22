@@ -49,7 +49,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           />
           {!collapsed && (
             <span className="text-sm font-semibold tracking-tight text-white">
-              Meeting Intel
+              Prism
             </span>
           )}
         </Link>
