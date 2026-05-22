@@ -73,10 +73,14 @@
 - TypeScript: 0 errors, Tests: 91/91, Build: success
 - CLAUDE.md, MEMORY.md, progress.md updated with current state
 
-**n8n changes pending (Phase 2 - Neeraj manual):**
-- Score CS prompt hardening (JSON-only instruction block)
-- Process Scores JSON repair fallback (regex extraction for known keys)
-- Re-score 7 failed meetings after fix
+**n8n changes completed (Phase 2 - Neeraj manual):**
+- Score CS prompt hardened with JSON-only instruction block (DONE)
+- Process Scores JSON repair fallback with regex extraction (DONE)
+- Max tokens set to 8192 on ALL 12 model nodes (DONE - was the key fix for truncation)
+- MI|3 published as active version (DONE)
+- 6 of 8 re-scored successfully (6.5-7.6 range)
+- 2 persistent failures: ISW (46K transcript too long) + Lathan McKee (LLM non-compliance)
+- Both hidden from digests by status='completed' filter
 
 **Parked:**
 - Phase 3: anon key to service_role key swap in n8n HTTP nodes
