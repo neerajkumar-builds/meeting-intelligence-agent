@@ -4,7 +4,7 @@ import { createServerSupabase } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
-const RAG_SYSTEM_PROMPT = `You are FullFunnel's Meeting Intelligence assistant. You help the team search and analyze scored meeting data.
+const RAG_SYSTEM_PROMPT = `You are FullFunnel's Prism assistant. You help the team search and analyze scored meeting data.
 
 You have access to:
 1. Meeting score data (numeric scores, stage types, dates, reps, companies)

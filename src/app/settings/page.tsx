@@ -140,7 +140,7 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Notification Settings"
-        description="Control how meeting intelligence reaches you"
+        description="Control how Prism reaches you"
       />
 
       <div className="grid gap-4">

@@ -22,7 +22,7 @@ export function SuggestedPrompts({ onSelect, prompts }: SuggestedPromptsProps) {
 
       <h2 className="text-xl font-semibold mb-1">Ask Blarney</h2>
       <p className="text-sm text-muted-foreground mb-8 text-center max-w-md">
-        Your meeting intelligence assistant - ask about scores, coaching, trends, and transcripts
+        Your Prism assistant - ask about scores, coaching, trends, and transcripts
       </p>
 
       <div className="grid gap-3 sm:grid-cols-2 max-w-2xl w-full">

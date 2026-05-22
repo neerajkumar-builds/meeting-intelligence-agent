@@ -11,6 +11,15 @@ vi.mock("@supabase/supabase-js", () => ({
         gte: vi.fn(() => ({
           lte: vi.fn(() => ({
             not: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                order: vi.fn(() => Promise.resolve({ data: [], error: null })),
+              })),
+            })),
+          })),
+        })),
+        not: vi.fn(() => ({
+          not: vi.fn(() => ({
+            eq: vi.fn(() => ({
               order: vi.fn(() => Promise.resolve({ data: [], error: null })),
             })),
           })),
@@ -20,6 +29,7 @@ vi.mock("@supabase/supabase-js", () => ({
         })),
       })),
     })),
+    rpc: vi.fn(() => Promise.resolve({ data: [], error: null })),
   })),
 }));
 

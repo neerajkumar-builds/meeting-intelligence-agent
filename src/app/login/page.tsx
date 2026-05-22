@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 
 const TAGLINES = [
-  "AI-powered meeting intelligence",
+  "AI-powered meeting intelligence by Prism",
   "Real-time coaching insights",
   "Cross-call analysis at scale",
 ];
@@ -117,7 +117,7 @@ export default function LoginPage() {
             height={30}
             className="mb-4"
           />
-          <h1 className="text-lg font-semibold text-white">Meeting Intelligence</h1>
+          <h1 className="text-lg font-semibold text-white">Prism</h1>
           <p className="text-sm text-white/50 mt-1">Sign in to your account</p>
         </div>
 

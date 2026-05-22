@@ -49,7 +49,7 @@ export default function PrintReportPage({
       <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-[#146DFA]">
         <div>
           <Image src="/fullfunnel-logo.svg" alt="FullFunnel" width={140} height={22} />
-          <p className="text-xs text-gray-500 mt-1">Meeting Intelligence Report</p>
+          <p className="text-xs text-gray-500 mt-1">Prism Report</p>
         </div>
         <div className="text-right text-xs text-gray-500">
           <p>Generated {new Date().toLocaleDateString()}</p>
@@ -180,7 +180,7 @@ export default function PrintReportPage({
 
       {/* Footer */}
       <div className="mt-8 pt-4 border-t text-xs text-gray-400 flex justify-between">
-        <span>FullFunnel Meeting Intelligence</span>
+        <span>FullFunnel Prism</span>
         <span>Confidential - Internal Use Only</span>
       </div>
 

@@ -1,8 +1,8 @@
-# Meeting Intelligence Dashboard
+# Prism Dashboard (formerly Meeting Intelligence)
 
 ## What This Is
 Sales meeting scoring platform. Zoom recordings → n8n (5 workflows, 8h cycle) → Supabase (AI scoring with 6 LLM chains) → Next.js 16 dashboard with RAG search.
-500+ meetings, 17 tracked users across 7 classifications. Live in production with daily active users.
+526+ meetings, 17 tracked users across 7 classifications. Live in production with daily active users.
 6 stage types: discovery_scoping, follow_up, onboarding, client_meeting, internal_client_meeting, internal. ALL actively assigned.
 CS meetings scored with Stephen's 6-category rubric. Internal meetings scored with 4+2 category rubric.
 n8n MI|2 uses 8-theme AI prompt (including client_meeting, internal_client_meeting). MI|3 uses host-role-aware classification from zoom_users.
@@ -19,7 +19,7 @@ RLS on scored_meetings currently DISABLED (was blocking n8n pipeline). Re-enable
 |--|-----------|-------------|
 | **Supabase ID** | **`cxrjlmquzhfueqrudiuy`** | **`burcfsxsxgabknmodsrd`** |
 | Supabase name | project_n8n | FF_Internal_Initiatives |
-| Data | 373 meetings, 8 users (LIVE) | 9 seed meetings, 4 test users |
+| Data | 526+ meetings, 17 users (LIVE) | 42 meetings, 13 users |
 | GitHub | `neerajkumar-builds/meeting-intelligence-agent` | `say2neeraj/fullfunnel-meeting-intel` |
 | Git remote | `production` | `origin` |
 | Vercel | `dashboard-jet-seven-93.vercel.app` | localhost:3003 |
@@ -108,7 +108,7 @@ Next.js 16 + React 19 + TypeScript + Tailwind 4 + shadcn/ui + Supabase (pgvector
 ## Build
 ```bash
 npm run build    # Includes env validation (scripts/validate-env.mjs)
-npm test         # 80 tests (Vitest)
+npm test         # 91 tests (Vitest)
 npm run test:e2e # Playwright E2E (needs dev server running)
 ```
 

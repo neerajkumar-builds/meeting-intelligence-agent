@@ -17,7 +17,7 @@ test.describe("Authentication", () => {
 
   test("login page renders", async ({ page }) => {
     await page.goto("/login");
-    await expect(page.locator("h1")).toContainText("Meeting Intelligence");
+    await expect(page.locator("h1")).toContainText("Prism");
     await expect(page.locator('input[type="email"]')).toBeVisible();
     await expect(page.locator('input[type="password"]')).toBeVisible();
   });
@@ -108,7 +108,7 @@ test.describe("Ask Blarney", () => {
 
   test("loads with suggested prompts", async ({ page }) => {
     await page.goto("/search");
-    await expect(page.locator("text=Meeting Intelligence")).toBeVisible();
+    await expect(page.locator("text=Prism assistant")).toBeVisible();
     await expect(page.locator("text=Compare all reps")).toBeVisible();
   });
 });

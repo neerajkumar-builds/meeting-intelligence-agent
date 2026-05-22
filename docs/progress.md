@@ -1,9 +1,9 @@
-# Meeting Intelligence Dashboard — Progress
+# Prism Dashboard (formerly Meeting Intelligence) - Progress
 
 ## Current State
-- **Status:** Sprint 1-4 deployed. Pipeline restored. Classification fix live. Prism digest upgrade deployed.
-- **Last session:** 2026-05-18/19 (Session 4: pipeline fix, 17 users enabled, n8n classification upgrade, Prism digest)
-- **Branch:** `main` at `ad89e67`, production in sync
+- **Status:** Sprint 1-4 deployed. Score-0 cascade fix + Prism rebrand deployed. Pipeline flowing.
+- **Last session:** 2026-05-22 (Session 5: score-0 fix, Prism rename, pipeline triggers fix, notification frequency fix)
+- **Branch:** `main`, production in sync
 - **Production URL:** https://dashboard-jet-seven-93.vercel.app (company Vercel, auto-deploy from GitHub)
 - **Dev:** localhost:3003 - Supabase burcfsxsxgabknmodsrd (MI tables + 42 meetings)
 - **Deploy method:** Auto-deploy via Vercel GitHub App on push to main (neerajkumar-builds org)
@@ -48,6 +48,39 @@
 - [ ] Personal Slack DMs removed from roadmap (user decision: channels only, no DMs)
 
 ## Session Log
+
+### 2026-05-22 (Session 5) - Score-0 Cascade Fix + Prism Rebrand
+
+**Deep scan findings:**
+- 7 client_meeting scoring_failed (14% failure rate) - MI|3 Score CS LLM returning non-JSON
+- All 7 were LATEST meeting for their companies, poisoning pipeline triggers, at-risk alerts, health trends
+- Digest route had no status filter - showed scoring_failed as 0/10 in Slack
+- `detect_pipeline_triggers()` SQL had no status filter - generated false deal_slipping for 7 companies
+- Internal section notification frequency was 'weekly' - missed all Tue-Thu digests since May 18
+- Product officially renamed to "Prism" (confirmed in Granola NH Office meeting May 19)
+- No duplicates from 6-day batch reprocessing (on_conflict=meeting_uuid prevents)
+
+**Fixes applied (Phase 1):**
+- Added `.eq("status", "completed")` to digest main query and stale deals query
+- Updated `detect_pipeline_triggers()` SQL on dev + prod with `AND sm.status = 'completed'`
+- Changed internal notification_preferences frequency from 'weekly' to 'daily'
+- Renamed "Meeting Intelligence" to "Prism" across 9 files (layout, login, settings, digest, slack, chat, print, search)
+- Updated digest test mock for new query chain
+
+**Verified:**
+- 7 poisoned companies no longer in pipeline triggers
+- All notification preferences set to daily + active
+- TypeScript: 0 errors, Tests: 91/91, Build: success
+- CLAUDE.md, MEMORY.md, progress.md updated with current state
+
+**n8n changes pending (Phase 2 - Neeraj manual):**
+- Score CS prompt hardening (JSON-only instruction block)
+- Process Scores JSON repair fallback (regex extraction for known keys)
+- Re-score 7 failed meetings after fix
+
+**Parked:**
+- Phase 3: anon key to service_role key swap in n8n HTTP nodes
+- Phase 4: RLS re-enable (deferred, too risky without Phase 3 proven stable)
 
 ### 2026-05-18/19 (Session 4) - Pipeline Fix + Classification Upgrade + Prism Digests
 

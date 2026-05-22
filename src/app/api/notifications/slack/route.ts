@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     blocks.push({
       type: "context",
       elements: [
-        { type: "mrkdwn", text: `Sent from _Meeting Intelligence Dashboard_ at ${new Date().toLocaleString()}` },
+        { type: "mrkdwn", text: `Sent from _Prism Dashboard_ at ${new Date().toLocaleString()}` },
       ],
     });
 

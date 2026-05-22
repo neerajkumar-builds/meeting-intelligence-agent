@@ -66,6 +66,7 @@ export async function GET(request: Request) {
       .gte("scored_at", startDate.toISOString())
       .lte("scored_at", endDate.toISOString())
       .not("scoring_stage_type", "is", null)
+      .eq("status", "completed")
       .order("scored_at", { ascending: false });
 
     if (error) {
@@ -136,6 +137,7 @@ async function fetchStaleDeals(supabase: any): Promise<StaleCompany[]> {
       .select("company_name, scored_at, client_health_score, overall_score")
       .not("company_name", "is", null)
       .not("scoring_stage_type", "is", null)
+      .eq("status", "completed")
       .order("scored_at", { ascending: false });
 
     if (!data) return [];
@@ -528,7 +530,7 @@ async function sendToSlack(title: string, body: string, channelId: string): Prom
     { type: "header", text: { type: "plain_text", text: title.slice(0, 150), emoji: true } },
     { type: "section", text: { type: "mrkdwn", text: body.slice(0, 2800) } },
     { type: "context", elements: [
-      { type: "mrkdwn", text: `_Meeting Intelligence_ | <${DASHBOARD_URL}|Open Dashboard>` },
+      { type: "mrkdwn", text: `_Prism_ | <${DASHBOARD_URL}|Open Dashboard>` },
     ]},
   ];
 

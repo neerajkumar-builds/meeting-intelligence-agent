@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Meeting Intelligence | FullFunnel",
+  title: "Prism | FullFunnel",
   description:
     "AI-powered meeting scoring, search, and coaching for the FullFunnel team",
   icons: {
