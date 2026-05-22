@@ -2,14 +2,17 @@
 
 ## What This Is
 Sales meeting scoring platform. Zoom recordings → n8n (5 workflows, 8h cycle) → Supabase (AI scoring with 6 LLM chains) → Next.js 16 dashboard with RAG search.
-526+ meetings, 17 tracked users across 7 classifications. Live in production with daily active users.
+580+ meetings, 299 completed, 17 tracked users across 7 classifications. Live in production with daily active users.
+Product name: **Prism** (formerly Meeting Intelligence/MIA/Cipher). Part of portfolio: Prism, Current, Beacon, Pulse.
 6 stage types: discovery_scoping, follow_up, onboarding, client_meeting, internal_client_meeting, internal. ALL actively assigned.
 CS meetings scored with Stephen's 6-category rubric. Internal meetings scored with 4+2 category rubric.
-n8n MI|2 uses 8-theme AI prompt (including client_meeting, internal_client_meeting). MI|3 uses host-role-aware classification from zoom_users.
+n8n MI|2 uses 8-theme AI prompt. MI|3 uses host-role-aware classification from zoom_users. All 12 model nodes set to max_tokens=8192.
+MI|3 Score CS prompt hardened with JSON-only header. Process Scores has JSON regex fallback for parse failures.
 CRs 001-009 complete (revision 1). CRs 010-016 documented (revision 2). CR-012 + CR-013 + CR-011 (notifications) + CR-015 (pipeline triggers) implemented.
-Prism Slack digests: Mon priorities/Tue-Thu actions/Fri review to #mi-sales, #mi-cs, #mi-internal. Includes deal sentiment, pipeline alerts, investment tracking, coaching insights.
-Notification settings UI at /settings. Pipeline trigger detection live (deal slipping/accelerating/poor discovery).
-RLS on scored_meetings currently DISABLED (was blocking n8n pipeline). Re-enable with service_role key in n8n is pending.
+Prism Slack digests: Mon priorities/Tue-Thu actions/Fri review to #mi-sales, #mi-cs, #mi-internal. Digests filter status='completed' (no scoring_failed). Slack bot name: Prism.
+detect_pipeline_triggers() SQL function filters status='completed' (no false alerts from scoring_failed).
+Notification settings UI at /settings. All 3 sections set to daily frequency. Pipeline trigger detection live.
+RLS on scored_meetings currently DISABLED (was blocking n8n pipeline). Re-enable deferred (last attempt broke pipeline 6 days).
 
 ## Environments
 
@@ -91,6 +94,7 @@ Or read `migration/change-requests.json` for full CR details.
 | `migration/change-requests.json` | CRs 001-009 details (revision 1) |
 | `change_requests/revision_2/` | CRs 010-016 (revision 2, from 2026-05-12 meeting) |
 | `docs/03-database-schema.md` | Supabase schema reference |
+| `docs/n8n-session5-changes.md` | Score CS fix guide (prompt + JSON fallback + max_tokens) |
 
 ## Supabase Project Tracker
 
