@@ -1,9 +1,9 @@
 # Prism Dashboard (formerly Meeting Intelligence) - Progress
 
 ## Current State
-- **Status:** Sprint 1-4 deployed. Score-0 cascade fix + Prism rebrand deployed. Pipeline flowing.
-- **Last session:** 2026-05-22 (Session 5: score-0 fix, Prism rename, pipeline triggers fix, notification frequency fix)
-- **Branch:** `main`, production in sync
+- **Status:** Sprint 1-4 deployed. Score-0 cascade fix + Prism rebrand deployed. Ask Blarney chart crash fixed. Pipeline flowing.
+- **Last session:** 2026-06-09 (Session 6: Ask Blarney toFixed crash fix)
+- **Branch:** `main`, production in sync at `8bf09b4`
 - **Production URL:** https://dashboard-jet-seven-93.vercel.app (company Vercel, auto-deploy from GitHub)
 - **Dev:** localhost:3003 - Supabase burcfsxsxgabknmodsrd (MI tables + 42 meetings)
 - **Deploy method:** Auto-deploy via Vercel GitHub App on push to main (neerajkumar-builds org)
@@ -48,6 +48,23 @@
 - [ ] Personal Slack DMs removed from roadmap (user decision: channels only, no DMs)
 
 ## Session Log
+
+### 2026-06-09 (Session 6) - Ask Blarney Chart Crash Fix
+
+**Bug:** "t.toFixed is not a function" crash on Ask Blarney /search page when Claude generates chart data with string values instead of numbers. Intermittent - depends on whether Claude quotes numeric values in JSON. Recharts internally calls .toFixed() on string values, React render error escapes try/catch and crashes entire page via error.tsx boundary.
+
+**Root cause chain:** Claude generates `"value":"7.2"` (string) -> JSON.parse preserves string type -> Recharts calls .toFixed() on string -> TypeError -> React render error propagates to page error boundary -> full page crash.
+
+**Fixes applied:**
+- Added value normalization after JSON.parse in chat-message.tsx (parseFloat coercion on all chart data values)
+- Created ChartErrorBoundary (React class component) wrapping all 3 chart types (bar, donut, line) so bad charts show "Chart data unavailable" fallback instead of crashing page
+- Added defensive type coercion in BrandTooltip (chart-tooltip.tsx)
+
+**Audit findings (24 .toFixed() calls across 9 files):** All other usages have proper null guards. No additional fixes needed - they receive typed data from Supabase, not LLM text output.
+
+**Verified:** TypeScript 0 errors, 91/91 tests, build success, deployed to production (dpl_7GMN2SX3UwqwKfDiJ4T75LCNCAXg READY).
+
+**Commit:** 8bf09b4 - fix: prevent Ask Blarney crash when chart values are strings
 
 ### 2026-05-22 (Session 5) - Score-0 Cascade Fix + Prism Rebrand
 

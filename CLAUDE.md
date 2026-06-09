@@ -2,7 +2,8 @@
 
 ## What This Is
 Sales meeting scoring platform. Zoom recordings → n8n (5 workflows, 8h cycle) → Supabase (AI scoring with 6 LLM chains) → Next.js 16 dashboard with RAG search.
-580+ meetings, 299 completed, 17 tracked users across 7 classifications. Live in production with daily active users.
+580+ meetings, 306 completed, 17 tracked users across 7 classifications. Live in production with daily active users.
+Ask Blarney (RAG chat) has ChartErrorBoundary + value normalization for LLM-generated chart data.
 Product name: **Prism** (formerly Meeting Intelligence/MIA/Cipher). Part of portfolio: Prism, Current, Beacon, Pulse.
 6 stage types: discovery_scoping, follow_up, onboarding, client_meeting, internal_client_meeting, internal. ALL actively assigned.
 CS meetings scored with Stephen's 6-category rubric. Internal meetings scored with 4+2 category rubric.
@@ -95,6 +96,7 @@ Or read `migration/change-requests.json` for full CR details.
 | `change_requests/revision_2/` | CRs 010-016 (revision 2, from 2026-05-12 meeting) |
 | `docs/03-database-schema.md` | Supabase schema reference |
 | `docs/n8n-session5-changes.md` | Score CS fix guide (prompt + JSON fallback + max_tokens) |
+| `src/components/search/chart-error-boundary.tsx` | React Error Boundary for Ask Blarney charts |
 
 ## Supabase Project Tracker
 
