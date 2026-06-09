@@ -7,6 +7,7 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, CartesianGrid, PieCha
 import { cn } from "@/lib/utils";
 import { BrandTooltip } from "@/components/shared/chart-tooltip";
 import { ChartDownload } from "@/components/shared/chart-download";
+import { ChartErrorBoundary } from "./chart-error-boundary";
 import { SendToSlack } from "@/components/shared/send-to-slack";
 import { SourceCitation } from "./source-citation";
 import { Copy, Mail, Check, Sparkles, ThumbsUp, ThumbsDown, AlertCircle } from "lucide-react";
@@ -219,11 +220,18 @@ export function ChatMessage({ role, content, isStreaming, onFollowUp, sessionId,
                       }
                       try {
                         const chartData = JSON.parse(String(children).trim());
+                        if (Array.isArray(chartData.data)) {
+                          chartData.data = chartData.data.map((d: Record<string, unknown>) => ({
+                            ...d,
+                            value: typeof d.value === "number" ? d.value : (parseFloat(String(d.value)) || 0),
+                          }));
+                        }
                         const CHART_COLORS = ["#146DFA", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444", "#94a3b8", "#ec4899", "#06b6d4"];
 
                         if (chartData.type === "bar" && Array.isArray(chartData.data)) {
                           const maxVal = Math.max(...chartData.data.map((d: { value: number }) => d.value));
                           return (
+                            <ChartErrorBoundary>
                             <ChartDownload title={chartData.title} className="my-3 rounded-lg border bg-card p-4">
                               {chartData.title && <p className="text-xs font-semibold mb-3">{chartData.title}</p>}
                               <ResponsiveContainer width="100%" height={180}>
@@ -236,11 +244,13 @@ export function ChatMessage({ role, content, isStreaming, onFollowUp, sessionId,
                                 </BarChart>
                               </ResponsiveContainer>
                             </ChartDownload>
+                            </ChartErrorBoundary>
                           );
                         }
 
                         if (chartData.type === "donut" && Array.isArray(chartData.data)) {
                           return (
+                            <ChartErrorBoundary>
                             <ChartDownload title={chartData.title} className="my-3 rounded-lg border bg-card p-4">
                               {chartData.title && <p className="text-xs font-semibold mb-3">{chartData.title}</p>}
                               <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
@@ -273,10 +283,12 @@ export function ChatMessage({ role, content, isStreaming, onFollowUp, sessionId,
                                 </div>
                               </div>
                             </ChartDownload>
+                            </ChartErrorBoundary>
                           );
                         }
                         if (chartData.type === "line" && Array.isArray(chartData.data)) {
                           return (
+                            <ChartErrorBoundary>
                             <ChartDownload title={chartData.title} className="my-3 rounded-lg border bg-card p-4">
                               {chartData.title && <p className="text-xs font-semibold mb-3">{chartData.title}</p>}
                               <ResponsiveContainer width="100%" height={180}>
@@ -295,6 +307,7 @@ export function ChatMessage({ role, content, isStreaming, onFollowUp, sessionId,
                                 </AreaChart>
                               </ResponsiveContainer>
                             </ChartDownload>
+                            </ChartErrorBoundary>
                           );
                         }
                       } catch {

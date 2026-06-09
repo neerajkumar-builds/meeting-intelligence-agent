@@ -19,7 +19,7 @@ export function BrandTooltip({ active, payload, label }: ChartTooltipProps) {
             style={{ backgroundColor: entry.color }}
           />
           <span className="text-muted-foreground">{entry.name}:</span>
-          <span className="font-medium">{entry.value}</span>
+          <span className="font-medium">{typeof entry.value === "number" ? entry.value : Number(entry.value) || 0}</span>
         </div>
       ))}
     </div>
