@@ -1,6 +1,25 @@
 # Session Handover: Meeting Intelligence
 
 ## Last Session
+- **Date:** 2026-06-19 (Session 7)
+- **Operator:** Neeraj + Claude Opus 4.8
+- **Commit:** `c5eb248` on `main`, production in sync, verified live.
+
+### What Was Done (2026-06-19, Session 7)
+
+**Retired model id fix - commit `c5eb248`**
+- SYMPTOM: Ask Blarney ("Something went wrong"). `/api/chat` returned 502 on every query.
+- ROOT CAUSE: Anthropic retired `claude-sonnet-4-20250514` → API returns `404 not_found_error`. All 4 Claude routes shared this dead default (`/api/chat`, `/api/actions/{resummarize,meeting-prep,draft-email}`). Prod `CHAT_MODEL` env var ALSO held the dead id (overrides code default).
+- DIAGNOSIS: pulled Vercel runtime logs (truncated "Anthropic API error"), reproduced via direct SDK call which surfaced the raw 404.
+- FIX: switched all 4 routes + `scripts/validate-env.mjs` default to undated alias `claude-sonnet-4-6`; reset prod `CHAT_MODEL` env var to match (`vercel env rm`/`add`). Hardened `/api/chat` error mapping: permanent errors (400/401/403/404) → 500 "contact admin" + log status/request_id; only 429/5xx keep "try again".
+- VERIFY: 91/91 tests, clean build, prod `curl` = HTTP 200 + `text/event-stream` from `claude-sonnet-4-6`.
+- DOCS: sop.md §E rewritten (alias rule + deprecation runbook + E.4 incident), progress.md + MEMORY.md updated.
+- LESSON: never hardcode dated model ids - use aliases. Broad Claude-feature breakage → suspect retired model id first.
+
+---
+
+## Session 2
+
 - **Date:** 2026-05-13 (Session 2)
 - **Duration:** Extended session covering Sprint 3 (notifications, CS intelligence, pipeline triggers)
 - **Operator:** Neeraj + Claude Opus 4.6

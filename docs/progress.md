@@ -1,14 +1,15 @@
 # Prism Dashboard (formerly Meeting Intelligence) - Progress
 
 ## Current State
-- **Status:** Sprint 1-4 deployed. Score-0 cascade fix + Prism rebrand deployed. Ask Blarney chart crash fixed. Pipeline flowing.
-- **Last session:** 2026-06-09 (Session 6: Ask Blarney toFixed crash fix)
-- **Branch:** `main`, production in sync at `8bf09b4`
+- **Status:** Sprint 1-4 deployed. Score-0 cascade fix + Prism rebrand deployed. Ask Blarney chart crash fixed. Retired-model-id fix deployed. Pipeline flowing.
+- **Last session:** 2026-06-19 (Session 7: retired model id fix + error-mapping hardening)
+- **Branch:** `main`, production in sync at `c5eb248`
 - **Production URL:** https://dashboard-jet-seven-93.vercel.app (company Vercel, auto-deploy from GitHub)
 - **Dev:** localhost:3003 - Supabase burcfsxsxgabknmodsrd (MI tables + 42 meetings)
 - **Deploy method:** Auto-deploy via Vercel GitHub App on push to main (neerajkumar-builds org)
 - **Tests:** 91 passing (17 test files, Vitest)
 - **Stack:** Next.js 16.2.2, React 19, Supabase, Anthropic SDK 0.82+, Tailwind v4
+- **LLM model:** `claude-sonnet-4-6` (undated alias) in all 4 routes + `CHAT_MODEL` prod env var. NEVER use dated ids (they get retired → 404). See sop.md §E.
 - **Stage types:** 6 (discovery_scoping, follow_up, onboarding, client_meeting, internal_client_meeting, internal) - ALL now actively assigned
 - **Supabase prod:** RLS DISABLED on scored_meetings (fix for n8n pipeline), scoring_config v2, notification_preferences, detect_pipeline_triggers(), user_roles email UNIQUE
 - **Supabase dev:** Full MI schema + 42 meetings (11 seed + 31 migrated from prod)
@@ -27,6 +28,7 @@
 - [x] Sprint 3: CR-011 Notification + Digest System (digest engine + settings UI + Slack channels deployed)
 - [x] Sprint 3: CR-015 Pipeline Trigger Alerts (SQL function + API deployed to prod)
 - [x] Company intelligence CS extraction (deployed to prod)
+- [x] Session 7 (2026-06-19): Fixed retired model id `claude-sonnet-4-20250514` → `claude-sonnet-4-6` in 4 routes + validate-env + prod CHAT_MODEL env var. Hardened /api/chat error mapping (permanent vs transient). Commit `c5eb248`, verified prod 200. (DONE)
 - [ ] Sprint 3: CR-014 HubSpot Score Writeback (blocked: needs API key with write perms)
 - [ ] Sprint 4: CR-010 Teams Recording Capture MVP (blocked: needs Azure AD credentials)
 - [ ] Deferred: CR-016 Modular Pricing

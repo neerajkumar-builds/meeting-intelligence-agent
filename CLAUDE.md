@@ -4,6 +4,7 @@
 Sales meeting scoring platform. Zoom recordings → n8n (5 workflows, 8h cycle) → Supabase (AI scoring with 6 LLM chains) → Next.js 16 dashboard with RAG search.
 580+ meetings, 306 completed, 17 tracked users across 7 classifications. Live in production with daily active users.
 Ask Blarney (RAG chat) has ChartErrorBoundary + value normalization for LLM-generated chart data.
+LLM model: `claude-sonnet-4-6` (undated alias) in all 4 Claude routes + prod `CHAT_MODEL` env var. NEVER use dated model ids - they get retired by Anthropic (404). See migration/sop.md §E.
 Product name: **Prism** (formerly Meeting Intelligence/MIA/Cipher). Part of portfolio: Prism, Current, Beacon, Pulse.
 6 stage types: discovery_scoping, follow_up, onboarding, client_meeting, internal_client_meeting, internal. ALL actively assigned.
 CS meetings scored with Stephen's 6-category rubric. Internal meetings scored with 4+2 category rubric.

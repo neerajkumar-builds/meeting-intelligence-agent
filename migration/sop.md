@@ -199,26 +199,41 @@ If dev n8n is left active, it processes the same Zoom meetings as production, do
 
 ### E.1 Current Setup
 
-All 4 LLM routes use `process.env.CHAT_MODEL ?? "claude-sonnet-4-20250514"`:
+All 4 LLM routes use `process.env.CHAT_MODEL ?? "claude-sonnet-4-6"`:
 - `/api/chat` (RAG streaming)
 - `/api/actions/draft-email`
 - `/api/actions/meeting-prep`
 - `/api/actions/resummarize`
 
-n8n MI|3 has its own model config (separate from dashboard env vars).
+Plus the fallback note in `scripts/validate-env.mjs`. n8n MI|3 has its own model config (separate from dashboard env vars).
+
+RULE: always use undated model aliases (`claude-sonnet-4-6`), never dated ids (`claude-sonnet-4-20250514`). Aliases float to the current snapshot; dated ids get retired by Anthropic and start returning 404. See E.4.
 
 ### E.2 Changing Model Version
 
 1. Set `CHAT_MODEL=<new-model>` in `.env.local`
 2. Test all 4 routes on dev
-3. Update `CHAT_MODEL` in both Vercel projects
-4. If changing n8n's model: update MI|3 workflow separately
+3. Update `CHAT_MODEL` in the prod Vercel project (`vercel env rm CHAT_MODEL production --yes && printf "<new-model>" | vercel env add CHAT_MODEL production`). Env change only applies on next deploy.
+4. Update the code fallback default in all 4 route files + `scripts/validate-env.mjs`
+5. If changing n8n's model: update MI|3 workflow separately
 
 ### E.3 Model Deprecation
 
-1. Update the fallback default in code (all 4 route files)
-2. Update `CHAT_MODEL` env var everywhere
-3. Test thoroughly — different models produce different score formats
+When Anthropic retires a model id, the API returns `404 not_found_error: model: <id>` and every Claude-backed feature breaks at once.
+
+1. Update the fallback default in code (all 4 route files + `scripts/validate-env.mjs`)
+2. Update `CHAT_MODEL` env var in prod Vercel — the env var OVERRIDES the code default, so fixing code alone is NOT enough if the env var holds a dead id
+3. Redeploy (env changes only take effect on the next deploy)
+4. Verify: `curl -s -X POST https://dashboard-jet-seven-93.vercel.app/api/chat -H "Content-Type: application/json" -d '{"message":"test","history":[]}' -w "%{http_code}"` → expect HTTP 200 + `text/event-stream`, not 502
+5. Test thoroughly — different models produce different score formats
+
+### E.4 Incident: model id retired (2026-06-19)
+
+- SYMPTOM: Ask Blarney shows "Something went wrong"; `/api/chat` returns 502. Vercel runtime logs show truncated "Anthropic API error".
+- ROOT CAUSE: `claude-sonnet-4-20250514` was retired by Anthropic → `404 not_found_error`. All 4 routes shared this dead default; prod `CHAT_MODEL` env var also held the dead id (overrode any code change).
+- DIAGNOSIS: reproduce by calling the SDK directly with the model id (bypasses app error masking) — `new Anthropic().messages.stream({model, ...}).withResponse()` surfaces the raw 404.
+- FIX: switched to undated alias `claude-sonnet-4-6` in code + prod env var. Hardened `/api/chat` so permanent errors (400/401/403/404) return 500 "contact admin" + log status/request_id instead of masking as 502 "try again".
+- LESSON: never hardcode dated model ids; use aliases. When a Claude feature breaks broadly, suspect a retired model id first.
 
 ---
 
