@@ -69,7 +69,7 @@ CRITICAL: Never query or reference legacy tables: documents, n8n_vectors, n8n_ch
 
 const DAILY_LIMIT = parseInt(process.env.DAILY_QUERY_LIMIT ?? "50", 10);
 const BURST_LIMIT = parseInt(process.env.BURST_QUERY_LIMIT ?? "10", 10);
-const CHAT_MODEL = process.env.CHAT_MODEL ?? "claude-sonnet-4-20250514";
+const CHAT_MODEL = process.env.CHAT_MODEL ?? "claude-sonnet-4-6";
 
 interface ChatRequest {
   message: string;
@@ -298,7 +298,25 @@ export async function POST(request: NextRequest) {
     try {
       await stream.withResponse();
     } catch (apiError) {
-      console.error("Anthropic API error:", apiError);
+      const status = (apiError as { status?: number })?.status;
+      const requestId = (apiError as { request_id?: string })?.request_id;
+      console.error(
+        `Anthropic API error (status=${status ?? "unknown"}, request_id=${requestId ?? "none"}):`,
+        apiError instanceof Error ? apiError.message : apiError
+      );
+
+      // Permanent errors are config problems - retrying will never succeed.
+      // 400 invalid request, 401/403 auth, 404 model-not-found (e.g. retired model id).
+      // These must NOT tell the user to "try again" - surface as 500 so monitoring flags them.
+      const isPermanent = status === 400 || status === 401 || status === 403 || status === 404;
+      if (isPermanent) {
+        return Response.json(
+          { error: "AI service misconfigured. Please contact your admin." },
+          { status: 500 }
+        );
+      }
+
+      // Transient: 429 rate limit, 5xx/529 overload - a retry may succeed.
       return Response.json(
         { error: "AI service temporarily unavailable. Please try again in a moment." },
         { status: 502 }

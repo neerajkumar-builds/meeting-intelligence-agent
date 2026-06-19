@@ -53,7 +53,7 @@ ${m.rep_score ? `Rep Notes: ${JSON.stringify(m.rep_score).substring(0, 300)}` : 
       .join("\n---\n");
 
     const response = await anthropic.messages.create({
-      model: process.env.CHAT_MODEL ?? "claude-sonnet-4-20250514",
+      model: process.env.CHAT_MODEL ?? "claude-sonnet-4-6",
       max_tokens: 1500,
       system: `You are preparing a pre-call briefing for a FullFunnel team member about to meet with a client.
 Generate a structured prep brief that includes:

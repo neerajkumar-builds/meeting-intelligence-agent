@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     const templateConfig = TEMPLATES[template];
 
     const response = await anthropic.messages.create({
-      model: process.env.CHAT_MODEL ?? "claude-sonnet-4-20250514",
+      model: process.env.CHAT_MODEL ?? "claude-sonnet-4-6",
       max_tokens: 1024,
       system: templateConfig.systemPrompt,
       messages: [

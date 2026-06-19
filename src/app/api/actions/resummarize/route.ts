@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
     const formatConfig = FORMATS[format];
 
     const response = await anthropic.messages.create({
-      model: process.env.CHAT_MODEL ?? "claude-sonnet-4-20250514",
+      model: process.env.CHAT_MODEL ?? "claude-sonnet-4-6",
       max_tokens: 1500,
       system: formatConfig.systemPrompt,
       messages: [
