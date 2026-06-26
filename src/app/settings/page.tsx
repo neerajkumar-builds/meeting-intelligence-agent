@@ -14,8 +14,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSection } from "@/lib/section-context";
-import { SECTIONS, type SectionKey } from "@/lib/constants";
-import { Bell, BellOff, Hash, Mail, MessageSquare, Save, Check } from "lucide-react";
+import { SECTIONS, DIGESTS_PAUSED, type SectionKey } from "@/lib/constants";
+import { Bell, BellOff, Hash, Mail, MessageSquare, Save, Check, PauseCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface NotificationPref {
@@ -142,6 +142,20 @@ export default function SettingsPage() {
         title="Notification Settings"
         description="Control how Prism reaches you"
       />
+
+      {DIGESTS_PAUSED && (
+        <div className="flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
+          <PauseCircle className="h-5 w-5 shrink-0 mt-0.5" />
+          <div className="text-sm">
+            <p className="font-semibold">Scheduled Slack digests are paused.</p>
+            <p className="mt-0.5">
+              Automatic digests to #mi-sales, #mi-cs, and #mi-internal are paused
+              for cost efficiency. The preferences below are saved but will not
+              send any notifications until digests resume.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-4">
         {loading ? (

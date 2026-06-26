@@ -377,6 +377,38 @@ npx playwright install chromium  # For E2E tests
 
 ---
 
+## J. Slack Digests / Notifications
+
+### J.1 Current State (PAUSED as of 2026-06-27)
+
+**Scheduled Slack digests are intentionally PAUSED - this is NOT a bug.** Matt + Stephen requested pausing all Prism Slack digests for cost efficiency (Prism not in active development; team focused on Data Engine + Current).
+
+How it was paused (commit `da66633`):
+- Emptied the `crons` array in `vercel.json` (`{"crons": []}`). Vercel derives cron jobs from the current production deployment's config, so with no crons the 3 scheduled digests no longer fire.
+- All notification route code (`src/app/api/notifications/*`), Slack env vars (`SLACK_BOT_TOKEN`, `MI_*_CHANNEL_ID`), and the `notification_preferences` table are left INTACT.
+- `DIGESTS_PAUSED = true` in `src/lib/constants.ts` drives a paused banner on `/settings`; the controls still save but cannot trigger anything while paused.
+
+**Do not "fix" the absence of digests.** If a future session sees no digests posting, that is expected.
+
+### J.2 How digests work (when active)
+
+- 3 Vercel cron jobs hit `/api/notifications/digest?type=...`: `monday_priorities` (`0 13 * * 1`), `daily_actions` (`0 13 * * 2-4`), `friday_review` (`0 21 * * 5`).
+- The route reads `notification_preferences` per section (`shouldSkipSection()`): skips a section if all rows are `is_active=false` or the `frequency` does not match the digest type. **Default-open:** if no preference row exists, it sends.
+- Posts to #mi-sales / #mi-cs / #mi-internal via `SLACK_BOT_TOKEN` + `MI_*_CHANNEL_ID`.
+
+### J.3 Re-enable digests
+
+1. Restore the `crons` array in `vercel.json` (revert commit `da66633`: `git revert da66633`, or paste the 3 entries back).
+2. Set `DIGESTS_PAUSED = false` in `src/lib/constants.ts` (removes the paused banner).
+3. Commit + push to `production`; Vercel re-creates the cron jobs on deploy.
+4. Verify: Vercel dashboard -> Cron Jobs shows 3 jobs; next scheduled window posts to the 3 channels.
+
+### J.4 Other Slack paths (not gated by digest pause)
+
+- **Manual "Share to Slack"** (`/api/notifications/slack`, user button) - still works, unaffected.
+- **Real-time per-meeting trigger** (`/api/notifications/triggers`) - exists in code but is NOT wired from n8n (no n8n node calls it), so it does not fire on its own.
+- **n8n MI|3 "Send to #clay-test" node** - active; posts a Slack message to the #clay-test test channel (`C08ST2T9KM3`) on every scored meeting (every-8h pipeline). This is separate from the digests and the mi-* channels. To pause it, disable that node in n8n manually (n8n passes input through a disabled node, so the batch loop keeps working). Never auto-edit n8n.
+
 ## Maintenance
 
 This SOP should be updated when:

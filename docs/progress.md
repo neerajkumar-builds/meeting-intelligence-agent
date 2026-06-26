@@ -1,9 +1,10 @@
 # Prism Dashboard (formerly Meeting Intelligence) - Progress
 
 ## Current State
-- **Status:** Sprint 1-4 deployed. Score-0 cascade fix + Prism rebrand deployed. Ask Blarney chart crash fixed. Retired-model-id fix deployed. Pipeline flowing.
-- **Last session:** 2026-06-19 (Session 7: retired model id fix + error-mapping hardening)
-- **Branch:** `main`, production in sync at `c5eb248`
+- **Status:** Sprint 1-4 deployed. Score-0 cascade fix + Prism rebrand deployed. Ask Blarney chart crash fixed. Retired-model-id fix deployed. **Slack digests PAUSED (cost efficiency).** Pipeline flowing.
+- **Last session:** 2026-06-27 (Session 8: pause Slack digests + paused banner on /settings)
+- **Branch:** `main`, production in sync at `da66633`
+- **Slack digests:** PAUSED 2026-06-27 (Matt/Stephen, cost). Crons removed from vercel.json; `DIGESTS_PAUSED=true` shows banner on /settings. NOT broken - see sop.md §J to re-enable. n8n MI|3 still posts to #clay-test test channel on each scoring run (separate, not paused).
 - **Production URL:** https://dashboard-jet-seven-93.vercel.app (company Vercel, auto-deploy from GitHub)
 - **Dev:** localhost:3003 - Supabase burcfsxsxgabknmodsrd (MI tables + 42 meetings)
 - **Deploy method:** Auto-deploy via Vercel GitHub App on push to main (neerajkumar-builds org)
@@ -29,6 +30,7 @@
 - [x] Sprint 3: CR-015 Pipeline Trigger Alerts (SQL function + API deployed to prod)
 - [x] Company intelligence CS extraction (deployed to prod)
 - [x] Session 7 (2026-06-19): Fixed retired model id `claude-sonnet-4-20250514` → `claude-sonnet-4-6` in 4 routes + validate-env + prod CHAT_MODEL env var. Hardened /api/chat error mapping (permanent vs transient). Commit `c5eb248`, verified prod 200. (DONE)
+- [x] Session 8 (2026-06-27): Paused Slack digests (cost efficiency, Matt/Stephen). Removed 3 Vercel crons from vercel.json (`da66633`), added paused banner on /settings via `DIGESTS_PAUSED`. Documented in sop.md §J. n8n checked: real-time triggers route NOT wired; MI|3 still posts to #clay-test (flagged). (DONE)
 - [ ] Sprint 3: CR-014 HubSpot Score Writeback (blocked: needs API key with write perms)
 - [ ] Sprint 4: CR-010 Teams Recording Capture MVP (blocked: needs Azure AD credentials)
 - [ ] Deferred: CR-016 Modular Pricing

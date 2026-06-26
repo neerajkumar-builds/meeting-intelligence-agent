@@ -104,6 +104,13 @@ export const SECTION_CHANNEL_MAP: Record<string, string | undefined> = {
   internal: process.env.MI_INTERNAL_CHANNEL_ID,
 };
 
+// Scheduled Slack digests paused 2026-06-27 (Matt/Stephen, cost efficiency) by
+// removing the Vercel cron jobs from vercel.json. The /settings notification
+// controls still save to notification_preferences but cannot trigger anything
+// while paused, so the settings page shows a banner when this is true.
+// RE-ENABLE: restore the crons array in vercel.json AND set this to false.
+export const DIGESTS_PAUSED = true;
+
 export function getSectionForStageType(stageType: string | null): SectionKey {
   if (!stageType) return "all";
   for (const [key, config] of Object.entries(SECTIONS)) {
