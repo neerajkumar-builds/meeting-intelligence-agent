@@ -4,7 +4,7 @@ import "./globals.css";
 import { Providers } from "@/lib/providers";
 import { ConditionalShell } from "@/components/layout/conditional-shell";
 import { Toaster } from "sonner";
-import { Analytics } from "@vercel/analytics/react";
+import { Analytics } from "@vercel/analytics/next";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
